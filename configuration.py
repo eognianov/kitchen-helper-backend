@@ -42,11 +42,27 @@ class DbTypeOptions(CaseInsensitiveEnum):
 class SqliteConfig(BaseModel):
     """SQLite configuration"""
 
-    file_name: Optional[str]
+    file_name: Optional[str] = None
 
     @property
     def connection_string(self) -> str:
+        """Get connection string"""
         return f"sqlite:///{self.file_name if self.file_name else ':memory:'}"
+
+
+class PostgresConfig(BaseModel):
+    """PostgreSQL configuration"""
+
+    host: Optional[str] = None
+    port: Optional[int] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    database: Optional[str] = None
+
+    @property
+    def connection_string(self) -> str:
+        """Get connection string"""
+        return f"postgresql+psycopg2://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
 
 class Config(BaseSettings):
@@ -55,5 +71,12 @@ class Config(BaseSettings):
     context: ContextOptions = ContextOptions.DEV
     database: DbTypeOptions = DbTypeOptions.SQLITE
     sqlite: SqliteConfig
+    postgres: PostgresConfig
+
+    @property
+    def connection_string(self):
+        if self.database == DbTypeOptions.POSTGRES:
+            return self.postgres.connection_string
+        return self.sqlite.connection_string
 
     model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True, case_sensitive=False, env_nested_delimiter='__')
