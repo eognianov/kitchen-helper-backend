@@ -1,7 +1,8 @@
 """Configuation module"""
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
-
+from pydantic import BaseModel, Field
+from typing import Optional
 from enum import StrEnum, auto
 
 _module_path = pathlib.Path(__file__).resolve()
@@ -14,11 +15,8 @@ _ENV_FILES_PATHS = (
 )
 
 
-class ContextOptions(StrEnum):
-    PROD = auto()
-    DEV = auto()
-    TEST = auto()
-
+class CaseInsensitiveEnum(StrEnum):
+    """Case insensitive enum"""
     @classmethod
     def _missing_(cls, value: str):
         value = value.lower()
@@ -28,7 +26,34 @@ class ContextOptions(StrEnum):
         return None
 
 
-class Config(BaseSettings):
-    context: ContextOptions = 'dev'
+class ContextOptions(CaseInsensitiveEnum):
+    """Context options"""
+    PROD = auto()
+    DEV = auto()
+    TEST = auto()
 
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True, case_sensitive=False)
+
+class DbTypeOptions(CaseInsensitiveEnum):
+    """DB type options"""
+    SQLITE = auto()
+    POSTGRES = auto()
+
+
+class SqliteConfig(BaseModel):
+    """SQLite configuration"""
+
+    file_name: Optional[str]
+
+    @property
+    def connection_string(self) -> str:
+        return f"sqlite:///{self.file_name if self.file_name else ':memory:'}"
+
+
+class Config(BaseSettings):
+    """Base configurations"""
+
+    context: ContextOptions = ContextOptions.DEV
+    database: DbTypeOptions = DbTypeOptions.SQLITE
+    sqlite: SqliteConfig
+
+    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True, case_sensitive=False, env_nested_delimiter='__')
