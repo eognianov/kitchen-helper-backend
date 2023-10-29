@@ -1,7 +1,7 @@
 """Configuation module"""
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, model_validator
 from typing import Optional
 from enum import StrEnum, auto
 
@@ -55,14 +55,19 @@ class PostgresConfig(BaseModel):
 
     host: Optional[str] = None
     port: Optional[int] = None
-    username: Optional[str] = None
+    user: Optional[str] = None
     password: Optional[str] = None
     database: Optional[str] = None
 
     @property
     def connection_string(self) -> str:
         """Get connection string"""
-        return f"postgresql+psycopg2://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
+        return f"postgresql+psycopg2://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+
+    @property
+    def are_all_fields_populated(self):
+        """Check if all fields are populated"""
+        return self.host and self.port and self.user and self.password and self.database
 
 
 class Config(BaseSettings):
@@ -80,3 +85,8 @@ class Config(BaseSettings):
         return self.sqlite.connection_string
 
     model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True, case_sensitive=False, env_nested_delimiter='__')
+
+    @model_validator(mode='after')
+    def validate_db_configuration(self):
+        if self.database == DbTypeOptions.POSTGRES and not self.postgres.are_all_fields_populated:
+            raise ValueError('You have selected postgres as database but did not provide its configuration')
