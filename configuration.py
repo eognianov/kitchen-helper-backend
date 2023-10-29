@@ -49,6 +49,11 @@ class SqliteConfig(BaseModel):
         """Get connection string"""
         return f"sqlite:///{self.file_name if self.file_name else ':memory:'}"
 
+    @property
+    def is_in_memory(self) -> bool:
+        """Check if sqlite is running in memory"""
+        return not self.file_name
+
 
 class PostgresConfig(BaseModel):
     """PostgreSQL configuration"""
