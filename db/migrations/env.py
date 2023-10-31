@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 import db.models
 import configuration
-import app
+from pathlib import Path
 
 from alembic import context
 
@@ -16,6 +16,8 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+Path(f"{config.get_section_option('alembic', 'script_location')}/versions").mkdir(exist_ok=True)
 
 config.set_main_option('sqlalchemy.url', configuration.Config().connection_string)
 
