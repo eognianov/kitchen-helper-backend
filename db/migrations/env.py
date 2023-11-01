@@ -2,7 +2,7 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-import db.models
+from features import DbBaseModel
 import configuration
 from pathlib import Path
 
@@ -25,7 +25,7 @@ config.set_main_option('sqlalchemy.url', configuration.Config().connection_strin
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = db.models.DbBaseModel.metadata
+target_metadata = DbBaseModel.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
