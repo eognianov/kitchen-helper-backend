@@ -1,10 +1,10 @@
 from sqlalchemy import String, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column
 
-from db.models import DbBaseModel
+from features import DbBaseModel
 
 
-class UserOrm(DbBaseModel):
+class User(DbBaseModel):
     __tablename__ = 'Users'
 
     id: Mapped[int] = mapped_column(primary_key=True)

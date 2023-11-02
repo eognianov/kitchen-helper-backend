@@ -18,4 +18,4 @@ app.add_middleware(
 
 
 app.include_router(features.health.router, prefix='/health')
-app.include_router(features.users.router, prefix='/user')
+app.include_router(features.users.router, prefix='/users')

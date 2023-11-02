@@ -1,17 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from db.connection import get_session
 
-from .models import UserOrm
-from .input_models import User
+from .models import User
+from .input_models import RegisterUserInputModel
 
-from .operations import (create_access_token, check_if_user_exists, get_user_by_username,
-                         validate_password, set_password, check_password)
+from .operations import create_access_token, check_if_user_exists, get_user_by_username, set_password, check_password
 
 user_router = APIRouter()
 
 
 @user_router.post("/signup")
-async def signup(user: User):
+async def signup(user: RegisterUserInputModel):
     # Check if the username or email already exists
     db = get_session()
     if check_if_user_exists(db, user.username, user.email):
@@ -23,7 +22,7 @@ async def signup(user: User):
 
     # Validate password
     try:
-        validate_password(user.password)
+        RegisterUserInputModel.validate_password(user.password)
     except ValueError as e:
         # Raise an HTTPException with the error message
         raise HTTPException(
@@ -36,7 +35,7 @@ async def signup(user: User):
 
     # Create the user in the database
     with get_session() as session:
-        db_user = UserOrm(username=user.username, email=user.email, password=user.password)
+        db_user = User(username=user.username, email=user.email, password=user.password)
         session.add(db_user)
         session.commit()
         session.refresh(db_user)
