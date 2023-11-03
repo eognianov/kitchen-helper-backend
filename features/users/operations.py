@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from starlette.responses import JSONResponse
 
 from db.connection import get_session
 
@@ -25,6 +26,13 @@ JWT_REFRESH_SECRET_KEY = 'JWT_REFRESH_SECRET_KEY'
 
 def custom_exception_response(message, error_type: str = "string"):
     return [{"loc": ["string", 0], "msg": message, "type": error_type}]
+
+
+def successfully_created_user_response(serialized_user_data):
+    return JSONResponse(
+        content={"message": "Successfully created", "user_data": serialized_user_data},
+        status_code=201
+    )
 
 
 def hash_password(password: str):
@@ -96,16 +104,26 @@ def signin_user(username: str, password: str):
         )
 
 
-def serialize_users_data(all_users: list):
+def serialize_users_data(all_users: list = None, user: User = None):
     # Convert the list of User objects into a dict of dictionaries
-    serialized_data = {
-        f"{user.id}": {
-            # "id": user.id,
-            "username": user.username,
-            "email": user.email
+    serialized_data = {}
+    if all_users:
+        serialized_data = {
+            user.id: {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email
+            }
+            for user in all_users
         }
-        for user in all_users
-    }
+    elif user:
+        serialized_data = {
+            user.id: {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email
+            }
+        }
 
     return serialized_data
 

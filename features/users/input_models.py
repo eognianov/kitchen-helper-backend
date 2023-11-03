@@ -7,7 +7,7 @@ config = configuration.Config()
 
 
 class RegisterUserInputModel(BaseModel):
-    # id: int
+    id: int
     username: constr(min_length=3, max_length=30)
     email: EmailStr  # EmailStr for email validation
     password: constr()
@@ -43,6 +43,6 @@ class RegisterUserInputModel(BaseModel):
 
 
 class UsersResponseModel(BaseModel):
-    _id: int
+    id: int
     username: str
     email: str

@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from .input_models import RegisterUserInputModel, UsersResponseModel
 
 from .operations import create_access_token, create_new_user, signin_user, get_all_users, get_user_by_id_username_email, \
-    serialize_users_data
+    serialize_users_data, successfully_created_user_response
 
 user_router = APIRouter()
 
@@ -11,7 +11,8 @@ user_router = APIRouter()
 @user_router.post("/signup")
 async def signup(user: RegisterUserInputModel):
     db_user = create_new_user(user)
-    return db_user
+    serialized_data = serialize_users_data(user=db_user)
+    return successfully_created_user_response(serialized_data)
 
 
 @user_router.post("/signin")
@@ -25,9 +26,10 @@ async def signin(username: str, password: str):
 @user_router.get("/all")
 async def show_all_users():
     all_users = get_all_users()
-    return serialize_users_data(all_users)
+    return serialize_users_data(all_users=all_users)
 
 
-@user_router.get("/user/{user_id}", response_model=UsersResponseModel)
+@user_router.get("/user/{user_id}")
 async def show_user(user_id: int):
-    return get_user_by_id_username_email(pk=user_id)
+    user = get_user_by_id_username_email(pk=user_id)
+    return serialize_users_data(user=user)
