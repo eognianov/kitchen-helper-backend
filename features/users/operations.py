@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-from pydantic import BaseModel
 
 from db.connection import get_session
 
@@ -22,10 +21,6 @@ JWT_SECRET_KEY = 'JWT_SECRET_KEY'
 JWT_REFRESH_SECRET_KEY = 'JWT_REFRESH_SECRET_KEY'
 # JWT_SECRET_KEY = os.environ['JWT_SECRET_KEY']
 # JWT_REFRESH_SECRET_KEY = os.environ['JWT_REFRESH_SECRET_KEY']
-
-
-class ErrorResponse(BaseModel):
-    detail: list[dict]
 
 
 def custom_exception_response(message, error_type: str = "string"):
@@ -101,18 +96,31 @@ def signin_user(username: str, password: str):
         )
 
 
-def get_user_by_id_username_email(**kwargs) -> User | None:
+def serialize_users_data(*args):
+    # Convert the list of User objects into a dict of dictionaries
+    serialized_data = {
+        f"{user.id}": {
+            # "id": user.id,
+            "username": user.username,
+            "email": user.email
+        }
+        for user in args
+    }
+
+    return serialized_data
+
+
+def get_user_by_id_username_email(pk: int = None, username: str = None, email: str = None) -> User | None:
     db = get_session()
     query = db.query(User)
     filters = []
 
-    for field, value in kwargs.items():
-        if field == 'pk':
-            filters.append(User.id == value)
-        elif field == 'username':
-            filters.append(User.username == value)
-        elif field == 'email':
-            filters.append(User.email == value)
+    if pk:
+        filters.append(User.id == pk)
+    elif username:
+        filters.append(User.username == username)
+    elif email:
+        filters.append(User.email == email)
 
     if filters:
         query = query.filter(*filters)
@@ -126,7 +134,9 @@ def get_user_by_id_username_email(**kwargs) -> User | None:
 
 def get_all_users():
     db = get_session()
+    # Fetch all the users from the db
     all_users = db.query(User).all()
+
     return all_users
 
 

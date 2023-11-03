@@ -40,3 +40,9 @@ class RegisterUserInputModel(BaseModel):
         else:
             RegisterUserInputModel.validate_password_prod(password)
         return password
+
+
+class UsersResponseModel(BaseModel):
+    _id: int
+    username: str
+    email: str
