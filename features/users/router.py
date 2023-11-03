@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
-from .input_models import RegisterUserInputModel, UsersResponseModel
+from .input_models import RegisterUserInputModel
 
-from .operations import create_access_token, create_new_user, signin_user, get_all_users, get_user_by_id_username_email, \
-    serialize_users_data, successfully_created_user_response
+from .operations import (create_access_token, create_new_user, signin_user, get_all_users,
+                         get_user_by_id_username_email, serialize_users_data, successfully_created_user_response)
 
 user_router = APIRouter()
 
