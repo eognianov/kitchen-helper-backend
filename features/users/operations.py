@@ -96,7 +96,7 @@ def signin_user(username: str, password: str):
         )
 
 
-def serialize_users_data(*args):
+def serialize_users_data(all_users: list):
     # Convert the list of User objects into a dict of dictionaries
     serialized_data = {
         f"{user.id}": {
@@ -104,7 +104,7 @@ def serialize_users_data(*args):
             "username": user.username,
             "email": user.email
         }
-        for user in args
+        for user in all_users
     }
 
     return serialized_data
