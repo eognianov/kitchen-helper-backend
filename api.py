@@ -5,15 +5,18 @@ import features.users
 
 from fastapi.middleware.cors import CORSMiddleware
 
+import configuration
+
+config = configuration.Config()
+
 app = fastapi.FastAPI()
 
-# TODO: Configure CORS middleware
 # Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost", ],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=config.cors.allow_origins,
+    allow_methods=config.cors.allow_methods,
+    allow_headers=config.cors.allow_headers,
 )
 
 

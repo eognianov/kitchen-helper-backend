@@ -2,7 +2,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
 from pydantic import BaseModel, model_validator
-from typing import Optional
+from typing import Optional, List
 from enum import StrEnum, auto
 
 _module_path = pathlib.Path(__file__).resolve()
@@ -75,6 +75,20 @@ class PostgresConfig(BaseModel):
         return self.host and self.port and self.user and self.password and self.database
 
 
+class JwtToken(BaseModel):
+    access_token_expire_minutes: int
+    refresh_token_expire_minutes: int
+    algorithm: str
+    secret_key: str
+    refresh_secret_key: str
+
+
+class CorsSettings(BaseModel):
+    allow_origins: List[str]
+    allow_methods: List[str]
+    allow_headers: List[str]
+
+
 class Config(BaseSettings):
     """Base configurations"""
 
@@ -82,6 +96,8 @@ class Config(BaseSettings):
     database: DbTypeOptions = DbTypeOptions.SQLITE
     sqlite: SqliteConfig
     postgres: PostgresConfig
+    jwt: JwtToken
+    cors: CorsSettings
 
     @property
     def connection_string(self):
@@ -89,7 +105,8 @@ class Config(BaseSettings):
             return self.postgres.connection_string
         return self.sqlite.connection_string
 
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True, case_sensitive=False, env_nested_delimiter='__')
+    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
+                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
     @model_validator(mode='after')
     def validate_db_configuration(self):
