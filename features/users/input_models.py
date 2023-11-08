@@ -1,3 +1,4 @@
+"""Users feature input model"""
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from email_validator import validate_email
 
@@ -15,7 +16,11 @@ class RegisterUserInputModel(BaseModel):
     @field_validator('email', mode='after')
     @classmethod
     def validate_email(cls, email):
-        validate_email(email)
+        try:
+            validate_email(email)
+        except Exception as e:
+            raise ValueError(f"Invalid email address: {e}")
+
         return email
 
     @field_validator('password', mode='after')
@@ -37,3 +42,31 @@ class RegisterUserInputModel(BaseModel):
                 raise ValueError("Password must contain at least one special symbol: !@#$%^&?")
 
         return password
+
+
+class UpdateUserInputModel(BaseModel):
+    """Update email"""
+    field: str
+    value: str
+
+    @field_validator('field')
+    @classmethod
+    def validate_field(cls, field: str):
+        allowed_fields_to_edit = [
+            'EMAIL'
+        ]
+
+        if field.upper() not in allowed_fields_to_edit:
+            raise ValueError(f"You are not allowed to edit {field} column")
+
+        return field
+
+    @field_validator('value')
+    @classmethod
+    def validate_value(cls, value: str):
+        try:
+            validate_email(value)
+        except Exception as e:
+            raise ValueError(f"Invalid email address: {e}")
+
+        return value
