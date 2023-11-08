@@ -20,3 +20,5 @@ class UpdateCategoryInputModel(pydantic.BaseModel):
         return field
 
 
+class CreateCategoryInputModel(pydantic.BaseModel):
+    name: str = pydantic.Field(min_length=3, max_length=255)
