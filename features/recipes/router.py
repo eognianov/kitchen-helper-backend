@@ -5,7 +5,7 @@ import fastapi
 import features.recipes.operations
 import features.recipes.responses
 import features.recipes.exceptions
-from .input_models import UpdateCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
+from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
@@ -62,16 +62,16 @@ def create_category(create_category_input_model: CreateCategoryInputModel):
 
 
 @categories_router.patch('/{category_id}')
-def update_category(category_id: int = fastapi.Path(), update_category_input_model: UpdateCategoryInputModel = fastapi.Body()):
+def update_category(category_id: int = fastapi.Path(), patch_category_input_model: PatchCategoryInputModel = fastapi.Body()):
     """
     Update category
 
     :param category_id:
-    :param update_category_input_model:
+    :param patch_category_input_model:
     :return:
     """
     try:
-        updated_category = features.recipes.operations.update_category(category_id, **update_category_input_model.model_dump())
+        updated_category = features.recipes.operations.update_category(category_id, **patch_category_input_model.model_dump())
         return features.recipes.responses.Category(**updated_category.__dict__)
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
@@ -81,7 +81,7 @@ def update_category(category_id: int = fastapi.Path(), update_category_input_mod
     except features.recipes.exceptions.CategoryNameViolationException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail=f"Category with name {update_category_input_model.name} already exists"
+            detail=f"Category with name {patch_category_input_model.name} already exists"
         )
 
 

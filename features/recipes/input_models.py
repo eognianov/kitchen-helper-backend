@@ -4,7 +4,7 @@ from typing import Optional
 import pydantic
 
 
-class UpdateCategoryInputModel(pydantic.BaseModel):
+class PatchCategoryInputModel(pydantic.BaseModel):
     """Update category"""
 
     field: str
