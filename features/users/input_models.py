@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
+from email_validator import validate_email
 
 import re
 import configuration
@@ -8,8 +9,14 @@ config = configuration.Config()
 
 class RegisterUserInputModel(BaseModel):
     username: str = Field(min_length=3, max_length=30)
-    email: str = EmailStr  # for email validation
+    email: str = EmailStr
     password: str = Field()
+
+    @field_validator('email', mode='after')
+    @classmethod
+    def validate_email(cls, email):
+        validate_email(email)
+        return email
 
     @field_validator('password', mode='after')
     @classmethod
@@ -29,8 +36,4 @@ class RegisterUserInputModel(BaseModel):
             if not re.search(r'[!@#$%^&?]', password):
                 raise ValueError("Password must contain at least one special symbol: !@#$%^&?")
 
-
-class UsersResponseModel(BaseModel):
-    id: int
-    username: str
-    email: str
+        return password
