@@ -2,7 +2,6 @@
 
 import fastapi
 
-import db.connection
 import features.recipes.operations
 import features.recipes.responses
 import features.recipes.exceptions
@@ -89,7 +88,8 @@ def update_category(category_id: int = fastapi.Path(), update_category_input_mod
 @recipes_router.get('/')
 def get_all_recipes():
     """Get all recipes"""
-    return 'recipes'
+    all_recipes = features.recipes.operations.get_all_recipes()
+    return [features.recipes.responses.Recipe(**_.__dict__) for _ in all_recipes]
 
 
 @recipes_router.get('/{recipe_id}')

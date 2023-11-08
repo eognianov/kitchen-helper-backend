@@ -96,3 +96,11 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
         session.commit()
         session.refresh(recipe)
     return recipe
+
+
+def get_all_recipes():
+    """Get all recipes"""
+
+    with db.connection.get_session() as session:
+        result = session.query(Recipe).join(Recipe.category).all()
+        return result

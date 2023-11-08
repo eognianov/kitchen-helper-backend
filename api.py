@@ -4,7 +4,7 @@ import features.health
 import features.recipes
 import uvicorn
 
-app = fastapi.FastAPI(debug=True)
+app = fastapi.FastAPI()
 app.include_router(features.health.router, prefix='/health')
 app.include_router(features.recipes.category_router, prefix='/categoires')
 app.include_router(features.recipes.recipes_router, prefix='/recipes')
