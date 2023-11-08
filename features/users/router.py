@@ -34,9 +34,7 @@ async def signup(user: RegisterUserInputModel):
     except features.users.exceptions.UserAlreadyExists:
         raise HTTPException(
             status_code=fastapi.status.HTTP_409_CONFLICT,
-            detail=features.users.exceptions.custom_exception_response(
-                message="User with this username or email already exists!"
-            )
+            detail="User with this username or email already exists!"
         )
 
 
@@ -57,7 +55,7 @@ async def signin(username: str, password: str):
     except features.users.exceptions.AccessDenied:
         raise HTTPException(
             status_code=fastapi.status.HTTP_403_FORBIDDEN,
-            detail=features.users.exceptions.custom_exception_response(message="Incorrect username or password")
+            detail="Incorrect username or password"
         )
 
 
@@ -86,7 +84,7 @@ async def show_user(user_id: int):
     except features.users.exceptions.UserDoesNotExistException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"User with id <{user_id}> does not exist"
+            detail=f"User with id {user_id=} does not exist"
         )
 
 
