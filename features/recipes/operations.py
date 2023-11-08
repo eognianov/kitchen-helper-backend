@@ -56,3 +56,43 @@ def create_category(category_name: str, created_by: str = 'me') -> RecipeCategor
             return category
     except sqlalchemy.exc.IntegrityError as ex:
         raise CategoryNameViolationException(ex)
+
+
+def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
+                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0, created_by: str = 'me'):
+    """
+    Create recipe
+
+    :param name:
+    :param time_to_prepare:
+    :param category_id:
+    :param picture:
+    :param summary:
+    :param calories:
+    :param carbo:
+    :param fats:
+    :param proteins:
+    :param cholesterol:
+    :param created_by:
+    :return:
+    """
+
+    recipe = Recipe(
+        name=name,
+        time_to_prepare=time_to_prepare,
+        category_id=category_id,
+        picture=picture,
+        summary=summary,
+        calories=calories,
+        carbo=carbo,
+        fats=fats,
+        proteins=proteins,
+        cholesterol=cholesterol,
+        created_by=created_by
+    )
+
+    with db.connection.get_session() as session:
+        session.add(recipe)
+        session.commit()
+        session.refresh(recipe)
+    return recipe

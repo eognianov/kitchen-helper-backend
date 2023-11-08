@@ -1,15 +1,18 @@
 """Recipes feature endpoints"""
 
 import fastapi
+
+import db.connection
 import features.recipes.operations
 import features.recipes.responses
 import features.recipes.exceptions
-from .input_models import UpdateCategoryInputModel, CreateCategoryInputModel
+from .input_models import UpdateCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
 
-category_router = fastapi.APIRouter()
+categories_router = fastapi.APIRouter()
+recipes_router = fastapi.APIRouter()
 
 
-@category_router.get('/')
+@categories_router.get('/')
 def get_all_categories():
     """
     Get all categories
@@ -21,7 +24,7 @@ def get_all_categories():
     return [features.recipes.responses.Category(**_.__dict__) for _ in categories]
 
 
-@category_router.get('/{category_id}')
+@categories_router.get('/{category_id}')
 def get_category(category_id: int = fastapi.Path()):
     """
     Get category
@@ -40,7 +43,7 @@ def get_category(category_id: int = fastapi.Path()):
         )
 
 
-@category_router.post('/')
+@categories_router.post('/')
 def create_category(create_category_input_model: CreateCategoryInputModel):
     """
     Crate category
@@ -59,7 +62,7 @@ def create_category(create_category_input_model: CreateCategoryInputModel):
         )
 
 
-@category_router.patch('/{category_id}')
+@categories_router.patch('/{category_id}')
 def update_category(category_id: int = fastapi.Path(), update_category_input_model: UpdateCategoryInputModel = fastapi.Body()):
     """
     Update category
@@ -81,3 +84,28 @@ def update_category(category_id: int = fastapi.Path(), update_category_input_mod
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Category with name {update_category_input_model.name} already exists"
         )
+
+
+@recipes_router.get('/')
+def get_all_recipes():
+    """Get all recipes"""
+    return 'recipes'
+
+
+@recipes_router.get('/{recipe_id}')
+def get_recipe(recipe_id: int = fastapi.Path()):
+    """Get recipe"""
+    return f"recipe {recipe_id}"
+
+
+@recipes_router.post('/')
+def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
+    """
+    Create recipe
+
+    :param create_recipe_input_model:
+    :return:
+    """
+    created_recipe = features.recipes.operations.create_recipe(**create_recipe_input_model.model_dump())
+
+    return features.recipes.responses.Recipe(**created_recipe.__dict__)

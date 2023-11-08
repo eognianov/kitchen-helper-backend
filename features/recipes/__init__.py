@@ -1,3 +1,4 @@
 import features.recipes.router as r
 
-category_router = r.category_router
+category_router = r.categories_router
+recipes_router = r.recipes_router

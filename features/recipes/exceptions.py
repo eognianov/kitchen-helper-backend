@@ -4,5 +4,6 @@
 class CategoryNotFoundException(Exception):
     ...
 
+
 class CategoryNameViolationException(Exception):
     ...
