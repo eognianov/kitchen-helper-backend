@@ -7,3 +7,7 @@ class CategoryNotFoundException(Exception):
 
 class CategoryNameViolationException(Exception):
     ...
+
+
+class RecipeNotFoundException(Exception):
+    ...

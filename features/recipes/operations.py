@@ -1,7 +1,7 @@
 """Recipes feature business logic"""
 import db.connection
 from .models import RecipeCategory, Recipe
-from .exceptions import CategoryNotFoundException, CategoryNameViolationException
+from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException
 from typing import Type
 from sqlalchemy import update
 import sqlalchemy.exc
@@ -102,5 +102,15 @@ def get_all_recipes():
     """Get all recipes"""
 
     with db.connection.get_session() as session:
-        result = session.query(Recipe).join(Recipe.category).all()
-        return result
+        return session.query(Recipe).join(Recipe.category).all()
+
+
+def get_recipe_by_id(recipe_id: int):
+    """Get recipe by id"""
+
+    with db.connection.get_session() as session:
+
+        recipe = session.query(Recipe).join(Recipe.category).where(Recipe.id==recipe_id).first()
+        if not recipe:
+            raise RecipeNotFoundException
+        return recipe
