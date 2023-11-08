@@ -35,4 +35,5 @@ def update_category(category_id: int, field: str, value: str, updated_by: str = 
     with db.connection.get_session() as session:
         session.execute(update(RecipeCategory), [{"id": category.id, f"{field}": value, "updated_by": updated_by}])
         session.commit()
-        return session.query(RecipeCategory).where(RecipeCategory.id == category_id).first()
+        RecipeCategory.__setattr__(category, field, value)
+        return category
