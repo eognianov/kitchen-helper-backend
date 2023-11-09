@@ -13,6 +13,7 @@ from .input_models import RegisterUserInputModel
 from .models import User
 
 import configuration
+from .responses import JwtTokenResponseModel
 
 config = configuration.Config()
 
@@ -31,28 +32,30 @@ def check_password(user: User, password: str) -> bool:
 def create_new_user(user: RegisterUserInputModel) -> User:
     # Create the user in the database
     with get_session() as session:
-        # Check if the username or email already exists
-        if get_user_from_db(username=user.username, email=user.email):
-            # Raise an Exception
-            raise features.users.exceptions.UserAlreadyExists()
-
-        user.password = hash_password(password=user.password)
-        db_user = User(username=user.username, email=user.email, password=user.password)
-        session.add(db_user)
-        session.commit()
-        session.refresh(db_user)
+        try:
+            # Check if the username or email already exists
+            if get_user_from_db(username=user.username, email=user.email):
+                # Raise an Exception
+                raise features.users.exceptions.UserAlreadyExists()
+        except features.users.exceptions.UserDoesNotExistException:
+            # Create the new user
+            user.password = hash_password(password=user.password)
+            db_user = User(username=user.username, email=user.email, password=user.password)
+            session.add(db_user)
+            session.commit()
+            session.refresh(db_user)
 
     return db_user
 
 
-def signin_user(username: str, password: str) -> tuple:
+def signin_user(username: str, password: str) -> JwtTokenResponseModel:
     # Get user and check if username and password are correct
     current_user = get_user_from_db(username=username)
     if not current_user or not check_password(current_user, password):
         features.users.exceptions.AccessDenied()
     # Create jwt token
     token, token_type = create_token(username)
-    return token, token_type
+    return JwtTokenResponseModel(token_value=token, token_type=token_type)
 
 
 def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
@@ -95,7 +98,7 @@ def update_user(user_id: int, field: str, value: str, updated_by: str = '') -> T
         return session.query(User).where(User.id == user_id).first()
 
 
-def create_token(subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True) -> tuple:
+def create_token(subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True) -> JwtTokenResponseModel:
     minutes = config.jwt.access_token_expire_minutes if access else config.jwt.refresh_token_expire_minutes
     secret_key = config.jwt.secret_key if access else config.jwt.refresh_secret_key
     algorithm = config.jwt.algorithm
@@ -107,4 +110,5 @@ def create_token(subject: Union[str, Any], expires_delta: timedelta = None, acce
 
     to_encode = {"exp": expires_delta, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm)
-    return encoded_jwt, token_type
+
+    return JwtTokenResponseModel(token_value=encoded_jwt, token_type=token_type)

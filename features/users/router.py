@@ -5,14 +5,14 @@ from fastapi import APIRouter, HTTPException
 
 import features.users.exceptions
 from .input_models import RegisterUserInputModel, UpdateUserInputModel
-from .responses import UsersResponseModel
+from .responses import UsersResponseModel, JwtTokenResponseModel
 
 from .operations import create_new_user, signin_user, get_all_users, get_user_from_db
 
 user_router = APIRouter()
 
 
-@user_router.post("/signup")
+@user_router.post("/signup", response_model=UsersResponseModel)
 async def signup(user: RegisterUserInputModel):
     """
     Sing up user
@@ -31,7 +31,7 @@ async def signup(user: RegisterUserInputModel):
 
 
 @user_router.post("/signin")
-async def signin(username: str, password: str):
+async def signin(username: str, password: str) -> JwtTokenResponseModel:
     """
     Sing in user
 
@@ -41,8 +41,8 @@ async def signin(username: str, password: str):
     """
     try:
         # Sign in user and create jwt token
-        token, token_type = signin_user(username, password)
-        return {"token": token, "token_type": token_type}
+        response_model = signin_user(username, password)
+        return response_model
     except features.users.exceptions.AccessDenied:
         raise HTTPException(
             status_code=fastapi.status.HTTP_403_FORBIDDEN,
