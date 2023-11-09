@@ -102,7 +102,7 @@ def get_all_recipes():
     """Get all recipes"""
 
     with db.connection.get_session() as session:
-        return session.query(Recipe).join(Recipe.category).all()
+        return session.query(Recipe).join(Recipe.category, isouter=True).all()
 
 
 def get_recipe_by_id(recipe_id: int):
@@ -110,7 +110,7 @@ def get_recipe_by_id(recipe_id: int):
 
     with db.connection.get_session() as session:
 
-        recipe = session.query(Recipe).join(Recipe.category).where(Recipe.id==recipe_id).first()
+        recipe = session.query(Recipe).join(Recipe.category, isouter=True).where(Recipe.id==recipe_id).first()
         if not recipe:
             raise RecipeNotFoundException
         return recipe
