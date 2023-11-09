@@ -77,10 +77,14 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     :return:
     """
 
+    category = None
+    if category_id:
+        category = get_category_by_id(category_id)
+
     recipe = Recipe(
         name=name,
         time_to_prepare=time_to_prepare,
-        category_id=category_id,
+        category=category,
         picture=picture,
         summary=summary,
         calories=calories,

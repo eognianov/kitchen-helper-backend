@@ -29,7 +29,7 @@ class Recipe(DbBaseModel):
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
     updated_by: Mapped[Optional[str]] = mapped_column(String(30), nullable=True, init=False)
     updated_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp(), init=False)
-    category: Mapped[RecipeCategory] = relationship("RecipeCategory", back_populates="recipes", init=False, lazy="selectin")
+    category: Mapped[RecipeCategory] = relationship("RecipeCategory", back_populates="recipes", default=None, lazy="selectin")
     category_id: Mapped[int] = mapped_column(ForeignKey("RECIPE_CATEGORIES.id"), nullable=True, default=0)
     picture: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, default=None)
     summary: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True, default=None)

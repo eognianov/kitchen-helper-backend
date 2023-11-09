@@ -114,6 +114,12 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
     :param create_recipe_input_model:
     :return:
     """
-    created_recipe = features.recipes.operations.create_recipe(**create_recipe_input_model.model_dump())
+    try:
+        created_recipe = features.recipes.operations.create_recipe(**create_recipe_input_model.model_dump())
 
-    return features.recipes.responses.Recipe(**created_recipe.__dict__)
+        return features.recipes.responses.Recipe(**created_recipe.__dict__)
+    except features.recipes.exceptions.CategoryNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Category with id {create_recipe_input_model.category_id} does not exist"
+        )
