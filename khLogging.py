@@ -44,7 +44,7 @@ class Logger:
             getattr(self.child_logger, level)(*args)
         else:
             if not Logger.logger:
-                Logger('undefined.log')
+                Logger('undefined')
             getattr(Logger.logger, level)(*args)
 
     def debug(self, *args):
