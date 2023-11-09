@@ -1,19 +1,22 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean
+from sqlalchemy import Integer, String, Float, Boolean
 from sqlalchemy.ext.declarative import declarative_base
+from features import DbBaseModel
+from sqlalchemy.orm import Mapped, mapped_column
+from typing import Optional
 
 Base = declarative_base()
 
-class Ingredient(Base):
+class Ingredient(DbBaseModel):
 
     __tablename__ = "ingredients"
 
-    id = Column(Integer, primary_key= True, index= True)
-    name = Column(String, index=True)
-    category = Column(String)
-    calories = Column(Float)
-    carbo = Column(Float)
-    fats = Column(Float)
-    protein = Column(Float)
-    cholesterol = Column(Float)
-    measurement = Column(String)
-    is_deleted = Column(Boolean, default=False)
+    id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key= True)
+    name: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    category: Mapped[str] = mapped_column(String, nullable=False)
+    calories: Mapped[float] = mapped_column(Float, nullable=False)
+    carbo: Mapped[float] = mapped_column(Float, nullable=False)
+    fats: Mapped[float] = mapped_column(Float, nullable=False)
+    protein: Mapped[float] = mapped_column(Float, nullable=False)
+    cholesterol: Mapped[float] = mapped_column(Float, nullable=False)
+    measurement: Mapped[float] = mapped_column(Float, nullable=False)
+    is_deleted: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
