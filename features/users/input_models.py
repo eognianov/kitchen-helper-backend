@@ -15,7 +15,7 @@ class RegisterUserInputModel(BaseModel):
 
     @field_validator('email', mode='after')
     @classmethod
-    def validate_email(cls, email):
+    def validate_user_email(cls, email):
         try:
             validate_email(email)
         except Exception as e:
