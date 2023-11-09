@@ -14,7 +14,8 @@ class RecipeCategory(DbBaseModel):
     created_by: Mapped[str] = mapped_column(String(30))
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
     updated_by: Mapped[Optional[str]] = mapped_column(String(30), nullable=True, init=False)
-    updated_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp(), init=False)
+    updated_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(),
+                                                          onupdate=func.current_timestamp(), init=False)
     recipes: Mapped[list["Recipe"]] = relationship("Recipe", back_populates="category", init=False, lazy="selectin")
 
 
@@ -28,8 +29,10 @@ class Recipe(DbBaseModel):
     created_by: Mapped[str] = mapped_column(String(30))
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
     updated_by: Mapped[Optional[str]] = mapped_column(String(30), nullable=True, init=False)
-    updated_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp(), init=False)
-    category: Mapped[RecipeCategory] = relationship("RecipeCategory", back_populates="recipes", default=None, lazy="selectin")
+    updated_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(),
+                                                          onupdate=func.current_timestamp(), init=False)
+    category: Mapped[RecipeCategory] = relationship("RecipeCategory", back_populates="recipes", default=None,
+                                                    lazy="selectin")
     category_id: Mapped[int] = mapped_column(ForeignKey("RECIPE_CATEGORIES.id"), nullable=True, default=0)
     picture: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, default=None)
     summary: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True, default=None)
@@ -38,3 +41,19 @@ class Recipe(DbBaseModel):
     fats: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     proteins: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     cholesterol: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
+    instructions: Mapped[list["RecipeInstruction"]] = relationship("RecipeInstruction", back_populates="recipe",
+                                                                   init=False)
+
+
+class RecipeInstruction(DbBaseModel):
+    """Recipe instruction"""
+    __tablename__ = "RECIPE_INSTRUCTIONS"
+
+    id: Mapped[int] = mapped_column(Integer, init=False, autoincrement=True, primary_key=True)
+    instruction: Mapped[str] = mapped_column(String(300))
+    category: Mapped[str] = mapped_column(String(100))
+    time: Mapped[int] = mapped_column(Integer)
+    complexity: Mapped[float] = mapped_column(Float)
+
+    recipe_id: Mapped[int] = mapped_column(ForeignKey('RECIPES.id'), nullable=False, init=False)
+    recipe: Mapped[Recipe] = relationship('Recipe', back_populates='instructions', init=False)
