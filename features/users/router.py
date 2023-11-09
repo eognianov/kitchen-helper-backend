@@ -1,15 +1,13 @@
 """Users feature endpoints"""
-from typing import List
 
 import fastapi
 from fastapi import APIRouter, HTTPException
-from starlette.responses import JSONResponse
 
 import features.users.exceptions
 from .input_models import RegisterUserInputModel, UpdateUserInputModel
 from .responses import UsersResponseModel
 
-from .operations import create_token, create_new_user, signin_user, get_all_users, get_user
+from .operations import create_new_user, signin_user, get_all_users, get_user_from_db
 
 user_router = APIRouter()
 
@@ -24,13 +22,7 @@ async def signup(user: RegisterUserInputModel):
     """
     try:
         db_user = create_new_user(user)
-        return JSONResponse(
-            content={
-                "message": "Successfully created",
-                "user_data": {"id": db_user.id, "username": db_user.username, "email": db_user.email}
-            },
-            status_code=201
-        )
+        return db_user
     except features.users.exceptions.UserAlreadyExists:
         raise HTTPException(
             status_code=fastapi.status.HTTP_409_CONFLICT,
@@ -48,9 +40,8 @@ async def signin(username: str, password: str):
     :return:
     """
     try:
-        signin_user(username, password)
-        # Create jwt token
-        token, token_type = create_token(username)
+        # Sign in user and create jwt token
+        token, token_type = signin_user(username, password)
         return {"token": token, "token_type": token_type}
     except features.users.exceptions.AccessDenied:
         raise HTTPException(
@@ -59,7 +50,7 @@ async def signin(username: str, password: str):
         )
 
 
-@user_router.get("/all", response_model=List[UsersResponseModel])
+@user_router.get("/all", response_model=list[UsersResponseModel])
 async def show_all_users():
     """
     Show all users
@@ -71,7 +62,7 @@ async def show_all_users():
 
 
 @user_router.get("/{user_id}", response_model=UsersResponseModel)
-async def show_user(user_id: int):
+async def get_user(user_id: int):
     """
     Show user details
 
@@ -79,7 +70,7 @@ async def show_user(user_id: int):
     :return:
     """
     try:
-        user = get_user(pk=user_id)
+        user = get_user_from_db(pk=user_id)
         return user
     except features.users.exceptions.UserDoesNotExistException:
         raise fastapi.HTTPException(
@@ -89,7 +80,7 @@ async def show_user(user_id: int):
 
 
 @user_router.patch('/{user_id}')
-def update_user(user_id: int = fastapi.Path(), update_user_input_model: UpdateUserInputModel = fastapi.Body()):
+def patch_user(user_id: int = fastapi.Path(), update_user_input_model: UpdateUserInputModel = fastapi.Body()):
     """
     Update user email
 

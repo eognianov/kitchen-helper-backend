@@ -17,7 +17,7 @@ import configuration
 config = configuration.Config()
 
 
-def hash_password(password: str):
+def hash_password(password: str) -> bytes:
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
     return hashed_password
@@ -28,15 +28,11 @@ def check_password(user: User, password: str) -> bool:
     return bcrypt.checkpw(password.encode('utf-8'), user.password)
 
 
-def set_password(user: RegisterUserInputModel, password: str):
-    user.password = hash_password(password=password)
-
-
 def create_new_user(user: RegisterUserInputModel) -> User:
     # Create the user in the database
     with get_session() as session:
         # Check if the username or email already exists
-        if get_user(username=user.username, email=user.email):
+        if get_user_from_db(username=user.username, email=user.email):
             # Raise an Exception
             raise features.users.exceptions.UserAlreadyExists()
 
@@ -49,14 +45,17 @@ def create_new_user(user: RegisterUserInputModel) -> User:
     return db_user
 
 
-def signin_user(username: str, password: str):
+def signin_user(username: str, password: str) -> tuple:
     # Get user and check if username and password are correct
-    current_user = get_user(username=username)
+    current_user = get_user_from_db(username=username)
     if not current_user or not check_password(current_user, password):
         features.users.exceptions.AccessDenied()
+    # Create jwt token
+    token, token_type = create_token(username)
+    return token, token_type
 
 
-def get_user(*, pk: int = None, username: str = None, email: str = None) -> User | None:
+def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
 
     with get_session() as session:
         query = session.query(User)
@@ -89,7 +88,7 @@ def get_all_users():
 
 
 def update_user(user_id: int, field: str, value: str, updated_by: str = '') -> Type[User]:
-    user = get_user(pk=user_id)
+    user = get_user_from_db(pk=user_id)
     with get_session() as session:
         session.execute(update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}])
         session.commit()
