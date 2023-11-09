@@ -32,7 +32,7 @@ class Logger:
             self.name = log_name
             self.child_logger = child_logger
 
-    def _check_for_unregistered_loggers(self):
+    def register_parent_logger(self):
         parent_logger = Logger.logger
         if parent_logger and parent_logger not in Logger.child_logger_registration[self.name]:
             self.child_logger = logging.getLogger(f"{parent_logger.name}.{self.name}")
@@ -40,7 +40,7 @@ class Logger:
 
     def _log(self, level, *args, **kwargs):
         if self.child_logger:
-            self._check_for_unregistered_loggers()
+            self.register_parent_logger()
             getattr(self.child_logger, level)(*args)
         else:
             if not Logger.logger:
