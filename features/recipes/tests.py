@@ -4,6 +4,8 @@ from tests.fixtures import use_test_db
 from features.recipes import operations
 from features.recipes.models import RecipeCategory
 from features.recipes.exceptions import CategoryNameViolationException, CategoryNotFoundException
+from fastapi.testclient import TestClient
+from api import app
 
 
 class TestCategoryOperations:
@@ -43,3 +45,30 @@ class TestCategoryOperations:
         operations.update_category(created_category.id, 'name', 'new_name')
         updated_category = operations.get_category_by_id(created_category.id)
         assert updated_category.name == 'new_name'
+
+
+class TestCategoriesEndpoints:
+    client = TestClient(app)
+
+    @classmethod
+    def test_get_all_categories_empty(cls, use_test_db):
+        response = cls.client.get('/categories/')
+        assert response.status_code == 200
+        assert len(response.json()) == 0
+
+    @classmethod
+    def test_get_all_categories(cls, use_test_db):
+        created_category = operations.create_category('new')
+        response = cls.client.get('/categories/')
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+        assert response.json()[0]['name'] == created_category.name
+        assert response.json()[0]['created_by'] == created_category.created_by
+
+    @classmethod
+    def test_get_category_by_id(cls, use_test_db):
+        created_category = operations.create_category('new')
+        response = cls.client.get(f'/categories/{created_category.id}')
+        assert response.status_code == 200
+        assert response.json()['name'] == created_category.name
+        assert response.json()['created_by'] == created_category.created_by
