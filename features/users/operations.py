@@ -13,7 +13,6 @@ from .input_models import RegisterUserInputModel
 from .models import User
 
 import configuration
-from .responses import JwtTokenResponseModel
 
 config = configuration.Config()
 
@@ -48,14 +47,13 @@ def create_new_user(user: RegisterUserInputModel) -> User:
     return db_user
 
 
-def signin_user(username: str, password: str) -> JwtTokenResponseModel:
+def signin_user(username: str, password: str) -> tuple:
     # Get user and check if username and password are correct
     current_user = get_user_from_db(username=username)
     if not current_user or not check_password(current_user, password):
         features.users.exceptions.AccessDenied()
     # Create jwt token
-    token, token_type = create_token(username)
-    return JwtTokenResponseModel(token_value=token, token_type=token_type)
+    return create_token(username)
 
 
 def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
@@ -81,7 +79,7 @@ def get_user_from_db(*, pk: int = None, username: str = None, email: str = None)
     return user
 
 
-def get_all_users():
+def get_all_users() -> list:
 
     with get_session() as session:
         # Fetch all the users from the db
@@ -98,7 +96,7 @@ def update_user(user_id: int, field: str, value: str, updated_by: str = '') -> T
         return session.query(User).where(User.id == user_id).first()
 
 
-def create_token(subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True) -> JwtTokenResponseModel:
+def create_token(subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True) -> tuple:
     minutes = config.jwt.access_token_expire_minutes if access else config.jwt.refresh_token_expire_minutes
     secret_key = config.jwt.secret_key if access else config.jwt.refresh_secret_key
     algorithm = config.jwt.algorithm
@@ -111,4 +109,4 @@ def create_token(subject: Union[str, Any], expires_delta: timedelta = None, acce
     to_encode = {"exp": expires_delta, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm)
 
-    return JwtTokenResponseModel(token_value=encoded_jwt, token_type=token_type)
+    return encoded_jwt, token_type

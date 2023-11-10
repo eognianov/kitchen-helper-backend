@@ -30,8 +30,8 @@ async def signup(user: RegisterUserInputModel):
         )
 
 
-@user_router.post("/signin")
-async def signin(username: str, password: str) -> JwtTokenResponseModel:
+@user_router.post("/signin", response_model=JwtTokenResponseModel)
+async def signin(username: str, password: str):
     """
     Sing in user
 
@@ -41,8 +41,8 @@ async def signin(username: str, password: str) -> JwtTokenResponseModel:
     """
     try:
         # Sign in user and create jwt token
-        response_model = signin_user(username, password)
-        return response_model
+        token, token_type = signin_user(username, password)
+        return JwtTokenResponseModel(token_value=token, token_type=token_type)
     except features.users.exceptions.AccessDenied:
         raise HTTPException(
             status_code=fastapi.status.HTTP_403_FORBIDDEN,
