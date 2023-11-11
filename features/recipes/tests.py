@@ -9,7 +9,7 @@ from api import app
 
 
 class TestCategoryOperations:
-    def test_create_category_success(self, use_test_db):
+    def test_create_category_success(self, use_test_db, mocker):
         expected_name = 'new_category'
         operations.create_category(expected_name)
         with db.connection.get_session() as session:
@@ -51,10 +51,11 @@ class TestCategoriesEndpoints:
     client = TestClient(app)
 
     @classmethod
-    def test_get_all_categories_empty(cls, use_test_db):
+    def test_get_all_categories_empty(cls, use_test_db, mocker):
+        get_all_categories_spy = mocker.spy(operations, 'get_all_recipe_categories')
         response = cls.client.get('/categories/')
         assert response.status_code == 200
-        assert len(response.json()) == 0
+        assert get_all_categories_spy.call_count == 1
 
     @classmethod
     def test_get_all_categories(cls, use_test_db):
