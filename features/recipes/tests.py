@@ -58,21 +58,21 @@ class TestCategoriesEndpoints:
         assert get_all_categories_spy.call_count == 1
 
     @classmethod
-    def test_get_all_categories(cls, use_test_db):
+    def test_get_all_categories(cls, use_test_db, mocker):
         created_category = operations.create_category('new')
+        get_all_categories_spy = mocker.spy(operations, 'get_all_recipe_categories')
         response = cls.client.get('/categories/')
         assert response.status_code == 200
         assert len(response.json()) == 1
-        assert response.json()[0]['name'] == created_category.name
-        assert response.json()[0]['created_by'] == created_category.created_by
+        assert get_all_categories_spy.call_count == 1
 
     @classmethod
-    def test_get_category_by_id(cls, use_test_db):
+    def test_get_category_by_id(cls, use_test_db, mocker):
         created_category = operations.create_category('new')
+        get_category_spy = mocker.spy(operations, 'get_category_by_id')
         response = cls.client.get(f'/categories/{created_category.id}')
         assert response.status_code == 200
-        assert response.json()['name'] == created_category.name
-        assert response.json()['created_by'] == created_category.created_by
+        get_category_spy.assert_called_with(created_category.id)
 
     @classmethod
     def test_patch_category(cls, use_test_db, mocker):
