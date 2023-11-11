@@ -11,3 +11,7 @@ class CategoryNameViolationException(Exception):
 
 class RecipeNotFoundException(Exception):
     ...
+
+
+class InstructionNotFoundException(Exception):
+    ...

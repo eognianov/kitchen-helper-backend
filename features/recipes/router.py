@@ -6,7 +6,8 @@ from starlette import status
 import features.recipes.operations
 import features.recipes.responses
 import features.recipes.exceptions
-from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, InstructionRequest
+from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, InstructionRequest, \
+    InstructionInput
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
@@ -137,7 +138,7 @@ def get_all_instructions():
     return [features.recipes.responses.InstructionResponse(**i.__dict__) for i in instructions]
 
 
-@instructions_router.post('/{recipe_id}')
+@instructions_router.post('/{recipe_id}', status_code=status.HTTP_201_CREATED)
 def create_instructions(instructions_request: InstructionRequest, recipe_id: int):
     """
         Create instructions for recipe
@@ -155,9 +156,7 @@ def create_instructions(instructions_request: InstructionRequest, recipe_id: int
             detail=f"Recipe with {recipe_id=} does not exist"
         )
 
-    features.recipes.operations.create_instructions_and_update_recipe(instructions_request, recipe)
-
-    return status.HTTP_201_CREATED
+    features.recipes.operations.create_instructions(instructions_request, recipe)
 
 
 @instructions_router.get('/{recipe_id}')
@@ -178,3 +177,23 @@ def get_recipe_instructions(recipe_id: int = fastapi.Path()):
 
     instructions = features.recipes.operations.get_instructions_by_recipe_id(recipe_id)
     return [features.recipes.responses.InstructionResponse(**i.__dict__) for i in instructions]
+
+
+@instructions_router.put('/{instruction_id}')
+def update_instruction(instruction_request: InstructionInput, instruction_id: int = fastapi.Path()):
+    """
+        Update instruction
+        :instruction_request:
+        :instruction_id:
+        :return:
+    """
+
+    try:
+        instruction = features.recipes.operations.get_instruction_by_id(instruction_id)
+    except features.recipes.exceptions.InstructionNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Instruction with {instruction_id=} does not exist"
+        )
+
+    features.recipes.operations.update_instruction(instruction_request, instruction)

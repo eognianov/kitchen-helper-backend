@@ -1,7 +1,8 @@
 """Recipes feature business logic"""
 import db.connection
 from .models import RecipeCategory, Recipe, RecipeInstruction
-from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException
+from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
+    InstructionNotFoundException
 from typing import Type
 from sqlalchemy import update
 import sqlalchemy.exc
@@ -129,9 +130,22 @@ def get_all_instructions() -> list[Type[RecipeInstruction]]:
         return session.query(RecipeInstruction).all()
 
 
-def create_instructions_and_update_recipe(instructions_request, recipe):
+def update_recipe(session, recipe):
+    instructions = session.query(RecipeInstruction).filter(RecipeInstruction.recipe_id == recipe.id)
+
+    total_complexity = (sum([InstructionResponse(**x.__dict__).complexity for x in instructions]))
+    complexity_len = (len([InstructionResponse(**x.__dict__).complexity for x in instructions]))
+    time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in instructions]))
+
+    recipe.complexity = round(total_complexity / complexity_len, 1)
+    recipe.time_to_prepare = time_to_prepare
+    session.add(recipe)
+    session.commit()
+
+
+def create_instructions(instructions_request, recipe):
     """
-        Create instruction
+        Create instructions
 
         :param instructions_request:
         :param recipe:
@@ -141,27 +155,13 @@ def create_instructions_and_update_recipe(instructions_request, recipe):
     with db.connection.get_session() as session:
         instructions = instructions_request.instructions
 
-        old_instructions = session.query(RecipeInstruction).filter(RecipeInstruction.recipe_id == recipe.id)
-
-        old_total_complexity = (sum([InstructionResponse(**x.__dict__).complexity for x in old_instructions]))
-        old_len = (len([InstructionResponse(**x.__dict__).complexity for x in old_instructions]))
-        old_time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in old_instructions]))
-
-        total_complexity = old_total_complexity
-        total_time_to_prepare = old_time_to_prepare
-
         for instruction in instructions:
             new_instruction = RecipeInstruction(**instruction.model_dump())
             new_instruction.recipe_id = recipe.id
-            total_time_to_prepare += new_instruction.time
-            total_complexity += new_instruction.complexity
             session.add(new_instruction)
             session.commit()
 
-        recipe.complexity = round(total_complexity / (len(instructions) + old_len), 1)
-        recipe.time_to_prepare = total_time_to_prepare
-        session.add(recipe)
-        session.commit()
+        update_recipe(session, recipe)
 
 
 def get_instructions_by_recipe_id(recipe_id: int):
@@ -170,3 +170,35 @@ def get_instructions_by_recipe_id(recipe_id: int):
     with db.connection.get_session() as session:
         instructions = session.query(RecipeInstruction).filter(RecipeInstruction.recipe_id == recipe_id)
         return instructions
+
+
+def get_instruction_by_id(instruction_id: int):
+    """Get instruction by id"""
+
+    with db.connection.get_session() as session:
+        instruction = session.query(RecipeInstruction).filter(RecipeInstruction.id == instruction_id).first()
+        if not instruction:
+            raise InstructionNotFoundException
+        return instruction
+
+
+def update_instruction(instruction_request, instruction):
+    """
+            Update instruction
+
+            :param instruction_request:
+            :param instruction:
+            :return:
+        """
+    with db.connection.get_session() as session:
+        instruction.instruction = instruction_request.instruction
+        instruction.category = instruction_request.category
+        instruction.time = instruction_request.time
+        instruction.complexity = instruction_request.complexity
+
+        session.add(instruction)
+        session.commit()
+        session.refresh(instruction)
+
+        recipe = get_recipe_by_id(instruction.recipe_id)
+        update_recipe(session, recipe)
