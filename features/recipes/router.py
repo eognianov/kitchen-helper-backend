@@ -67,7 +67,7 @@ def update_category(category_id: int = fastapi.Path(), patch_category_input_mode
     :return:
     """
     try:
-        return features.recipes.operations.update_category(category_id, **patch_category_input_model.model_dump())
+        return features.recipes.operations.update_category(category_id=category_id, **patch_category_input_model.model_dump())
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,

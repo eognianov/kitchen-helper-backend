@@ -73,3 +73,15 @@ class TestCategoriesEndpoints:
         assert response.status_code == 200
         assert response.json()['name'] == created_category.name
         assert response.json()['created_by'] == created_category.created_by
+
+    @classmethod
+    def test_patch_category(cls, use_test_db, mocker):
+        created_category = operations.create_category('new')
+        patch_payload = {
+            'field': 'name',
+            'value': 'updated'
+        }
+        update_category_spy = mocker.spy(operations, 'update_category')
+        response = cls.client.patch(f'/categories/{created_category.id}', json=patch_payload)
+        assert response.status_code == 200
+        update_category_spy.assert_called_with(category_id=1, field='name', value='updated')
