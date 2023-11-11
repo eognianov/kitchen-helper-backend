@@ -1,5 +1,5 @@
 """Recipe feature input model"""
-from typing import Optional
+from typing import Optional, List
 
 import pydantic
 
@@ -42,3 +42,16 @@ class CreateRecipeInputModel(pydantic.BaseModel):
     cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
     time_to_prepare: int = pydantic.Field(gt=0)
     category_id: Optional[int] = None
+
+
+class InstructionInput(pydantic.BaseModel):
+    """Single instruction"""
+    instruction: str = pydantic.Field(max_length=300)
+    category: str = pydantic.Field(max_length=100)
+    time: int = pydantic.Field()
+    complexity: float = pydantic.Field()
+
+
+class InstructionRequest(pydantic.BaseModel):
+    """Create instructions"""
+    instructions: List[InstructionInput]

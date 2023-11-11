@@ -36,3 +36,14 @@ class Recipe(pydantic.BaseModel):
     def model_post_init(self, __context: Any):
         if self.category:
             self.category = Category(**self.category.__dict__)
+
+
+class InstructionResponse(pydantic.BaseModel):
+    """Instruction response"""
+
+    id: int
+    instruction: str
+    category: str
+    time: int
+    complexity: float
+    recipe_id: int

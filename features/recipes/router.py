@@ -1,14 +1,16 @@
 """Recipes feature endpoints"""
 
 import fastapi
+from starlette import status
 
 import features.recipes.operations
 import features.recipes.responses
 import features.recipes.exceptions
-from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
+from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, InstructionRequest
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
+instructions_router = fastapi.APIRouter()
 
 
 @categories_router.get('/')
@@ -62,7 +64,8 @@ def create_category(create_category_input_model: CreateCategoryInputModel):
 
 
 @categories_router.patch('/{category_id}')
-def update_category(category_id: int = fastapi.Path(), patch_category_input_model: PatchCategoryInputModel = fastapi.Body()):
+def update_category(category_id: int = fastapi.Path(),
+                    patch_category_input_model: PatchCategoryInputModel = fastapi.Body()):
     """
     Update category
 
@@ -71,7 +74,8 @@ def update_category(category_id: int = fastapi.Path(), patch_category_input_mode
     :return:
     """
     try:
-        updated_category = features.recipes.operations.update_category(category_id, **patch_category_input_model.model_dump())
+        updated_category = features.recipes.operations.update_category(category_id,
+                                                                       **patch_category_input_model.model_dump())
         return features.recipes.responses.Category(**updated_category.__dict__)
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
@@ -123,3 +127,34 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Category with id {create_recipe_input_model.category_id} does not exist"
         )
+
+
+@instructions_router.get('/', )
+def get_all_instructions():
+    """Get instructions"""
+
+    instructions = features.recipes.operations.get_all_instructions()
+    return [features.recipes.responses.InstructionResponse(**i.__dict__) for i in instructions]
+
+
+@instructions_router.post('/{recipe_id}')
+def create_instruction(instructions_request: InstructionRequest, recipe_id: int):
+    """
+        Create instructions for recipe
+
+        :param recipe_id:
+        :param instructions_request:
+        :return:
+    """
+
+    try:
+        recipe = features.recipes.operations.get_recipe_by_id(recipe_id)
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with {recipe_id=} does not exist"
+        )
+
+    features.recipes.operations.create_instructions_and_update_recipe(instructions_request, recipe)
+
+    return status.HTTP_201_CREATED

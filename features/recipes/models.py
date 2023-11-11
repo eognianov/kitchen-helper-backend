@@ -41,6 +41,7 @@ class Recipe(DbBaseModel):
     fats: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     proteins: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     cholesterol: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
+    complexity: Mapped[float] = mapped_column(Float, nullable=True, default=0)
     instructions: Mapped[list["RecipeInstruction"]] = relationship("RecipeInstruction", back_populates="recipe",
                                                                    init=False)
 
