@@ -138,7 +138,7 @@ def get_all_instructions():
 
 
 @instructions_router.post('/{recipe_id}')
-def create_instruction(instructions_request: InstructionRequest, recipe_id: int):
+def create_instructions(instructions_request: InstructionRequest, recipe_id: int):
     """
         Create instructions for recipe
 
@@ -158,3 +158,23 @@ def create_instruction(instructions_request: InstructionRequest, recipe_id: int)
     features.recipes.operations.create_instructions_and_update_recipe(instructions_request, recipe)
 
     return status.HTTP_201_CREATED
+
+
+@instructions_router.get('/{recipe_id}')
+def get_recipe_instructions(recipe_id: int = fastapi.Path()):
+    """
+        Get recipe instructions
+        :param recipe_id:
+        :return:
+    """
+
+    try:
+        recipe = features.recipes.operations.get_recipe_by_id(recipe_id)
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with {recipe_id=} does not exist"
+        )
+
+    instructions = features.recipes.operations.get_instructions_by_recipe_id(recipe_id)
+    return [features.recipes.responses.InstructionResponse(**i.__dict__) for i in instructions]

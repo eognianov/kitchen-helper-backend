@@ -139,7 +139,6 @@ def create_instructions_and_update_recipe(instructions_request, recipe):
     """
 
     with db.connection.get_session() as session:
-
         instructions = instructions_request.instructions
 
         old_instructions = session.query(RecipeInstruction).filter(RecipeInstruction.recipe_id == recipe.id)
@@ -163,3 +162,11 @@ def create_instructions_and_update_recipe(instructions_request, recipe):
         recipe.time_to_prepare = total_time_to_prepare
         session.add(recipe)
         session.commit()
+
+
+def get_instructions_by_recipe_id(recipe_id: int):
+    """Get instructions by recipe_id"""
+
+    with db.connection.get_session() as session:
+        instructions = session.query(RecipeInstruction).filter(RecipeInstruction.recipe_id == recipe_id)
+        return instructions

@@ -48,8 +48,8 @@ class InstructionInput(pydantic.BaseModel):
     """Single instruction"""
     instruction: str = pydantic.Field(max_length=300)
     category: str = pydantic.Field(max_length=100)
-    time: int = pydantic.Field()
-    complexity: float = pydantic.Field()
+    time: int = pydantic.Field(ge=1, lt=100)
+    complexity: float = pydantic.Field(ge=1, le=5)
 
 
 class InstructionRequest(pydantic.BaseModel):
