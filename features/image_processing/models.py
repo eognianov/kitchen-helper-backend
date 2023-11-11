@@ -10,6 +10,7 @@ class Image(DbBaseModel):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(300), unique=True)
     storage_location: Mapped[str] = mapped_column(String(300))
+    cloudinary_url: Mapped[str] = mapped_column(String(300))
     width: Mapped[int] = mapped_column(Integer)
     height: Mapped[int] = mapped_column(Integer)
     uploaded_by: Mapped[str] = mapped_column(String(30))

@@ -7,10 +7,17 @@ from httpx import AsyncClient, HTTPStatusError, RequestError
 import os
 import aiofiles
 import secrets
+import cloudinary.uploader
 
-from configuration import Config
+CLOUDINARY_CLOUD_NAME = 'dipxtlowj'
+CLOUDINARY_API_KEY = '324171519888611'
+CLOUDINARY_API_SECRET = 'x-5IO1FgHRZEcalw0dy4nnSFFFA'
 
-SQLALCHEMY_DATABASE_URL = Config().connection_string
+cloudinary.config(
+    cloud_name=CLOUDINARY_CLOUD_NAME,
+    api_key=CLOUDINARY_API_KEY,
+    api_secret=CLOUDINARY_API_SECRET
+)
 
 
 def generate_id() -> str:
@@ -56,15 +63,30 @@ async def save_metadata_to_db(image_metadata):
         session.close()
 
 
-async def process_and_store_image(file_name: str, content: bytes, uploader: str = "test_uploader"):
+async def upload_image_to_cloud(file_path: str, image_name: str, uploader: str) -> str:
+    public_id = os.path.splitext(image_name)[0]
+    response = cloudinary.uploader.upload(
+        file_path,
+        public_id=public_id,
+        context=f"uploader={uploader}"
+    )
+    return response.get('secure_url')
+
+
+async def process_and_store_image(file_name: str, content: bytes,
+                                  uploader: str = "test_uploader"):  # Todo: change it to the current user
     unique_filename = generate_filename(file_name)
     file_path = os.path.join(UPLOAD_DIR, unique_filename)
     await save_file_to_disk(file_path, content)
+
+    cloudinary_url = await upload_image_to_cloud(file_path, unique_filename, uploader)
+
     width, height = await get_image_dimensions(file_path)
 
     image_metadata = {
         'name': unique_filename,
         'storage_location': file_path,
+        'cloudinary_url': cloudinary_url,
         'width': width,
         'height': height,
         'uploaded_on': datetime.now(),
