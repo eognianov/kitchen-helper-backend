@@ -8,7 +8,7 @@ Base = declarative_base()
 
 class Ingredient(DbBaseModel):
 
-    __tablename__ = "ingredients"
+    __tablename__ = "INGREDIENTS"
 
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key= True)
     name: Mapped[str] = mapped_column(String, index=True, nullable=False)
