@@ -68,7 +68,7 @@ def update_ingredient(ingredient_id: int, field: str, value: str):
 
             raise IngredientIntegrityViolation(exc)
 
-def soft_delete_ingredient(ingredient_id: int):
+def delete_ingredient(ingredient_id: int):
 
     with db.connection.get_session() as session:
         db_ingredient = session.query(Ingredient).filter(Ingredient.id == ingredient_id,
