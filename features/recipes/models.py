@@ -43,7 +43,7 @@ class Recipe(DbBaseModel):
     cholesterol: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     complexity: Mapped[float] = mapped_column(Float, nullable=True, default=0)
     instructions: Mapped[list["RecipeInstruction"]] = relationship("RecipeInstruction", back_populates="recipe",
-                                                                   init=False)
+                                                                   init=False, lazy='selectin')
 
 
 class RecipeInstruction(DbBaseModel):
@@ -57,4 +57,4 @@ class RecipeInstruction(DbBaseModel):
     complexity: Mapped[float] = mapped_column(Float)
 
     recipe_id: Mapped[int] = mapped_column(ForeignKey('RECIPES.id'), nullable=False, init=False)
-    recipe: Mapped[Recipe] = relationship('Recipe', back_populates='instructions', init=False)
+    recipe: Mapped[Recipe] = relationship('Recipe', back_populates='instructions', init=False, lazy='selectin')
