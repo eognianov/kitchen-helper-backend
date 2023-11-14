@@ -1,17 +1,16 @@
 """Recipes feature endpoints"""
 
 import fastapi
-from starlette import status
 
 import features.recipes.operations
 import features.recipes.responses
+from features.recipes.responses import InstructionResponse
 import features.recipes.exceptions
-from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, InstructionRequest, \
-    InstructionInput
+from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, \
+    InstructionRequest, InstructionInput
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
-instructions_router = fastapi.APIRouter()
 
 
 @categories_router.get('/')
@@ -130,15 +129,7 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
         )
 
 
-@instructions_router.get('/', )
-def get_all_instructions():
-    """Get instructions"""
-
-    instructions = features.recipes.operations.get_all_instructions()
-    return [features.recipes.responses.InstructionResponse(**i.__dict__) for i in instructions]
-
-
-@instructions_router.post('/{recipe_id}', status_code=status.HTTP_201_CREATED)
+@recipes_router.post('/{recipe_id}/instructions', status_code=fastapi.status.HTTP_201_CREATED)
 def create_instructions(instructions_request: InstructionRequest, recipe_id: int):
     """
         Create instructions for recipe
@@ -159,10 +150,11 @@ def create_instructions(instructions_request: InstructionRequest, recipe_id: int
     features.recipes.operations.create_instructions(instructions_request, recipe)
 
 
-@instructions_router.get('/{recipe_id}')
+@recipes_router.get('/{recipe_id}/instructions')
 def get_recipe_instructions(recipe_id: int = fastapi.Path()):
     """
         Get recipe instructions
+
         :param recipe_id:
         :return:
     """
@@ -179,10 +171,11 @@ def get_recipe_instructions(recipe_id: int = fastapi.Path()):
     return [features.recipes.responses.InstructionResponse(**i.__dict__) for i in instructions]
 
 
-@instructions_router.put('/{instruction_id}')
+@recipes_router.put('/instructions/{instruction_id}', status_code=fastapi.status.HTTP_200_OK)
 def update_instruction(instruction_request: InstructionInput, instruction_id: int = fastapi.Path()):
     """
         Update instruction
+
         :instruction_request:
         :instruction_id:
         :return:
@@ -197,3 +190,5 @@ def update_instruction(instruction_request: InstructionInput, instruction_id: in
         )
 
     features.recipes.operations.update_instruction(instruction_request, instruction)
+    updated_instruction = features.recipes.operations.get_instruction_by_id(instruction_id)
+    return InstructionResponse(**updated_instruction.__dict__)

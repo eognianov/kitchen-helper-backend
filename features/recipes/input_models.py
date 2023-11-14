@@ -1,5 +1,5 @@
 """Recipe feature input model"""
-from typing import Optional, List
+from typing import Optional
 
 import pydantic
 
@@ -54,4 +54,4 @@ class InstructionInput(pydantic.BaseModel):
 
 class InstructionRequest(pydantic.BaseModel):
     """Create instructions"""
-    instructions: List[InstructionInput]
+    instructions: list[InstructionInput]
