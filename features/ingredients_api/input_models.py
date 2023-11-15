@@ -1,31 +1,41 @@
 from typing import Optional
+
+import pydantic
 from pydantic import BaseModel, Field, validator
 
-class PatchIngredientInputModel(BaseModel):
 
-    """Update ingredient"""
+class PatchIngredientCategoryInputModel(BaseModel):
+
+    """Update ingredient category"""
 
     field: str
     value: str
 
+    @pydantic.validator('field')
     @validator('field')
-    def validate_field(cls, field):
+    def validate_field(cls, field: str):
 
         allowed_fields_to_edit = [
-            'NAME',
-            'CATEGORY',
-            'CALORIES',
-            'CARBO',
-            'FATS',
-            'PROTEINS',
-            'CHOLESTEROL',
-            'MEASUREMENT'
+            'NAME'
         ]
 
         if field.upper() not in allowed_fields_to_edit:
             raise ValueError(f"You are not allowed to edit {field} column")
 
         raise field
+
+class CreateIngredientCategoryInputModel(BaseModel):
+    """Create ingredient category"""
+
+    name: str = Field(min_length=3, max_length=255)
+
+
+class PatchIngredientInputModel(BaseModel):
+
+    """Update ingredient"""
+
+    field: str = Field(max_length=255)
+    value: str = Field(max_length=255)
 
 class CreateIngredientInputModel(BaseModel):
     """Create ingredient"""

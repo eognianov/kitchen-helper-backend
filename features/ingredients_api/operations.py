@@ -1,12 +1,79 @@
+from typing import List, Type
+
 from fastapi import HTTPException
 from sqlalchemy import update
 
 import db.connection
-from .exceptions import IngredientIntegrityViolation
+from .exceptions import IngredientIntegrityViolation, IngredientCategoryNotFoundException, \
+    IngredientCategoryIntegrityViolation, IngredientCategoryNameViolation
 from .models import Ingredient
 from .responses import Ingredient
+from .models import IngredientCategory
 from sqlalchemy.exc import IntegrityError
 
+
+def get_all_ingredients_category() -> List[Ingredient]:
+
+    """Get all ingredients categories
+        ...
+        :return: list of ingredients categories
+        :rtype: List[Ingredient]
+        """
+
+    with db.connection.get_session() as session:
+        return session.query(Ingredient).all()
+
+def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
+
+    """Get ingredient category by id
+        ...
+        :return: ingredient category
+        :rtype: IngredientCategory
+        """
+
+    with db.connection.get_session() as session:
+        category = session.query(IngredientCategory).filter(IngredientCategory.id == category_id).first()
+
+        if not category:
+            raise IngredientCategoryNotFoundException()
+        return category
+def update_ingredient_category(category_id: int, field: str, value: str, updated_by: str) -> Type[IngredientCategory]:
+
+    """Update ingredient category
+        ...
+        :return: updated ingredient category
+        :rtype: IngredientCategory
+        """
+
+    category = get_ingredient_category_by_id(category_id)
+
+    try:
+        with db.connection.get_session() as session:
+            session.execute(update(IngredientCategory).where(IngredientCategory.id == category_id).values({field: value, 'updated_by': updated_by}))
+            setattr(category, field, value)
+            session.commit()
+            session.refresh(category)
+            return category
+    except IntegrityError as ex:
+        raise IngredientCategoryIntegrityViolation(ex)
+
+def create_ingredient_category(name: str, created_by: str) -> Type[IngredientCategory]:
+
+        """Create ingredient category
+            ...
+            :return: created ingredient category
+            :rtype: IngredientCategory
+            """
+
+        try:
+            category = IngredientCategory(name=name, created_by=created_by)
+            with db.connection.get_session() as session:
+                session.add(category)
+                session.commit()
+                session.refresh(category)
+                return category
+        except IntegrityError as ex:
+            raise IngredientCategoryNameViolation(ex)
 
 def create_ingredient(ingredient: Ingredient):
 

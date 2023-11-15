@@ -1,3 +1,12 @@
+class IngredientCategoryNotFoundException():
+    pass
+
+class IngredientCategoryIntegrityViolation():
+    pass
+
+class IngredientCategoryNameViolation():
+    pass
+
 class IngredientIntegrityViolation():
     pass
 
