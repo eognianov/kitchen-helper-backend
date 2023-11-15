@@ -1,6 +1,6 @@
 """Recipes feature business logic"""
 import db.connection
-from .input_models import InstructionRequest, InstructionInput
+from .input_models import InstructionInput
 from .models import RecipeCategory, Recipe, RecipeInstruction
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
     InstructionNotFoundException
@@ -124,34 +124,29 @@ def get_recipe_by_id(recipe_id: int):
         return recipe
 
 
-def get_all_instructions() -> list[Type[RecipeInstruction]]:
-    """Get instructions"""
-
-    with db.connection.get_session() as session:
-        return session.query(RecipeInstruction).all()
-
-
-def update_recipe(session, recipe: Recipe) -> None:
+def update_recipe(recipe_id: int) -> None:
     """
         Update recipe after adding instruction/s
 
-        :param recipe:
-        :param session:
+        :param recipe_id:
         :return:
     """
-    instructions = session.query(RecipeInstruction).filter(RecipeInstruction.recipe_id == recipe.id)
 
-    total_complexity = (sum([InstructionResponse(**x.__dict__).complexity for x in instructions]))
-    complexity_len = (len([InstructionResponse(**x.__dict__).complexity for x in instructions]))
-    time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in instructions]))
+    with db.connection.get_session() as session:
+        recipe = session.query(Recipe).filter(Recipe.id == recipe_id).first()
+        instructions = session.query(RecipeInstruction).filter(RecipeInstruction.recipe_id == recipe.id)
 
-    recipe.complexity = round(total_complexity / complexity_len, 1)
-    recipe.time_to_prepare = time_to_prepare
-    session.add(recipe)
-    session.commit()
+        total_complexity = (sum([InstructionResponse(**x.__dict__).complexity for x in instructions]))
+        complexity_len = (len([InstructionResponse(**x.__dict__).complexity for x in instructions]))
+        time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in instructions]))
+
+        recipe.complexity = round(total_complexity / complexity_len, 1)
+        recipe.time_to_prepare = time_to_prepare
+        session.add(recipe)
+        session.commit()
 
 
-def create_instructions(instructions_request: InstructionRequest, recipe: Recipe) -> None:
+def create_instructions(instructions_request: list[InstructionInput], recipe: Recipe) -> None:
     """
         Create instructions
 
@@ -159,8 +154,9 @@ def create_instructions(instructions_request: InstructionRequest, recipe: Recipe
         :param recipe:
         :return:
     """
+
     with db.connection.get_session() as session:
-        instructions = instructions_request.instructions
+        instructions = instructions_request
 
         for instruction in instructions:
             new_instruction = RecipeInstruction(**instruction.model_dump())
@@ -168,10 +164,10 @@ def create_instructions(instructions_request: InstructionRequest, recipe: Recipe
             session.add(new_instruction)
             session.commit()
 
-        update_recipe(session, recipe)
+    update_recipe(recipe_id=recipe.id)
 
 
-def get_instructions_by_recipe_id(recipe_id: int) -> list[Type[RecipeInstruction]]:
+def get_instructions_by_recipe_id(recipe_id: int) -> list[RecipeInstruction]:
     """
         Get instructions by recipe_id
 
@@ -184,22 +180,26 @@ def get_instructions_by_recipe_id(recipe_id: int) -> list[Type[RecipeInstruction
         return instructions
 
 
-def get_instruction_by_id(instruction_id: int) -> RecipeInstruction:
+def get_instruction_by_id(instruction_id: int, recipe_id: int) -> RecipeInstruction:
     """
         Get instruction by id:
 
         :param instruction_id:
+        :param recipe_id:
         :return:
     """
 
     with db.connection.get_session() as session:
-        instruction = session.query(RecipeInstruction).filter(RecipeInstruction.id == instruction_id).first()
+        instruction = session.query(RecipeInstruction) \
+            .filter(RecipeInstruction.id == instruction_id,
+                    RecipeInstruction.recipe_id == recipe_id) \
+            .first()
         if not instruction:
             raise InstructionNotFoundException
         return instruction
 
 
-def update_instruction(instruction_request: InstructionInput, instruction: RecipeInstruction) -> None:
+def update_instruction(instruction_request: InstructionInput, instruction: RecipeInstruction) -> RecipeInstruction:
     """
             Update instruction
 
@@ -218,5 +218,6 @@ def update_instruction(instruction_request: InstructionInput, instruction: Recip
         session.commit()
         session.refresh(instruction)
 
-        recipe = get_recipe_by_id(instruction.recipe_id)
-        update_recipe(session, recipe)
+        update_recipe(recipe_id=instruction.recipe_id)
+
+        return instruction
