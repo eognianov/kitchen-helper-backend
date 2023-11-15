@@ -3,9 +3,9 @@ import db.connection
 from .models import RecipeCategory, Recipe
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException
 from typing import Type
-from sqlalchemy import update
+from sqlalchemy import update, and_
 import sqlalchemy.exc
-
+from datetime import datetime
 
 def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
     """
@@ -106,7 +106,11 @@ def get_all_recipes():
     """Get all recipes"""
 
     with db.connection.get_session() as session:
-        return session.query(Recipe).join(Recipe.category, isouter=True).all()
+        return (
+            session.query(Recipe)
+            .join(Recipe.category, isouter=True)
+            .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+        )
 
 
 def get_recipe_by_id(recipe_id: int):
@@ -118,3 +122,21 @@ def get_recipe_by_id(recipe_id: int):
         if not recipe:
             raise RecipeNotFoundException
         return recipe
+
+
+def soft_delete_recipe_by_id(*, recipe_id: int, deleted_by: int = 1):
+    recipe = get_recipe_by_id(recipe_id)
+
+    with db.connection.get_session() as session:
+        session.execute(
+            update(Recipe), [{
+                    "id": recipe.id,
+                    "is_deleted": True,
+                    "deleted_on": datetime.utcnow(),
+                    "deleted_by": deleted_by
+                }]
+        )
+        session.commit()
+        return recipe
+
+

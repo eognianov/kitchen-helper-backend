@@ -123,3 +123,22 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Category with id {create_recipe_input_model.category_id} does not exist"
         )
+
+
+@recipes_router.delete('/{recipe_id}')
+def delete_recipe(recipe_id: int):
+    """
+    Delete recipe
+
+    :param recipe_id
+    :return:
+    """
+
+    try:
+        del_recipe = features.recipes.operations.soft_delete_recipe_by_id(recipe_id=recipe_id)
+        return del_recipe
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with {recipe_id=} does not exist"
+        )

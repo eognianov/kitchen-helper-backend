@@ -1,6 +1,6 @@
 from features import DbBaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, Float, func, ForeignKey, DateTime
+from sqlalchemy import String, Integer, Float, func, ForeignKey, DateTime, Boolean
 import datetime
 from typing import Optional
 
@@ -38,3 +38,9 @@ class Recipe(DbBaseModel):
     fats: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     proteins: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     cholesterol: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
+    is_published: Mapped[bool] = mapped_column(Boolean, default=False)
+    published_on: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True, default=None)
+    published_by:  Mapped[str] = mapped_column(String(30), nullable=True, default=None)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
+    deleted_on: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True, default=None)
+    deleted_by:  Mapped[str] = mapped_column(String(30), nullable=True, default=None)
