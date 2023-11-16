@@ -16,3 +16,7 @@ class RoleAlreadyExists(Exception):
 
 class RoleDoesNotExistException(Exception):
     ...
+
+
+class UserWithRoleDoesNotExist(Exception):
+    ...

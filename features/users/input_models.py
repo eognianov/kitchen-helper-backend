@@ -81,3 +81,8 @@ class AddRoleToUser(BaseModel):
     user_id: int
     role_id: int
     added_by: str
+
+
+class RemoveRoleFromUser(BaseModel):
+    user_id: int
+    role_id: int

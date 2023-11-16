@@ -1,4 +1,4 @@
-from sqlalchemy import update
+from sqlalchemy import update, delete
 
 import db.connection
 import features.users.exceptions
@@ -150,6 +150,15 @@ def get_role_by_id(role_id: int) -> Role:
     return role
 
 
+def check_user_role(user_id, role_id) -> bool:
+    with db.connection.get_session() as session:
+        user = get_user_from_db(pk=user_id)
+        role = get_role_by_id(role_id)
+        if role not in user.roles:
+            raise features.users.exceptions.UserWithRoleDoesNotExist
+    return True
+
+
 def create_role(role_request: CreateUserRole) -> Role:
     """
         Create role
@@ -165,7 +174,7 @@ def create_role(role_request: CreateUserRole) -> Role:
     return role
 
 
-def add_role_to_user(user_id: int, role_id, added_by) -> None:
+def add_role_to_user(user_id: int, role_id: int, added_by: str) -> None:
     """
         Assign role to user
 
@@ -188,3 +197,29 @@ def add_role_to_user(user_id: int, role_id, added_by) -> None:
 
         session.execute(stmt)
         session.commit()
+
+
+def remove_role_from_user(user_id: int, role_id: int) -> None:
+    """
+        Remove role from user
+
+        :param user_id:
+        :param role_id:
+        :return:
+    """
+    with db.connection.get_session() as session:
+        user = get_user_from_db(pk=user_id)
+        role = get_role_by_id(role_id)
+        if role in user.roles:
+            user.roles.remove(role)
+
+        session.commit()
+
+        stmt = delete(user_roles).where(
+            (user_roles.c.user_id == user_id) & (user_roles.c.role_id == role_id)
+        )
+        session.execute(stmt)
+        session.commit()
+
+
+
