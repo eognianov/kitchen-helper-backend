@@ -6,6 +6,7 @@ import features.recipes.operations
 import features.recipes.responses
 import features.recipes.exceptions
 from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
+from .responses import Recipe
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
@@ -125,18 +126,18 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
         )
 
 
-@recipes_router.delete('/{recipe_id}')
-def delete_recipe(recipe_id: int):
+@recipes_router.delete('/{recipe_id}', response_model=Recipe)
+def delete_recipe(recipe_id: int, user_id: int = 1):
     """
     Delete recipe
 
     :param recipe_id
+    :param user_id
     :return:
     """
 
     try:
-        del_recipe = features.recipes.operations.soft_delete_recipe_by_id(recipe_id=recipe_id)
-        return del_recipe
+        return features.recipes.operations.delete_recipe(recipe_id=recipe_id, deleted_by=user_id)
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,

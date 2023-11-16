@@ -118,13 +118,17 @@ def get_recipe_by_id(recipe_id: int):
 
     with db.connection.get_session() as session:
 
-        recipe = session.query(Recipe).join(Recipe.category, isouter=True).where(Recipe.id==recipe_id).first()
+        recipe = (session.query(Recipe)
+                  .join(Recipe.category, isouter=True)
+                  .where(Recipe.id==recipe_id)
+                  .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+                  .first())
         if not recipe:
             raise RecipeNotFoundException
         return recipe
 
 
-def soft_delete_recipe_by_id(*, recipe_id: int, deleted_by: int = 1):
+def delete_recipe(*, recipe_id: int, deleted_by: int):
     recipe = get_recipe_by_id(recipe_id)
 
     with db.connection.get_session() as session:
