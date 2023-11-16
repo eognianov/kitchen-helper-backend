@@ -4,8 +4,8 @@ import fastapi
 from fastapi import APIRouter, HTTPException
 
 import features.users.exceptions
-from .input_models import RegisterUserInputModel, UpdateUserInputModel
-from .responses import UsersResponseModel, JwtTokenResponseModel
+from .input_models import RegisterUserInputModel, UpdateUserInputModel, CreateUserRole, AddRoleToUser
+from .responses import UsersResponseModel, JwtTokenResponseModel, RolesResponseModel, UserRoleResponseModel
 
 from .operations import create_new_user, signin_user, get_all_users, get_user_from_db
 
@@ -96,3 +96,48 @@ def patch_user(user_id: int = fastapi.Path(), update_user_input_model: UpdateUse
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"User with {user_id=} does not exist"
         )
+
+
+@user_router.get('/roles/', response_model=list[RolesResponseModel])
+def get_all_roles():
+    """
+    Show all roles
+
+    :return:
+    """
+    all_roles = features.users.operations.get_all_roles()
+    return all_roles
+
+
+@user_router.post('/roles/', status_code=fastapi.status.HTTP_201_CREATED, response_model=RolesResponseModel)
+def create_role(role_request: CreateUserRole):
+    """
+        Create role
+
+        :param role_request:
+        :return:
+    """
+    try:
+        role = features.users.operations.get_role_by_name(role_request.name)
+        if role:
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_409_CONFLICT,
+                detail=f"Role already exist"
+            )
+    except features.users.exceptions.RoleDoesNotExistException:
+        role = features.users.operations.create_role(role_request)
+        return role
+
+
+@user_router.post('/roles/add', status_code=fastapi.status.HTTP_201_CREATED)
+def add_role_to_user(user_role_request: AddRoleToUser):
+    """
+        Add role to user
+
+        :param user_role_request:
+        :return:
+    """
+    user_id = user_role_request.user_id
+    role_id = user_role_request.role_id
+    added_by = user_role_request.added_by
+    features.users.operations.add_role_to_user(user_id, role_id, added_by)

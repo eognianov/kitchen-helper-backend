@@ -70,3 +70,14 @@ class UpdateUserInputModel(BaseModel):
             raise ValueError(f"Invalid email address: {e}")
 
         return value
+
+
+class CreateUserRole(BaseModel):
+    name: str
+    created_by: str
+
+
+class AddRoleToUser(BaseModel):
+    user_id: int
+    role_id: int
+    added_by: str

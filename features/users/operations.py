@@ -1,5 +1,6 @@
 from sqlalchemy import update
 
+import db.connection
 import features.users.exceptions
 from db.connection import get_session
 
@@ -9,8 +10,8 @@ from datetime import datetime, timedelta
 from typing import Union, Any, Type
 from jose import jwt
 
-from .input_models import RegisterUserInputModel
-from .models import User
+from .input_models import RegisterUserInputModel, CreateUserRole
+from .models import User, Role, user_roles
 
 import configuration
 
@@ -57,7 +58,6 @@ def signin_user(username: str, password: str) -> tuple:
 
 
 def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
-
     with get_session() as session:
         query = session.query(User)
         filters = []
@@ -80,7 +80,6 @@ def get_user_from_db(*, pk: int = None, username: str = None, email: str = None)
 
 
 def get_all_users() -> list:
-
     with get_session() as session:
         # Fetch all the users from the db
         all_users = session.query(User).all()
@@ -110,3 +109,82 @@ def create_token(subject: Union[str, Any], expires_delta: timedelta = None, acce
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm)
 
     return encoded_jwt, token_type
+
+
+def get_all_roles() -> list:
+    """
+        Get all roles
+
+        :return:
+    """
+    with db.connection.get_session() as session:
+        roles = session.query(Role).all()
+        return roles
+
+
+def get_role_by_name(role_name: str) -> Role:
+    """
+        Get role by name
+
+        :param role_name:
+        :return:
+    """
+    with db.connection.get_session() as session:
+        role = session.query(Role).filter(Role.name == role_name).first()
+        if not role:
+            raise features.users.exceptions.RoleDoesNotExistException
+    return role
+
+
+def get_role_by_id(role_id: int) -> Role:
+    """
+        Get role by id
+
+        :param role_id:
+        :return:
+    """
+    with db.connection.get_session() as session:
+        role = session.query(Role).filter(Role.id == role_id).first()
+        if not role:
+            raise features.users.exceptions.RoleDoesNotExistException
+    return role
+
+
+def create_role(role_request: CreateUserRole) -> Role:
+    """
+        Create role
+
+        :param role_request:
+        :return:
+    """
+    with db.connection.get_session() as session:
+        role = Role(**role_request.model_dump())
+        session.add(role)
+        session.commit()
+        session.refresh(role)
+    return role
+
+
+def add_role_to_user(user_id: int, role_id, added_by) -> None:
+    """
+        Assign role to user
+
+        :param user_id:
+        :param role_id:
+        :param added_by:
+        :return:
+    """
+    with db.connection.get_session() as session:
+        user = get_user_from_db(pk=user_id)
+        role = get_role_by_id(role_id)
+        user.roles.append(role)
+
+        session.add(user)
+        session.commit()
+
+        stmt = update(user_roles).where(
+            (user_roles.c.user_id == user_id) & (user_roles.c.role_id == role_id)
+        ).values(added_by=added_by)
+
+        session.execute(stmt)
+        session.commit()
