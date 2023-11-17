@@ -28,7 +28,7 @@ app.add_middleware(
 
 app.include_router(features.health.router, prefix='/health')
 app.include_router(features.users.router, prefix='/users')
-app.include_router(features.recipes.category_router, prefix='/categoires')
+app.include_router(features.recipes.category_router, prefix='/categories')
 app.include_router(features.recipes.recipes_router, prefix='/recipes')
 
 if __name__ == '__main__':
