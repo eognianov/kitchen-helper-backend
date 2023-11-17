@@ -118,7 +118,7 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
     :return:
     """
     try:
-        created_recipe = features.recipes.operations.create_recipe(**create_recipe_input_model.model_dump())
+        created_recipe = features.recipes.operations.create_recipe(**create_recipe_input_model.__dict__)
 
         return features.recipes.responses.Recipe(**created_recipe.__dict__)
     except features.recipes.exceptions.CategoryNotFoundException:

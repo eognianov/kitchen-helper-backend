@@ -64,7 +64,7 @@ def create_category(category_name: str, created_by: str = 'me') -> RecipeCategor
 
 def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
                   calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0,
-                  created_by: str = 'me'):
+                  created_by: str = 'me', instructions: list[InstructionInput]):
     """
     Create recipe
 
@@ -79,6 +79,7 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     :param proteins:
     :param cholesterol:
     :param created_by:
+    :param instructions:
     :return:
     """
 
@@ -103,6 +104,10 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     with db.connection.get_session() as session:
         session.add(recipe)
         session.commit()
+        session.refresh(recipe)
+
+        if instructions:
+            create_instructions(instructions, recipe)
         session.refresh(recipe)
     return recipe
 
