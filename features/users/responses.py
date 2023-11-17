@@ -2,8 +2,6 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from features.users.models import Role
-
 
 class RolesResponseModel(BaseModel):
     id: int
@@ -18,7 +16,7 @@ class UsersResponseModel(BaseModel):
 
     def model_post_init(self, __context: Any):
         if self.roles:
-            self.roles = [RolesResponseModel(**_.__dict__).name for _ in self.roles]
+            self.roles = [RolesResponseModel(**_.__dict__) for _ in self.roles]
 
 
 class JwtTokenResponseModel(BaseModel):

@@ -1,3 +1,4 @@
 import features.users.router as r
 
-router = r.user_router
+user_router = r.user_router
+role_router = r.roles_router

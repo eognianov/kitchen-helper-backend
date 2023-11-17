@@ -1,19 +1,16 @@
+from datetime import datetime, timedelta
+from typing import Union, Any, Type
+
+import bcrypt
+from jose import jwt
 from sqlalchemy import update, delete
 
+import configuration
 import db.connection
 import features.users.exceptions
 from db.connection import get_session
-
-import bcrypt
-
-from datetime import datetime, timedelta
-from typing import Union, Any, Type
-from jose import jwt
-
-from .input_models import RegisterUserInputModel, CreateUserRole
+from .input_models import RegisterUserInputModel
 from .models import User, Role, user_roles
-
-import configuration
 
 config = configuration.Config()
 
@@ -122,59 +119,68 @@ def get_all_roles() -> list:
         return roles
 
 
-def get_role_by_name(role_name: str) -> Role:
+def get_role(pk: int = None, role_name: str = None) -> Role | None:
     """
-        Get role by name
+        Get role by id or name
 
+        :param pk:
         :param role_name:
         :return:
     """
     with db.connection.get_session() as session:
-        role = session.query(Role).filter(Role.name == role_name).first()
+        query = session.query(Role)
+        filters = []
+
+        if pk:
+            filters.append(Role.id == pk)
+        elif role_name:
+            filters.append(Role.name == role_name)
+
+        if filters:
+            query = query.filter(*filters)
+
+        role = query.first()
+
         if not role:
             raise features.users.exceptions.RoleDoesNotExistException
+
     return role
 
 
-def get_role_by_id(role_id: int) -> Role:
-    """
-        Get role by id
-
-        :param role_id:
-        :return:
-    """
-    with db.connection.get_session() as session:
-        role = session.query(Role).filter(Role.id == role_id).first()
-        if not role:
-            raise features.users.exceptions.RoleDoesNotExistException
-    return role
-
-
-def check_user_role(user_id, role_id) -> bool:
-    with db.connection.get_session() as session:
-        user = get_user_from_db(pk=user_id)
-        role = get_role_by_id(role_id)
-        if role not in user.roles:
-            raise features.users.exceptions.UserWithRoleDoesNotExist
-    return True
-
-
-def create_role(role_request: CreateUserRole) -> Role:
+def check_user_role(user_id: int, role_id: int) -> bool:
     """
         Create role
 
-        :param role_request:
+        :param user_id:
+        :param role_id:
+        :return:
+    """
+
+    user = get_user_from_db(pk=user_id)
+    role = get_role(pk=role_id)
+    if role not in user.roles:
+        raise features.users.exceptions.UserWithRoleDoesNotExist
+
+    return True
+
+
+def create_role(name: str, created_by: str = 'me') -> Role:
+    """
+        Create role
+
+        :param name:
+        :param created_by:
         :return:
     """
     with db.connection.get_session() as session:
-        role = Role(**role_request.model_dump())
+        role = Role(name=name, created_by=created_by)
         session.add(role)
         session.commit()
         session.refresh(role)
     return role
 
 
-def add_role_to_user(user_id: int, role_id: int, added_by: str) -> None:
+def add_role_to_user(user_id: int, role_id: int, added_by: str = 'me') -> None:
     """
         Assign role to user
 
@@ -184,8 +190,10 @@ def add_role_to_user(user_id: int, role_id: int, added_by: str) -> None:
         :return:
     """
     with db.connection.get_session() as session:
+        ...
         user = get_user_from_db(pk=user_id)
-        role = get_role_by_id(role_id)
+        role = get_role(pk=role_id)
+
         user.roles.append(role)
 
         session.add(user)
@@ -209,7 +217,7 @@ def remove_role_from_user(user_id: int, role_id: int) -> None:
     """
     with db.connection.get_session() as session:
         user = get_user_from_db(pk=user_id)
-        role = get_role_by_id(role_id)
+        role = get_role(pk=role_id)
         if role in user.roles:
             user.roles.remove(role)
 
@@ -220,6 +228,3 @@ def remove_role_from_user(user_id: int, role_id: int) -> None:
         )
         session.execute(stmt)
         session.commit()
-
-
-

@@ -1,8 +1,9 @@
 """Users feature input model"""
-from pydantic import BaseModel, EmailStr, Field, field_validator
-from email_validator import validate_email
-
 import re
+
+from email_validator import validate_email
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
 import configuration
 
 config = configuration.Config()
@@ -74,7 +75,6 @@ class UpdateUserInputModel(BaseModel):
 
 class CreateUserRole(BaseModel):
     name: str
-    created_by: str
 
 
 class AddRoleToUser(BaseModel):
