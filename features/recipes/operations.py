@@ -1,4 +1,6 @@
 """Recipes feature business logic"""
+from fastapi import HTTPException
+
 import db.connection
 from .models import RecipeCategory, Recipe
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException
@@ -118,3 +120,29 @@ def get_recipe_by_id(recipe_id: int):
         if not recipe:
             raise RecipeNotFoundException
         return recipe
+
+def update_recipe(recipe_id: int, field: str, value: str, updated_by: str):
+    """Update recipe"""
+
+    with db.connection.get_session() as session:
+        db_recipe = session.query(Recipe).where(Recipe.id == recipe_id).first()
+
+        if not db_recipe:
+            raise HTTPException(status_code=404, detail="Recipe not found")
+
+        try:
+            # Build the update statement
+            stmt = update(Recipe).where(Recipe.id == recipe_id).values({field: value, 'updated_by': updated_by})
+            session.execute(stmt)
+
+            # Update the corresponding attribute in the SQLAlchemy model
+            setattr(db_recipe, field, value)
+
+            # Commit the changes and refresh the model
+            session.commit()
+            session.refresh(db_recipe)
+
+            return db_recipe
+
+        except sqlalchemy.exc.IntegrityError as exc:
+            raise RecipeNotFoundException(exc)

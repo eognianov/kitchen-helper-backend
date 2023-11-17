@@ -42,3 +42,41 @@ class CreateRecipeInputModel(pydantic.BaseModel):
     cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
     time_to_prepare: int = pydantic.Field(gt=0)
     category_id: Optional[int] = None
+
+class UpgradeRecipeInputModel(pydantic.BaseModel):
+    """Update recipe"""
+
+    name: Optional[str] = pydantic.Field(max_length=255)
+    picture: Optional[str] = pydantic.Field(max_length=255)
+    summary: Optional[str] = pydantic.Field(max_length=1000)
+    calories: Optional[float] = pydantic.Field(default=0, ge=0)
+    carbo: Optional[float] = pydantic.Field(default=0, ge=0)
+    fats: Optional[float] = pydantic.Field(default=0, ge=0)
+    proteins: Optional[float] = pydantic.Field(default=0, ge=0)
+    cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
+    time_to_prepare: Optional[int] = pydantic.Field(gt=0)
+    category_id: Optional[int] = None
+
+    @pydantic.validator('recipe_id')
+    @classmethod
+    def validate_recipe_id(cls, recipe_id: int):
+        if not recipe_id:
+            raise ValueError("Recipe id is required")
+
+        return recipe_id
+
+    @pydantic.validator('name')
+    @classmethod
+    def validate_name(cls, name: str):
+        if not name:
+            raise ValueError("Name is required")
+
+        return name
+
+    @pydantic.validator('time_to_prepare')
+    @classmethod
+    def validate_time_to_prepare(cls, time_to_prepare: int):
+        if not time_to_prepare:
+            raise ValueError("Time to prepare is required")
+
+        return time_to_prepare

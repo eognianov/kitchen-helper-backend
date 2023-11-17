@@ -123,3 +123,25 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Category with id {create_recipe_input_model.category_id} does not exist"
         )
+
+@recipes_router.patch('/{recipe_id}', response_model=features.recipes.responses.Recipe)
+def update_recipe(recipe_id: int = fastapi.Path(), upgrade_recipe_input_model: features.recipes.input_models.UpgradeRecipeInputModel = fastapi.Body()):
+    """
+    Update recipe
+
+    :param recipe_id: Identifier for recipe
+    :type recipe_id: int
+    ...
+    :raises fastapi.HTTPException: Recipe not found
+    ...
+    :return: Updated recipe
+    :rtype: features.recipes.responses.Recipe
+    """
+    try:
+        return features.recipes.operations.update_recipe(recipe_id=recipe_id, **upgrade_recipe_input_model.model_dump())
+
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with id {recipe_id} does not exist"
+        )
