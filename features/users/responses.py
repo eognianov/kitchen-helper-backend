@@ -27,3 +27,19 @@ class JwtTokenResponseModel(BaseModel):
 class UserRoleResponseModel(BaseModel):
     user_id: int
     role_id: int
+
+
+class RolesUsersResponseModel(BaseModel):
+    id: int
+    username: str
+    email: str
+
+
+class RolesWithUsersResponseModel(BaseModel):
+    id: int
+    name: str
+    users: list[RolesUsersResponseModel] | Any = None
+
+    def model_post_init(self, __context: Any):
+        if self.users:
+            self.users = [RolesUsersResponseModel(**_.__dict__) for _ in self.users]

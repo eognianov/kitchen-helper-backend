@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 import features.users.exceptions
 from .input_models import RegisterUserInputModel, UpdateUserInputModel, CreateUserRole
 from .operations import create_new_user, signin_user, get_all_users, get_user_from_db
-from .responses import UsersResponseModel, JwtTokenResponseModel, RolesResponseModel
+from .responses import UsersResponseModel, JwtTokenResponseModel, RolesResponseModel, RolesWithUsersResponseModel
 
 user_router = APIRouter()
 roles_router = APIRouter()
@@ -193,3 +193,9 @@ def remove_role_from_user(user_id: int, role_id: int):
         )
 
     features.users.operations.remove_role_from_user(user_id, role_id)
+
+
+@roles_router.get('/users', response_model=list[RolesWithUsersResponseModel])
+def get_all_roles_with_users():
+    roles = get_all_roles()
+    return roles
