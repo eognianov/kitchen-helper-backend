@@ -6,7 +6,8 @@ import features.recipes.operations
 import features.recipes.responses
 from features.recipes.responses import InstructionResponse
 import features.recipes.exceptions
-from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, InstructionInput
+from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, InstructionInput, \
+    InstructionUpdate
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
@@ -128,8 +129,9 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
         )
 
 
-@recipes_router.post('/{recipe_id}/instructions', status_code=fastapi.status.HTTP_201_CREATED)
-def create_instructions(instructions_request: list[InstructionInput], recipe_id: int):
+@recipes_router.put('/{recipe_id}/instructions', status_code=fastapi.status.HTTP_201_CREATED,
+                    response_model=list[InstructionResponse])
+def update_instructions(instructions_request: list[InstructionUpdate], recipe_id: int):
     """
         Create instructions for recipe
 
@@ -146,53 +148,53 @@ def create_instructions(instructions_request: list[InstructionInput], recipe_id:
             detail=f"Recipe with {recipe_id=} does not exist"
         )
 
-    features.recipes.operations.create_instructions(instructions_request, recipe)
+    return features.recipes.operations.update_instructions(instructions_request, recipe)
 
 
-@recipes_router.get('/{recipe_id}/instructions', response_model=list[InstructionInput])
-def get_recipe_instructions(recipe_id: int = fastapi.Path()):
-    """
-        Get recipe instructions
+# @recipes_router.get('/{recipe_id}/instructions', response_model=list[InstructionResponse])
+# def get_recipe_instructions(recipe_id: int = fastapi.Path()):
+#     """
+#         Get recipe instructions
+#
+#         :param recipe_id:
+#         :return:
+#     """
+#
+#     try:
+#         recipe = features.recipes.operations.get_recipe_by_id(recipe_id)
+#     except features.recipes.exceptions.RecipeNotFoundException:
+#         raise fastapi.HTTPException(
+#             status_code=fastapi.status.HTTP_404_NOT_FOUND,
+#             detail=f"Recipe with {recipe_id=} does not exist"
+#         )
+#
+#     instructions = features.recipes.operations.get_recipe_instructions(recipe_id)
+#     return instructions
 
-        :param recipe_id:
-        :return:
-    """
 
-    try:
-        recipe = features.recipes.operations.get_recipe_by_id(recipe_id)
-    except features.recipes.exceptions.RecipeNotFoundException:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Recipe with {recipe_id=} does not exist"
-        )
-
-    instructions = features.recipes.operations.get_instructions_by_recipe_id(recipe_id)
-    return instructions
-
-
-@recipes_router.put('/{recipe_id}/instructions/{instruction_id}',
-                    status_code=fastapi.status.HTTP_200_OK,
-                    response_model=InstructionResponse)
-def update_instruction(instruction_request: InstructionInput,
-                       recipe_id: int = fastapi.Path(),
-                       instruction_id: int = fastapi.Path()):
-    """
-        Update instruction
-
-        :instruction_request:
-        :recipe_id:
-        :instruction_id:
-        :return:
-    """
-
-    try:
-        instruction = features.recipes.operations.get_instruction_by_id(instruction_id, recipe_id)
-    except features.recipes.exceptions.InstructionNotFoundException:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Instruction with {instruction_id=} does not exist"
-        )
-
-    new_instruction = features.recipes.operations.update_instruction(instruction_request, instruction)
-
-    return new_instruction
+# @recipes_router.put('/{recipe_id}/instructions/{instruction_id}',
+#                     status_code=fastapi.status.HTTP_200_OK,
+#                     response_model=InstructionResponse)
+# def update_instruction(instruction_request: InstructionInput,
+#                        recipe_id: int = fastapi.Path(),
+#                        instruction_id: int = fastapi.Path()):
+#     """
+#         Update instruction
+#
+#         :instruction_request:
+#         :recipe_id:
+#         :instruction_id:
+#         :return:
+#     """
+#
+#     try:
+#         instruction = features.recipes.operations.get_instruction_by_id(instruction_id, recipe_id)
+#     except features.recipes.exceptions.InstructionNotFoundException:
+#         raise fastapi.HTTPException(
+#             status_code=fastapi.status.HTTP_404_NOT_FOUND,
+#             detail=f"Instruction with {instruction_id=} does not exist"
+#         )
+#
+#     new_instruction = features.recipes.operations.update_instruction(instruction_request, instruction)
+#
+#     return new_instruction
