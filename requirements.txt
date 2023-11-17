@@ -25,4 +25,5 @@ pyasn1==0.5.0
 ecdsa==0.18.0
 bcrypt==4.0.1
 httpx==0.25.1
+pytest==7.4.3
 pytest-mock==3.12.0
