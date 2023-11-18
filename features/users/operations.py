@@ -3,6 +3,7 @@ from typing import Union, Any, Type
 
 import bcrypt
 from jose import jwt
+from pydantic import ValidationError
 from sqlalchemy import update, delete
 
 import configuration
@@ -131,9 +132,12 @@ def get_role(pk: int = None, role_name: str = None) -> Role | None:
         query = session.query(Role)
         filters = []
 
+        if not pk and not role_name:
+            raise ValidationError("Neither pk nor role_name is provided")
+
         if pk:
             filters.append(Role.id == pk)
-        elif role_name:
+        if role_name:
             filters.append(Role.name == role_name)
 
         if filters:
@@ -159,7 +163,7 @@ def check_user_role(user_id: int, role_id: int) -> bool:
     user = get_user_from_db(pk=user_id)
     role = get_role(pk=role_id)
     if role not in user.roles:
-        raise features.users.exceptions.UserWithRoleDoesNotExist
+        return False
 
     return True
 
@@ -173,6 +177,9 @@ def create_role(name: str, created_by: str = 'me') -> Role:
         :return:
     """
     with db.connection.get_session() as session:
+        role = session.query(Role).filter(Role.name == name).first()
+        if role:
+            raise features.users.exceptions.RoleAlreadyExists
         role = Role(name=name, created_by=created_by)
         session.add(role)
         session.commit()
@@ -190,9 +197,11 @@ def add_role_to_user(user_id: int, role_id: int, added_by: str = 'me') -> None:
         :return:
     """
     with db.connection.get_session() as session:
-        ...
         user = get_user_from_db(pk=user_id)
         role = get_role(pk=role_id)
+
+        if check_user_role(user_id, role_id):
+            raise features.users.exceptions.UserWithRoleExist
 
         user.roles.append(role)
 
@@ -218,6 +227,10 @@ def remove_role_from_user(user_id: int, role_id: int) -> None:
     with db.connection.get_session() as session:
         user = get_user_from_db(pk=user_id)
         role = get_role(pk=role_id)
+
+        if not check_user_role(user_id, role_id):
+            raise features.users.exceptions.UserWithRoleDoesNotExist
+
         if role in user.roles:
             user.roles.remove(role)
 

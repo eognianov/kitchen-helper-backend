@@ -20,3 +20,7 @@ class RoleDoesNotExistException(Exception):
 
 class UserWithRoleDoesNotExist(Exception):
     ...
+
+
+class UserWithRoleExist(Exception):
+    ...
