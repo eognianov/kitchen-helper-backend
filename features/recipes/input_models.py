@@ -29,7 +29,7 @@ class CreateCategoryInputModel(pydantic.BaseModel):
     name: str = pydantic.Field(min_length=3, max_length=255)
 
 
-class InstructionInput(pydantic.BaseModel):
+class CreateInstructionInputModel(pydantic.BaseModel):
     """Create instruction"""
     instruction: str = pydantic.Field(max_length=300)
     category: str = pydantic.Field(max_length=100)
@@ -37,7 +37,7 @@ class InstructionInput(pydantic.BaseModel):
     complexity: float = pydantic.Field(ge=1, le=5)
 
 
-class InstructionUpdate(pydantic.BaseModel):
+class UpdateInstructionInputModel(pydantic.BaseModel):
     """Update instruction"""
     id: int = pydantic.Field()
     instruction: str = pydantic.Field(max_length=300)
@@ -59,4 +59,4 @@ class CreateRecipeInputModel(pydantic.BaseModel):
     cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
     time_to_prepare: int = pydantic.Field(gt=0)
     category_id: Optional[int] = None
-    instructions: Optional[list[InstructionInput]] = None
+    instructions: Optional[list[CreateInstructionInputModel]] = None

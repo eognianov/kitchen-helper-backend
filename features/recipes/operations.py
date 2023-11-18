@@ -1,13 +1,13 @@
 """Recipes feature business logic"""
-import db.connection
-from .input_models import InstructionInput, InstructionUpdate
-from .models import RecipeCategory, Recipe, RecipeInstruction
-from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
-    InstructionNotFoundException
 from typing import Type
-from sqlalchemy import update, delete
-import sqlalchemy.exc
 
+import sqlalchemy.exc
+from sqlalchemy import update, delete
+
+import db.connection
+from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException
+from .input_models import CreateInstructionInputModel, UpdateInstructionInputModel
+from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse
 
 
@@ -64,7 +64,7 @@ def create_category(category_name: str, created_by: str = 'me') -> RecipeCategor
 
 def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
                   calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0,
-                  created_by: str = 'me', instructions: list[InstructionInput]):
+                  created_by: str = 'me', instructions: list[CreateInstructionInputModel]):
     """
     Create recipe
 
@@ -152,7 +152,7 @@ def update_recipe(recipe_id: int) -> None:
         session.refresh(recipe)
 
 
-def create_instructions(instructions_request: list[InstructionInput], recipe: Recipe) -> None:
+def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe: Recipe) -> None:
     """
         Create instructions
 
@@ -173,76 +173,30 @@ def create_instructions(instructions_request: list[InstructionInput], recipe: Re
     update_recipe(recipe_id=recipe.id)
 
 
-def get_recipe_instructions(recipe_id: int) -> list[RecipeInstruction]:
+def update_instructions(instructions_request: list[UpdateInstructionInputModel], recipe_id: int):
     """
-        Get instructions by recipe_id
+        Update instructions
 
+        :param instructions_request:
         :param recipe_id:
         :return:
     """
-
-    with db.connection.get_session() as session:
-        instructions = session.query(RecipeInstruction).filter(RecipeInstruction.recipe_id == recipe_id)
-        return instructions
-
-
-def get_instruction_by_id(instruction_id: int, recipe_id: int) -> RecipeInstruction:
-    """
-        Get instruction by id:
-
-        :param instruction_id:
-        :param recipe_id:
-        :return:
-    """
-
-    with db.connection.get_session() as session:
-        instruction = session.query(RecipeInstruction) \
-            .filter(RecipeInstruction.id == instruction_id,
-                    RecipeInstruction.recipe_id == recipe_id) \
-            .first()
-        if not instruction:
-            raise InstructionNotFoundException
-        return instruction
-
-
-# def update_instruction(instruction_request: InstructionInput, instruction: RecipeInstruction) -> RecipeInstruction:
-#     """
-#             Update instruction
-#
-#             :param instruction_request:
-#             :param instruction:
-#             :return:
-#     """
-#
-#     with db.connection.get_session() as session:
-#         instruction.instruction = instruction_request.instruction
-#         instruction.category = instruction_request.category
-#         instruction.time = instruction_request.time
-#         instruction.complexity = instruction_request.complexity
-#
-#         session.add(instruction)
-#         session.commit()
-#         session.refresh(instruction)
-#
-#         update_recipe(recipe_id=instruction.recipe_id)
-#
-#         return instruction
-
-
-def update_instructions(instructions_request: list[InstructionUpdate], recipe: Recipe):
     with db.connection.get_session() as session:
 
-        instructions_ids = [InstructionUpdate(**x.__dict__).id for x in recipe.instructions]
+        recipe = session.query(Recipe).filter(Recipe.id == recipe_id).first()
+        instructions_ids_to_remove = [UpdateInstructionInputModel(**x.__dict__).id for x in recipe.instructions]
 
         for request in instructions_request:
+
             instruction = session.query(RecipeInstruction).filter(RecipeInstruction.id == request.id).first()
-            if instruction:
+
+            if instruction and instruction.id == recipe_id:
                 instruction.instruction = request.instruction
                 instruction.category = request.category
                 instruction.time = request.time
                 instruction.complexity = request.complexity
 
-                instructions_ids.remove(instruction.id)
+                instructions_ids_to_remove.remove(instruction.id)
 
                 session.add(instruction)
                 session.commit()
@@ -258,17 +212,16 @@ def update_instructions(instructions_request: list[InstructionUpdate], recipe: R
                 new_instruction.recipe_id = recipe.id
                 session.add(new_instruction)
                 session.commit()
+                session.refresh(new_instruction)
 
-        if instructions_ids:
+        if instructions_ids_to_remove:
             stmt = delete(RecipeInstruction).where(
-                RecipeInstruction.id.in_(instructions_ids)
+                RecipeInstruction.id.in_(instructions_ids_to_remove)
             )
             session.execute(stmt)
             session.commit()
 
         update_recipe(recipe_id=recipe.id)
+        session.refresh(recipe)
 
-        x = session.query(Recipe).filter(Recipe.id == recipe.id).first()
-        session.refresh(x)
-        return x.instructions
-
+        return recipe.instructions
