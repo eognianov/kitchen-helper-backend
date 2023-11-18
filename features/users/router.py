@@ -109,6 +109,18 @@ def get_all_roles():
     return all_roles
 
 
+@roles_router.get('/users', response_model=list[RolesWithUsersResponseModel])
+def get_all_roles_with_users():
+    roles = features.users.operations.get_all_roles()
+    return roles
+
+
+@roles_router.get('/{role_id}', response_model=RolesWithUsersResponseModel)
+def get_role_with_users(role_id: int):
+    role = features.users.operations.get_role(role_id)
+    return role
+
+
 @roles_router.post('/', status_code=fastapi.status.HTTP_201_CREATED, response_model=RolesResponseModel)
 def create_role(role_request: CreateUserRole):
     """
@@ -184,9 +196,3 @@ def remove_role_from_user(user_id: int, role_id: int):
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"No user with this role"
         )
-
-
-@roles_router.get('/users', response_model=list[RolesWithUsersResponseModel])
-def get_all_roles_with_users():
-    roles = get_all_roles()
-    return roles

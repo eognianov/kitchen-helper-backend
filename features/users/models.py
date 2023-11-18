@@ -38,11 +38,12 @@ user_roles = Table('user_roles', DbBaseModel.metadata,
 
 
 # class UserRole(DbBaseModel):
-#     __tablename__ = 'UserRole'
-#     user_id = Column(Integer, ForeignKey('Users.id'), nullable=False)
-#     role_id = Column(Integer, ForeignKey('Roles.id'), nullable=False)
-#     added_by = Column(String(50))
-#     added_on = mapped_column(DateTime, server_default=func.current_timestamp())
+#     __tablename__ = 'user_role'
+#
+#     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('Users.id'), nullable=False)
+#     role_id: Mapped[int] = mapped_column(Integer, ForeignKey('Roles.id'), nullable=False)
+#     added_by: Mapped[str] = mapped_column(String(50))
+#     added_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp())
 #
 #     user = relationship('User', back_populates='roles')
 #     role = relationship('Role', back_populates='users')
