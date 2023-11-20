@@ -120,7 +120,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+.env.dev
 .venv
 env/
 venv/
@@ -164,6 +164,7 @@ cython_debug/
 
 # AWS User-specific
 .idea/**/aws.xml
+.idea/
 
 # Generated files
 .idea/**/contentModel.xml
