@@ -11,7 +11,7 @@ import db.connection
 import features.users.exceptions
 from db.connection import get_session
 from .input_models import RegisterUserInputModel
-from .models import User, Role, user_roles
+from .models import User, Role, UserRole
 
 config = configuration.Config()
 
@@ -208,8 +208,8 @@ def add_role_to_user(user_id: int, role_id: int, added_by: str = 'me') -> None:
         session.add(user)
         session.commit()
 
-        stmt = update(user_roles).where(
-            (user_roles.c.user_id == user_id) & (user_roles.c.role_id == role_id)
+        stmt = update(UserRole).where(
+            (UserRole.user_id == user_id) & (UserRole.role_id == role_id)
         ).values(added_by=added_by)
 
         session.execute(stmt)
@@ -236,8 +236,8 @@ def remove_role_from_user(user_id: int, role_id: int) -> None:
 
         session.commit()
 
-        stmt = delete(user_roles).where(
-            (user_roles.c.user_id == user_id) & (user_roles.c.role_id == role_id)
+        stmt = delete(UserRole).where(
+            (UserRole.user_id == user_id) & (UserRole.role_id == role_id)
         )
         session.execute(stmt)
         session.commit()

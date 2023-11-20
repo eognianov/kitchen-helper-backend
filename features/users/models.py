@@ -24,26 +24,16 @@ class Role(DbBaseModel):
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
     name: Mapped[str] = mapped_column(String(50), unique=True)
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
-    created_by: Mapped[str] = mapped_column(String(30))
+    created_by: Mapped[str] = mapped_column(String(30), nullable=True)
 
     users = relationship('User', secondary='user_roles', back_populates='roles', lazy='selectin')
 
 
-user_roles = Table('user_roles', DbBaseModel.metadata,
-                   Column('user_id', ForeignKey('Users.id'), primary_key=True),
-                   Column('role_id', ForeignKey('Roles.id'), primary_key=True),
-                   Column('added_by', String(50)),
-                   Column('added_on', DateTime, server_default=func.current_timestamp())
-                   )
+class UserRole(DbBaseModel):
+    __tablename__ = 'user_roles'
 
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('Users.id', ondelete='RESTRICT'), primary_key=True)
+    role_id: Mapped[int] = mapped_column(Integer, ForeignKey('Roles.id', ondelete='RESTRICT'), primary_key=True)
+    added_by: Mapped[str] = mapped_column(String(50), nullable=True)
+    added_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp())
 
-# class UserRole(DbBaseModel):
-#     __tablename__ = 'user_role'
-#
-#     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('Users.id'), nullable=False)
-#     role_id: Mapped[int] = mapped_column(Integer, ForeignKey('Roles.id'), nullable=False)
-#     added_by: Mapped[str] = mapped_column(String(50))
-#     added_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp())
-#
-#     user = relationship('User', back_populates='roles')
-#     role = relationship('Role', back_populates='users')
