@@ -1,8 +1,8 @@
-"""create role
+"""add Role and UserRole tables
 
-Revision ID: 790f201d8abf
+Revision ID: a453626dd99b
 Revises: 663d0c834556
-Create Date: 2023-11-16 09:23:46.094319
+Create Date: 2023-11-20 15:21:04.303918
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '790f201d8abf'
+revision: str = 'a453626dd99b'
 down_revision: Union[str, None] = '663d0c834556'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,17 +24,17 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('created_on', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
-    sa.Column('created_by', sa.String(length=30), nullable=False),
+    sa.Column('created_by', sa.String(length=30), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
     op.create_table('user_roles',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('role_id', sa.Integer(), nullable=False),
-    sa.Column('added_by', sa.String(length=50), nullable=True),
-    sa.Column('added_on', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
-    sa.ForeignKeyConstraint(['role_id'], ['Roles.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['Users.id'], ),
+    sa.Column('added_by', sa.String(length=50), nullable=False),
+    sa.Column('added_on', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.ForeignKeyConstraint(['role_id'], ['Roles.id'], ondelete='RESTRICT'),
+    sa.ForeignKeyConstraint(['user_id'], ['Users.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('user_id', 'role_id')
     )
     # ### end Alembic commands ###

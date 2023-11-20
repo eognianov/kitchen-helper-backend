@@ -4,7 +4,7 @@ from typing import Union, Any, Type
 import bcrypt
 from jose import jwt
 from pydantic import ValidationError
-from sqlalchemy import update, delete
+from sqlalchemy import update, delete, insert
 
 import configuration
 import db.connection
@@ -203,14 +203,12 @@ def add_role_to_user(user_id: int, role_id: int, added_by: str = 'me') -> None:
         if check_user_role(user_id, role_id):
             raise features.users.exceptions.UserWithRoleExist
 
-        user.roles.append(role)
+        # user.roles.append(role)
+        #
+        # session.add(user)
+        # session.commit()
 
-        session.add(user)
-        session.commit()
-
-        stmt = update(UserRole).where(
-            (UserRole.user_id == user_id) & (UserRole.role_id == role_id)
-        ).values(added_by=added_by)
+        stmt = insert(UserRole).values(user_id=user_id, role_id=role_id, added_by=added_by)
 
         session.execute(stmt)
         session.commit()
