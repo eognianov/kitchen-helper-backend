@@ -1,9 +1,9 @@
 import io
 import uuid
-import configuration
 from pathlib import Path
 
 import db.connection
+from .constants import IMAGES_DIR
 from .models import Image
 from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable, ImageNotFoundException
 from PIL import Image as PImage
@@ -12,8 +12,6 @@ import os
 import aiofiles
 import cloudinary.uploader
 
-IMAGES_DIR = Path.joinpath(configuration.ROOT_PATH, 'media/images')
-IMAGES_DIR.mkdir(exist_ok=True, parents=True)
 
 CLOUDINARY_CLOUD_NAME = 'dipxtlowj'
 CLOUDINARY_API_KEY = '324171519888611'
