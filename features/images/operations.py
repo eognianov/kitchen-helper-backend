@@ -1,3 +1,4 @@
+import io
 import uuid
 import configuration
 from pathlib import Path
@@ -6,13 +7,13 @@ import db.connection
 from .models import Image
 from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable
 from PIL import Image as PImage
-from datetime import datetime
 from httpx import AsyncClient, HTTPStatusError, RequestError
 import os
 import aiofiles
 import cloudinary.uploader
 
-IMAGES_DIR = Path.joinpath(configuration.ROOT_PATH, 'media/images').mkdir(exist_ok=True)
+IMAGES_DIR = Path.joinpath(configuration.ROOT_PATH, 'media/images')
+IMAGES_DIR.mkdir(exist_ok=True, parents=True)
 
 CLOUDINARY_CLOUD_NAME = 'dipxtlowj'
 CLOUDINARY_API_KEY = '324171519888611'
@@ -25,12 +26,12 @@ cloudinary.config(
 )
 
 
-async def save_file_to_disk(file_path: str, content: bytes):
+async def _save_file_to_disk(file_path: str, content: bytes):
     async with aiofiles.open(file_path, "wb") as buffer:
         await buffer.write(content)
 
 
-async def get_image_metadata(image_content: bytes):
+async def _get_image_metadata(image_content: io.BytesIO):
     with PImage.open(image_content) as img:
         return img.size, img.format.lower()
 
@@ -45,7 +46,7 @@ async def upload_image_to_cloud(file_path: str, image_name: str, uploader: str) 
     return response.get('secure_url')
 
 
-async def download_image_from_url(url: str) -> bytes:
+async def _download_image_from_url(url: str) -> bytes:
     """
     Get image from url
 
@@ -82,19 +83,17 @@ async def add_image(url: str = None, image: bytes = None, added_by: int = '1'):
         raise InvalidCreationInputException
 
     if url:
-        image = download_image_from_url(url)
+        image = _download_image_from_url(url)
 
-    size, extension = await get_image_metadata(image)
+    size, extension = await _get_image_metadata(io.BytesIO(image))
     file_name = str(uuid.uuid4()) + f'.{extension}'
     file_path = Path.joinpath(IMAGES_DIR, file_name)
-    await save_file_to_disk(file_path, image)
+    await _save_file_to_disk(file_path, image)
 
     image_metadata = {
         'name': file_name,
-        'storage_location': file_path,
         'width': size[0],
         'height': size[0],
-        'uploaded_on': datetime.now(),
         'uploaded_by': added_by
     }
 
