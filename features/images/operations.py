@@ -83,7 +83,7 @@ async def add_image(url: str = None, image: bytes = None, added_by: int = '1'):
         raise InvalidCreationInputException
 
     if url:
-        image = _download_image_from_url(url)
+        image = await _download_image_from_url(url)
 
     size, extension = await _get_image_metadata(io.BytesIO(image))
     file_name = str(uuid.uuid4()) + f'.{extension}'
