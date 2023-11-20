@@ -35,5 +35,5 @@ class UserRole(DbBaseModel):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('Users.id', ondelete='RESTRICT'), primary_key=True)
     role_id: Mapped[int] = mapped_column(Integer, ForeignKey('Roles.id', ondelete='RESTRICT'), primary_key=True)
     added_by: Mapped[str] = mapped_column(String(50))
-    added_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp())
+    added_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
 

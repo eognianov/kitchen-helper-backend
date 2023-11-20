@@ -203,14 +203,8 @@ def add_role_to_user(user_id: int, role_id: int, added_by: str = 'me') -> None:
         if check_user_role(user_id, role_id):
             raise features.users.exceptions.UserWithRoleExist
 
-        # user.roles.append(role)
-        #
-        # session.add(user)
-        # session.commit()
-
-        stmt = insert(UserRole).values(user_id=user_id, role_id=role_id, added_by=added_by)
-
-        session.execute(stmt)
+        user_role = UserRole(user_id=user_id, role_id=role_id, added_by=added_by)
+        session.add(user_role)
         session.commit()
 
 
@@ -232,10 +226,6 @@ def remove_role_from_user(user_id: int, role_id: int) -> None:
         if role in user.roles:
             user.roles.remove(role)
 
+        session.add(user)
         session.commit()
 
-        stmt = delete(UserRole).where(
-            (UserRole.user_id == user_id) & (UserRole.role_id == role_id)
-        )
-        session.execute(stmt)
-        session.commit()
