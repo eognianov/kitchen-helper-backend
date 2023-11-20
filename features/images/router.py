@@ -1,7 +1,7 @@
 import fastapi
-from .operations import add_image
+import features.images.operations
 from .responses import ImageResponse
-from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable
+from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable, ImageNotFoundException
 import khLogging
 
 router = fastapi.APIRouter()
@@ -24,7 +24,7 @@ async def upload_image(url: str = fastapi.Form(default=None), file: fastapi.Uplo
         if file:
             file_content = await file.read()
 
-        return await add_image(url, file_content)
+        return await features.images.operations.add_image(url, file_content)
     except InvalidCreationInputException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
@@ -40,3 +40,30 @@ async def upload_image(url: str = fastapi.Form(default=None), file: fastapi.Uplo
             status_code=fastapi.status.HTTP_424_FAILED_DEPENDENCY,
             detail="Can not get image from the url!"
         )
+
+
+@router.get('/{image_id}', response_model=ImageResponse)
+async def get_image(image_id: int = fastapi.Path()):
+    """
+    Get image
+    :param image_id:
+    :return:
+    """
+
+    try:
+        return await features.images.operations.get_image(image_id)
+    except ImageNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Image with id: {image_id} does not exist!"
+        )
+
+
+@router.get('/', response_model=list[ImageResponse])
+async def get_images():
+    """
+    Get images
+    :return:
+    """
+
+    return await features.images.operations.get_images()

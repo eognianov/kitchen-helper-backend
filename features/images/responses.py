@@ -8,5 +8,5 @@ class ImageResponse(BaseModel):
     width: int
     height: int
     uploaded_on: datetime
-    uploaded_by: str
+    uploaded_by: int
     in_cloudinary: bool

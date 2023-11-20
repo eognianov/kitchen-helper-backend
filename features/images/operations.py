@@ -5,7 +5,7 @@ from pathlib import Path
 
 import db.connection
 from .models import Image
-from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable
+from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable, ImageNotFoundException
 from PIL import Image as PImage
 from httpx import AsyncClient, HTTPStatusError, RequestError
 import os
@@ -104,3 +104,27 @@ async def add_image(url: str = None, image: bytes = None, added_by: int = '1'):
         session.refresh(image_db)
 
     return image_db
+
+
+async def get_image(image_id: int):
+    """
+    Get image
+    :param image_id:
+    :return:
+    """
+
+    with db.connection.get_session() as session:
+        image = session.query(Image).where(Image.id==image_id).first()
+
+        if not image:
+            raise ImageNotFoundException
+        return image
+
+
+async def get_images():
+    """
+    Get images
+    :return:
+    """
+    with db.connection.get_session() as session:
+        return session.query(Image).all()
