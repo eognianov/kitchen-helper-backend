@@ -5,4 +5,4 @@ import features.image_processing
 
 app = fastapi.FastAPI()
 app.include_router(features.health.router, prefix='/health')
-app.include_router(features.image_processing.router)
+app.include_router(features.image_processing.routerl, prefix='/images')
