@@ -2,7 +2,7 @@
 import fastapi
 
 import features.health
-import features.image_processing
+import features.images
 import features.users
 import features.recipes
 
