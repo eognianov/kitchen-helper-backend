@@ -1,29 +1,42 @@
-from fastapi import APIRouter, UploadFile, HTTPException
-from .operations import save_image_from_file, save_image_from_url
-from .input_models import ImageFromUrl
+import fastapi
+from .operations import add_image
 from .responses import ImageResponse
+from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable
+import khLogging
 
-router = APIRouter()
+router = fastapi.APIRouter()
 
 
-@router.post("/upload/file/", response_model=ImageResponse)
-async def upload_image(file: UploadFile):
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
+logging = khLogging.Logger.get_child_logger('images')
+
+
+@router.post('/', response_model=ImageResponse)
+async def upload_image(url: str = fastapi.Form(default=None), file: fastapi.UploadFile = fastapi.File(default=None)):
+    """
+    Upload image
+    :param url:
+    :param file:
+    :return:
+    """
 
     try:
-        static_uploader = "test_uploader"
-        image_data = await save_image_from_file(file, static_uploader)
-        return image_data
-    except Exception as e:  # Todo
-        raise HTTPException(status_code=400, detail=str(e))
+        file_content = None
+        if file:
+            file_content = await file.read()
 
-
-@router.post("/upload/url/")
-async def upload_image_from_url(image_data: ImageFromUrl):
-    try:
-        static_uploader = "test_uploader"
-        image_data = await save_image_from_url(image_data.url, static_uploader)
-        return image_data
-    except Exception as e:  # Todo
-        raise HTTPException(status_code=400, detail=str(e))
+        return await add_image(url, file_content)
+    except InvalidCreationInputException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail="You have to provide url or file!"
+        )
+    except ValueError as err:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Can not process the image! {err}"
+        )
+    except ImageUrlIsNotReachable:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_424_FAILED_DEPENDENCY,
+            detail="Can not get image from the url!"
+        )

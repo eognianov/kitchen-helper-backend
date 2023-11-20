@@ -11,10 +11,11 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
 import configuration
+import khLogging
 
 config = configuration.Config()
 
-
+logging = khLogging.Logger('api')
 
 app = fastapi.FastAPI()
 
@@ -31,7 +32,7 @@ app.include_router(features.health.router, prefix='/health')
 app.include_router(features.users.router, prefix='/users')
 app.include_router(features.recipes.category_router, prefix='/categories')
 app.include_router(features.recipes.recipes_router, prefix='/recipes')
-app.include_router(features.image_processing.routerl, prefix='/images')
+app.include_router(features.images.router, prefix='/images')
 
 if __name__ == '__main__':
     uvicorn.run(app)

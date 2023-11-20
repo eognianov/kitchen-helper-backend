@@ -1,13 +1,18 @@
+import uuid
+import configuration
+from pathlib import Path
+
+import db.connection
 from .models import Image
+from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable
 from PIL import Image as PImage
-from db.connection import get_session
 from datetime import datetime
-from fastapi import UploadFile
 from httpx import AsyncClient, HTTPStatusError, RequestError
 import os
 import aiofiles
-import secrets
 import cloudinary.uploader
+
+IMAGES_DIR = Path.joinpath(configuration.ROOT_PATH, 'media/images').mkdir(exist_ok=True)
 
 CLOUDINARY_CLOUD_NAME = 'dipxtlowj'
 CLOUDINARY_API_KEY = '324171519888611'
@@ -20,47 +25,14 @@ cloudinary.config(
 )
 
 
-def generate_id() -> str:
-    return secrets.token_hex(16)
-
-
-def construct_url(file_name: str) -> str:
-    return "http://127.0.0.1:8000/" + "uploads/" + str(file_name)
-
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
-UPLOAD_DIR = os.path.join(PROJECT_ROOT, 'uploads')
-
-
 async def save_file_to_disk(file_path: str, content: bytes):
     async with aiofiles.open(file_path, "wb") as buffer:
         await buffer.write(content)
 
 
-async def get_image_dimensions(file_path: str):
-    with PImage.open(file_path) as img:
-        return img.size
-
-
-def generate_filename(file_name: str) -> str:
-    file_extension = os.path.splitext(file_name)[1]
-    return secrets.token_hex(8) + file_extension
-
-
-async def save_metadata_to_db(image_metadata):
-    session = get_session()
-    new_image = Image(**image_metadata)
-    try:
-        session.add(new_image)
-        session.commit()
-        session.refresh(new_image)
-        return new_image.id
-    except Exception as e:
-        session.rollback()
-        raise e
-    finally:
-        session.close()
+async def get_image_metadata(image_content: bytes):
+    with PImage.open(image_content) as img:
+        return img.size, img.format.lower()
 
 
 async def upload_image_to_cloud(file_path: str, image_name: str, uploader: str) -> str:
@@ -73,64 +45,63 @@ async def upload_image_to_cloud(file_path: str, image_name: str, uploader: str) 
     return response.get('secure_url')
 
 
-async def process_and_store_image(file_name: str, content: bytes,
-                                  uploader: str = "test_uploader"):  # Todo: change it to the current user
-    unique_filename = generate_filename(file_name)
-    file_path = os.path.join(UPLOAD_DIR, unique_filename)
-    await save_file_to_disk(file_path, content)
+async def download_image_from_url(url: str) -> bytes:
+    """
+    Get image from url
 
-    cloudinary_url = await upload_image_to_cloud(file_path, unique_filename, uploader)
+    :param url:
+    :return:
+    """
 
-    width, height = await get_image_dimensions(file_path)
-
-    image_metadata = {
-        'name': unique_filename,
-        'storage_location': file_path,
-        'cloudinary_url': cloudinary_url,
-        'width': width,
-        'height': height,
-        'uploaded_on': datetime.now(),
-        'uploaded_by': uploader
-    }
-
-    image_id = await save_metadata_to_db(image_metadata)
-    image_metadata["id"] = image_id
-    return image_metadata
-
-
-# Main functions
-async def is_reachable_url(url: str) -> bool:
     async with AsyncClient() as client:
         try:
-            response = await client.head(url)
+
+            response = await client.get(url)
             response.raise_for_status()
-            return True
+
+            if 'image' not in response.headers.get('Content-Type', ''):
+                raise ValueError("URL does not point to a valid image file.")
+
+            return response.content
         except HTTPStatusError:
-            return False
+            raise ImageUrlIsNotReachable
         except RequestError:
-            return False
+            raise ImageUrlIsNotReachable
 
 
-async def download_image_from_url(url: str) -> bytes:
-    if not await is_reachable_url(url):
-        raise ValueError("The URL provided is not reachable.")
+async def add_image(url: str = None, image: bytes = None, added_by: int = '1'):
+    """
+    Add image
 
-    async with AsyncClient() as client:
-        response = await client.get(url)
-        response.raise_for_status()
+    :param url:
+    :param image:
+    :return:
+    """
 
-        if 'image' not in response.headers.get('Content-Type', ''):
-            raise ValueError("URL does not point to a valid image file.")
+    if not (url or image) or (url and image):
+        raise InvalidCreationInputException
 
-        return response.content
+    if url:
+        image = download_image_from_url(url)
 
+    size, extension = await get_image_metadata(image)
+    file_name = str(uuid.uuid4()) + f'.{extension}'
+    file_path = Path.joinpath(IMAGES_DIR, file_name)
+    await save_file_to_disk(file_path, image)
 
-async def save_image_from_url(url: str, uploader: str):
-    image_content = await download_image_from_url(url)
-    file_name = url.split('/')[-1]
-    return await process_and_store_image(file_name, image_content, uploader)
+    image_metadata = {
+        'name': file_name,
+        'storage_location': file_path,
+        'width': size[0],
+        'height': size[0],
+        'uploaded_on': datetime.now(),
+        'uploaded_by': added_by
+    }
 
+    with db.connection.get_session() as session:
+        image_db = Image(**image_metadata)
+        session.add(image_db)
+        session.commit()
+        session.refresh(image_db)
 
-async def save_image_from_file(file: UploadFile, uploader: str):
-    content = await file.read()
-    return await process_and_store_image(file.filename, content, uploader)
+    return image_db

@@ -1,4 +1,5 @@
-from pydantic import BaseModel, HttpUrl
+import fastapi
+from pydantic import BaseModel, HttpUrl, constr
 
 
 class ImageFromFile(BaseModel):
