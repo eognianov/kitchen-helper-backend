@@ -8,20 +8,9 @@ from .models import Image
 from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable, ImageNotFoundException
 from PIL import Image as PImage
 from httpx import AsyncClient, HTTPStatusError, RequestError
-import os
 import aiofiles
 import cloudinary.uploader
-
-
-CLOUDINARY_CLOUD_NAME = 'dipxtlowj'
-CLOUDINARY_API_KEY = '324171519888611'
-CLOUDINARY_API_SECRET = 'x-5IO1FgHRZEcalw0dy4nnSFFFA'
-
-cloudinary.config(
-    cloud_name=CLOUDINARY_CLOUD_NAME,
-    api_key=CLOUDINARY_API_KEY,
-    api_secret=CLOUDINARY_API_SECRET
-)
+import configuration
 
 
 async def _save_file_to_disk(file_path: str, content: bytes):
@@ -34,14 +23,16 @@ async def _get_image_metadata(image_content: io.BytesIO):
         return img.size, img.format.lower()
 
 
-async def upload_image_to_cloud(file_path: str, image_name: str, uploader: str) -> str:
-    public_id = os.path.splitext(image_name)[0]
+def upload_image_to_cloud(content: bytes, image_name: str, uploader: str) -> bool:
+    cloudinary.config(
+        **configuration.Cloudinary().model_dump()
+    )
     response = cloudinary.uploader.upload(
-        file_path,
-        public_id=public_id,
+        content,
+        public_id=image_name.split('.')[0],
         context=f"uploader={uploader}"
     )
-    return response.get('secure_url')
+    return bool(response.get('secure_url'))
 
 
 async def _download_image_from_url(url: str) -> bytes:
@@ -112,7 +103,7 @@ async def get_image(image_id: int):
     """
 
     with db.connection.get_session() as session:
-        image = session.query(Image).where(Image.id==image_id).first()
+        image = session.query(Image).where(Image.id == image_id).first()
 
         if not image:
             raise ImageNotFoundException

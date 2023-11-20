@@ -1,7 +1,7 @@
 """Configuation module"""
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 from typing import Optional, List
 from enum import StrEnum, auto
 
@@ -112,3 +112,14 @@ class Config(BaseSettings):
     def validate_db_configuration(self):
         if self.database == DbTypeOptions.POSTGRES and not self.postgres.are_all_fields_populated:
             raise ValueError('You have selected postgres as database but did not provide its configuration')
+
+
+class Cloudinary(BaseSettings):
+    """Cloudinary settings"""
+
+    cloud_name: str = Field(alias='cloudinary__cloud_name')
+    api_key: str = Field(alias='cloudinary__api_key')
+    api_secret: str = Field(alias='cloudinary__api_secret')
+
+    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
+                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
