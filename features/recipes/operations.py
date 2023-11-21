@@ -131,10 +131,10 @@ def get_recipe_by_id(recipe_id: int):
 
 def update_recipe(recipe_id: int) -> None:
     """
-        Update recipe after adding instruction/s
+    Update recipe after adding or editing instructions
 
-        :param recipe_id:
-        :return:
+    :param recipe_id:
+    :return:
     """
 
     with db.connection.get_session() as session:
@@ -154,11 +154,11 @@ def update_recipe(recipe_id: int) -> None:
 
 def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe: Recipe) -> None:
     """
-        Create instructions
+    Create instructions
 
-        :param instructions_request:
-        :param recipe:
-        :return:
+    :param instructions_request:
+    :param recipe:
+    :return:
     """
 
     with db.connection.get_session() as session:
@@ -184,6 +184,7 @@ def update_instructions(instructions_request: list[UpdateInstructionInputModel],
     with db.connection.get_session() as session:
 
         recipe = session.query(Recipe).filter(Recipe.id == recipe_id).first()
+
         instructions_ids_to_remove = [UpdateInstructionInputModel(**x.__dict__).id for x in recipe.instructions]
 
         for request in instructions_request:

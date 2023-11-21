@@ -134,19 +134,19 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
                     response_model=list[InstructionResponse])
 def update_instructions(instructions_request: list[UpdateInstructionInputModel], recipe_id: int):
     """
-        Update instructions for recipe
+    Update instructions for recipe
 
-        :param instructions_request:
-        :param recipe_id:
-        :return:
+    :param instructions_request:
+    :param recipe_id:
+    :return:
     """
 
     try:
-        recipe = features.recipes.operations.get_recipe_by_id(recipe_id)
+        instructions = features.recipes.operations.update_instructions(instructions_request, recipe_id)
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Recipe with {recipe_id=} does not exist"
         )
 
-    return features.recipes.operations.update_instructions(instructions_request, recipe_id)
+    return instructions
