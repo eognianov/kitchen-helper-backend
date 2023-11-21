@@ -140,7 +140,7 @@ def create_role(role_request: CreateUserRole):
     return role
 
 
-@roles_router.post('/{user_id}/{role_id}', status_code=fastapi.status.HTTP_201_CREATED)
+@user_router.post('/{user_id}/role/{role_id}', status_code=fastapi.status.HTTP_201_CREATED)
 def add_role_to_user(user_id: int, role_id: int):
     """
         Add role to user
@@ -169,7 +169,7 @@ def add_role_to_user(user_id: int, role_id: int):
         )
 
 
-@roles_router.delete('/{user_id}/{role_id}', status_code=fastapi.status.HTTP_204_NO_CONTENT)
+@user_router.delete('/{user_id}/role/{role_id}', status_code=fastapi.status.HTTP_204_NO_CONTENT)
 def remove_role_from_user(user_id: int, role_id: int):
     """
         Remove role from user
