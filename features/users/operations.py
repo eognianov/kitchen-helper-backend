@@ -128,12 +128,12 @@ def get_role(pk: int = None, role_name: str = None) -> Role | None:
         :param role_name:
         :return:
     """
+    if not pk and not role_name:
+        raise ValidationError("Neither pk nor role_name is provided")
+
     with db.connection.get_session() as session:
         query = session.query(Role)
         filters = []
-
-        if not pk and not role_name:
-            raise ValidationError("Neither pk nor role_name is provided")
 
         if pk:
             filters.append(Role.id == pk)
@@ -176,18 +176,20 @@ def create_role(name: str, created_by: str = 'me') -> Role:
         :param created_by:
         :return:
     """
-    with db.connection.get_session() as session:
-        role = session.query(Role).filter(Role.name == name).first()
+    try:
+        role = get_role(role_name=name)
         if role:
             raise features.users.exceptions.RoleAlreadyExists
-        role = Role(name=name, created_by=created_by)
-        session.add(role)
-        session.commit()
-        session.refresh(role)
-    return role
+    except features.users.exceptions.RoleDoesNotExistException:
+        with db.connection.get_session() as session:
+            role = Role(name=name, created_by=created_by)
+            session.add(role)
+            session.commit()
+            session.refresh(role)
+        return role
 
 
-def add_role_to_user(user_id: int, role_id: int, added_by: str = 'me') -> None:
+def add_user_to_role(user_id: int, role_id: int, added_by: str = 'me') -> None:
     """
         Assign role to user
 
@@ -196,36 +198,35 @@ def add_role_to_user(user_id: int, role_id: int, added_by: str = 'me') -> None:
         :param added_by:
         :return:
     """
+    user = get_user_from_db(pk=user_id)
+    role = get_role(pk=role_id)
+
+    if check_user_role(user_id, role_id):
+        raise features.users.exceptions.UserWithRoleExist
+
     with db.connection.get_session() as session:
-        user = get_user_from_db(pk=user_id)
-        role = get_role(pk=role_id)
-
-        if check_user_role(user_id, role_id):
-            raise features.users.exceptions.UserWithRoleExist
-
         user_role = UserRole(user_id=user_id, role_id=role_id, added_by=added_by)
         session.add(user_role)
         session.commit()
 
 
-def remove_role_from_user(user_id: int, role_id: int) -> None:
+def remove_user_from_role(user_id: int, role_id: int) -> None:
     """
-        Remove role from user
+        Remove user from role
 
         :param user_id:
         :param role_id:
         :return:
     """
+    user = get_user_from_db(pk=user_id)
+    role = get_role(pk=role_id)
+
+    if not check_user_role(user_id, role_id):
+        raise features.users.exceptions.UserWithRoleDoesNotExist
+
     with db.connection.get_session() as session:
-        user = get_user_from_db(pk=user_id)
-        role = get_role(pk=role_id)
-
-        if not check_user_role(user_id, role_id):
-            raise features.users.exceptions.UserWithRoleDoesNotExist
-
         if role in user.roles:
             user.roles.remove(role)
 
         session.add(user)
         session.commit()
-

@@ -140,7 +140,7 @@ def create_role(role_request: CreateUserRole):
 
 
 @user_router.post('/{user_id}/role/{role_id}', status_code=fastapi.status.HTTP_201_CREATED)
-def add_role_to_user(user_id: int, role_id: int):
+def add_user_to_role(user_id: int, role_id: int):
     """
         Add role to user
 
@@ -150,7 +150,7 @@ def add_role_to_user(user_id: int, role_id: int):
     """
 
     try:
-        features.users.operations.add_role_to_user(user_id, role_id)
+        features.users.operations.add_user_to_role(user_id, role_id)
     except features.users.exceptions.UserDoesNotExistException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -169,9 +169,9 @@ def add_role_to_user(user_id: int, role_id: int):
 
 
 @user_router.delete('/{user_id}/role/{role_id}', status_code=fastapi.status.HTTP_204_NO_CONTENT)
-def remove_role_from_user(user_id: int, role_id: int):
+def remove_user_from_role(user_id: int, role_id: int):
     """
-        Remove role from user
+        Remove user from role
 
         :param user_id:
         :param role_id:
@@ -179,7 +179,7 @@ def remove_role_from_user(user_id: int, role_id: int):
     """
 
     try:
-        features.users.operations.remove_role_from_user(user_id, role_id)
+        features.users.operations.remove_user_from_role(user_id, role_id)
     except features.users.exceptions.UserDoesNotExistException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
