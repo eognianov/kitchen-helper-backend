@@ -19,7 +19,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 from .input_models import RegisterUserInputModel
-from .models import User, EmailConfirmationToken
+from .models import User, EmailConfirmationToken, PasswordResetToken
 
 import configuration
 import db.connection
@@ -247,14 +247,13 @@ def remove_user_from_role(user_id: int, role_id: int) -> None:
         session.commit()
 
 
-async def send_email(user: User, token: str):
+async def send_email(*, user: User, subject: str, content: str, recipient: str):
     # TODO: setup from_email and host in html_content
     message = Mail(
         from_email='your@example.com',
-        to_emails=user.email,
-        subject='Test Email',
-        html_content=(f'Thank you for registering!\n\n Please click the link below to confirm your email:'
-                      f'\nhttp://127.0.0.1:8000/users/confirm-email/{token}')
+        to_emails=recipient,
+        subject=subject,
+        html_content=content
     )
 
     sg = SendGridAPIClient(api_key=config.grid.send_grid_api_key)
@@ -286,13 +285,16 @@ def generate_email_confirmation_token(user: User, expiration_days: int = 7):
     return token
 
 
-def get_token_from_db(email_confirmation_token: str):
+def get_token_from_db(token: str, token_type: str):
+    model = EmailConfirmationToken if token_type == 'email' else PasswordResetToken
     current_datetime = datetime.utcnow()
 
     with get_session() as session:
         # Fetch the token object
-        token = session.query(EmailConfirmationToken).filter(
-            EmailConfirmationToken.email_confirmation_token == email_confirmation_token
+        token = session.query(model).filter(
+            model.email_confirmation_token == token
+        ).first() if token_type == 'email' else session.query(model).filter(
+            model.reset_token == token
         ).first()
         # If token and it is expired delete the token
         if token and token.expired_on < current_datetime:
@@ -315,3 +317,24 @@ def confirm_email(user_id: int) -> User:
         session.delete(token)
         session.commit()
     return user
+
+
+def generate_password_reset_token(user: User, expiration_hours: int = 1):
+    token = secrets.token_urlsafe(32)
+    expiration_time = datetime.utcnow() + timedelta(hours=expiration_hours)
+
+    with get_session() as session:
+        reset_token = PasswordResetToken(
+            user_id=user.id,
+            reset_token=token,
+            expired_on=expiration_time
+        )
+        session.add(reset_token)
+        session.commit()
+
+    return token
+
+
+def update_user_password(user, new_password):
+    hashed_password = hash_password(new_password)
+    user.password = hashed_password
