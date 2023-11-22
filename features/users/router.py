@@ -22,6 +22,8 @@ async def signup(user: RegisterUserInputModel):
     """
     try:
         db_user = create_new_user(user)
+        token = features.users.operations.generate_email_confirmation_token(db_user)
+        await features.users.operations.send_email(db_user, token)
         return db_user
     except features.users.exceptions.UserAlreadyExists:
         raise HTTPException(
@@ -96,3 +98,23 @@ def patch_user(user_id: int = fastapi.Path(), update_user_input_model: UpdateUse
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"User with {user_id=} does not exist"
         )
+
+
+@user_router.get("/confirm-email/{token}")
+async def confirm_email(token: str):
+    """
+    Confirm email
+
+    :param token:
+    :return:
+    """
+    token = features.users.operations.get_token_from_db(email_confirmation_token=token)
+    if not token:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired confirmation token"
+        )
+
+    user = features.users.operations.confirm_email(token.user_id)
+
+    return {"message": "Email confirmed successfully", "email": user.email}
