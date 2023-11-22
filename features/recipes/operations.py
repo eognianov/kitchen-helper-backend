@@ -138,15 +138,15 @@ def update_recipe(recipe_id: int) -> None:
     """
 
     with db.connection.get_session() as session:
-        recipe = session.query(Recipe).filter(Recipe.id == recipe_id).first()
-        instructions = session.query(RecipeInstruction).filter(RecipeInstruction.recipe_id == recipe.id)
+        recipe = get_recipe_by_id(recipe_id=recipe_id)
 
-        total_complexity = (sum([InstructionResponse(**x.__dict__).complexity for x in instructions]))
-        complexity_len = (len([InstructionResponse(**x.__dict__).complexity for x in instructions]))
-        time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in instructions]))
+        total_complexity = (sum([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
+        complexity_len = (len([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
+        time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in recipe.instructions]))
 
         recipe.complexity = round(total_complexity / complexity_len, 1)
         recipe.time_to_prepare = time_to_prepare
+
         session.add(recipe)
         session.commit()
         session.refresh(recipe)
@@ -162,9 +162,8 @@ def create_instructions(instructions_request: list[CreateInstructionInputModel],
     """
 
     with db.connection.get_session() as session:
-        instructions = instructions_request
 
-        for instruction in instructions:
+        for instruction in instructions_request:
             new_instruction = RecipeInstruction(**instruction.model_dump())
             new_instruction.recipe_id = recipe.id
             session.add(new_instruction)
@@ -175,11 +174,11 @@ def create_instructions(instructions_request: list[CreateInstructionInputModel],
 
 def update_instructions(instructions_request: list[UpdateInstructionInputModel], recipe_id: int):
     """
-        Update instructions
+    Update instructions
 
-        :param instructions_request:
-        :param recipe_id:
-        :return:
+    :param instructions_request:
+    :param recipe_id:
+    :return:
     """
     with db.connection.get_session() as session:
 
@@ -191,7 +190,7 @@ def update_instructions(instructions_request: list[UpdateInstructionInputModel],
 
             instruction = session.query(RecipeInstruction).filter(RecipeInstruction.id == request.id).first()
 
-            if instruction and instruction.id == recipe_id:
+            if instruction in recipe.instructions:
                 instruction.instruction = request.instruction
                 instruction.category = request.category
                 instruction.time = request.time
