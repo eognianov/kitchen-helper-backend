@@ -24,12 +24,7 @@ class JwtTokenResponseModel(BaseModel):
     token_type: str
 
 
-class UserRoleResponseModel(BaseModel):
-    user_id: int
-    role_id: int
-
-
-class RolesUsersResponseModel(BaseModel):
+class UsersResponseModelWithoutRoles(BaseModel):
     id: int
     username: str
     email: str
@@ -38,8 +33,8 @@ class RolesUsersResponseModel(BaseModel):
 class RolesWithUsersResponseModel(BaseModel):
     id: int
     name: str
-    users: list[RolesUsersResponseModel] | Any = None
+    users: list[UsersResponseModelWithoutRoles] | Any = None
 
     def model_post_init(self, __context: Any):
         if self.users:
-            self.users = [RolesUsersResponseModel(**_.__dict__) for _ in self.users]
+            self.users = [UsersResponseModelWithoutRoles(**_.__dict__) for _ in self.users]
