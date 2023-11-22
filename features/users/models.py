@@ -24,3 +24,13 @@ class EmailConfirmationToken(DbBaseModel):
     user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
     expired_on: Mapped[datetime.datetime] = mapped_column(DateTime)
+
+
+class PasswordResetToken(DbBaseModel):
+    __tablename__ = 'PASSWORD_TOKEN'
+
+    id: Mapped[int] = mapped_column(primary_key=True, init=False)
+    reset_token: Mapped[str] = mapped_column(String(43), unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
+    created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
+    expired_on: Mapped[datetime.datetime] = mapped_column(DateTime)
