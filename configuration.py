@@ -89,6 +89,10 @@ class CorsSettings(BaseModel):
     allow_headers: List[str]
 
 
+class SendGrid(BaseModel):
+    send_grid_api_key: str
+
+
 class Config(BaseSettings):
     """Base configurations"""
 
@@ -98,6 +102,7 @@ class Config(BaseSettings):
     postgres: PostgresConfig
     jwt: JwtToken
     cors: CorsSettings
+    grid: SendGrid
 
     @property
     def connection_string(self):
