@@ -1,3 +1,13 @@
+import secrets
+
+from sqlalchemy import update
+
+import features.users.exceptions
+from db.connection import get_session
+
+import bcrypt
+import datetime
+
 from datetime import datetime, timedelta
 from typing import Union, Any, Type
 
@@ -5,6 +15,11 @@ import bcrypt
 from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy import update, delete, insert
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
+from .input_models import RegisterUserInputModel
+from .models import User, EmailConfirmationToken
 
 import configuration
 import db.connection
@@ -230,3 +245,73 @@ def remove_user_from_role(user_id: int, role_id: int) -> None:
 
         session.add(user)
         session.commit()
+
+
+async def send_email(user: User, token: str):
+    # TODO: setup from_email and host in html_content
+    message = Mail(
+        from_email='your@example.com',
+        to_emails=user.email,
+        subject='Test Email',
+        html_content=(f'Thank you for registering!\n\n Please click the link below to confirm your email:'
+                      f'\nhttp://127.0.0.1:8000/users/confirm-email/{token}')
+    )
+
+    sg = SendGridAPIClient(api_key=config.grid.send_grid_api_key)
+
+    try:
+        response = sg.send(message)
+        print(response.status_code)
+        return {"message": "Email sent successfully", "status_code": response.status_code}
+    except Exception as e:
+        print(e)
+        return {"message": "An error occurred", "error": str(e)}
+
+
+def generate_email_confirmation_token(user: User, expiration_days: int = 7):
+    token = secrets.token_urlsafe(32)
+
+    # Calculate the expiration datetime
+    expiration_time = datetime.utcnow() + timedelta(days=expiration_days)
+
+    with get_session() as session:
+        token_obj = EmailConfirmationToken(
+            email_confirmation_token=token,
+            user_id=user.id,
+            expired_on=expiration_time
+        )
+        session.add(token_obj)
+        session.commit()
+
+    return token
+
+
+def get_token_from_db(email_confirmation_token: str):
+    current_datetime = datetime.utcnow()
+
+    with get_session() as session:
+        # Fetch the token object
+        token = session.query(EmailConfirmationToken).filter(
+            EmailConfirmationToken.email_confirmation_token == email_confirmation_token
+        ).first()
+        # If token and it is expired delete the token
+        if token and token.expired_on < current_datetime:
+            session.delete(token)
+            session.commit()
+            return None
+
+    return token
+
+
+def confirm_email(user_id: int) -> User:
+    user = get_user_from_db(pk=user_id)
+    # Mark the user email as confirmed
+    user.is_email_confirmed = True
+    with get_session() as session:
+        # Fetch the token object
+        token = session.query(
+            EmailConfirmationToken
+        ).filter(EmailConfirmationToken.user_id == user.id).first()
+        session.delete(token)
+        session.commit()
+    return user
