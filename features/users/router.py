@@ -98,21 +98,20 @@ def patch_user(user_id: int = fastapi.Path(), update_user_input_model: UpdateUse
         )
 
 
-@roles_router.get('/', response_model=list[RolesResponseModel])
-def get_all_roles():
+@roles_router.get('/')
+def get_all_roles(include_users: bool = False):
     """
     Show all roles
 
+    :param include_users:
     :return:
     """
-    all_roles = features.users.operations.get_all_roles()
-    return all_roles
-
-
-@roles_router.get('/users', response_model=list[RolesWithUsersResponseModel])
-def get_all_roles_with_users():
     roles = features.users.operations.get_all_roles()
-    return roles
+
+    if include_users:
+        return [RolesWithUsersResponseModel(**role.__dict__) for role in roles]
+
+    return [RolesResponseModel(**role.__dict__) for role in roles]
 
 
 @roles_router.get('/{role_id}', response_model=RolesWithUsersResponseModel)
