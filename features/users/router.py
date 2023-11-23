@@ -26,7 +26,6 @@ async def signup(user: RegisterUserInputModel):
         email_content = (f'Thank you for registering!\n\n Please click the link below to confirm your email:'
                          f'\nhttp://127.0.0.1:8000/users/confirm-email/{token}')
         await features.users.operations.send_email(
-            user=db_user,
             content=email_content,
             subject='Email confirmation',
             recipient=db_user.email
@@ -139,7 +138,6 @@ async def request_password_reset(email: str):
                          f'{reset_url}\n\nIf you did not request a password reset, please ignore this email.'
                          f'\n\nThank you!\nPassword Reset Request')
         await features.users.operations.send_email(
-            user=db_user,
             content=email_content,
             subject='Password reset',
             recipient=db_user.email
@@ -153,7 +151,7 @@ async def request_password_reset(email: str):
 async def reset_password(token: str, new_password: str):
     reset_token = features.users.operations.get_token_from_db(token=token, token_type='password')
 
-    if not token:
+    if not reset_token:
         raise HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired confirmation token"
@@ -163,4 +161,3 @@ async def reset_password(token: str, new_password: str):
     features.users.operations.update_user_password(user, new_password)
 
     return {"message": "Password reset successful"}
-
