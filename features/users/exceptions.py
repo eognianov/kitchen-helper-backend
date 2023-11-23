@@ -24,3 +24,8 @@ class UserWithRoleDoesNotExist(Exception):
 
 class UserWithRoleExist(Exception):
     ...
+
+
+class SamePasswordsException(Exception):
+    ...
+

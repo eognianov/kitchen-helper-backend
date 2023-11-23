@@ -260,10 +260,8 @@ async def send_email(*, subject: str, content: str, recipient: str):
 
     try:
         response = sg.send(message)
-        print(response.status_code)
         return {"message": "Email sent successfully", "status_code": response.status_code}
     except Exception as e:
-        print(e)
         return {"message": "An error occurred", "error": str(e)}
 
 
@@ -342,13 +340,17 @@ def generate_password_reset_token(user: User, expiration_hours: int = 1) -> str:
 
 
 def update_user_password(user: User, new_password: str) -> User:
-    # Hash the new password, change it for the requested user and delete the token
+    # Check if the new password does not match the old password
+    # Hash the new password
+    # Change the password for the requested user and delete the token
+
+    if check_password(user, new_password):
+        raise features.users.exceptions.SamePasswordsException()
 
     hashed_password = hash_password(new_password)
     user.password = hashed_password
 
     with get_session() as session:
-        # Fetch the token object
         token = session.query(
             PasswordResetToken
         ).filter(PasswordResetToken.user_id == user.id).first()
