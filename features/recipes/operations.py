@@ -129,6 +129,14 @@ def get_recipe_by_id(recipe_id: int):
 
 
 def delete_recipe(*, recipe_id: int, deleted_by: int):
+    """
+    Delete recipe
+
+    :param recipe_id:
+    :param deleted_by:
+    :return:
+    """
+
     recipe = get_recipe_by_id(recipe_id)
 
     with db.connection.get_session() as session:

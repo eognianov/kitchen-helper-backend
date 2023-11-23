@@ -23,26 +23,44 @@ config = configuration.Config()
 
 
 def hash_password(password: str) -> bytes:
+    """
+    Hash the password
+    :param password:
+    :return:
+    """
+
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
     return hashed_password
 
 
 def check_password(user: User, password: str) -> bool:
-    # Check if passwords match (for login)
+    """
+    Check if passwords match (for login)
+
+    :param user:
+    :param password:
+    :return:
+    """
+
     return bcrypt.checkpw(password.encode('utf-8'), user.password)
 
 
 def create_new_user(user: RegisterUserInputModel) -> User:
-    # Create the user in the database
+    """
+    Create user
+
+    :param user:
+    :return:
+    """
+
     with get_session() as session:
         try:
-            # Check if the username or email already exists
+            """ Check if the username or email already exists"""
             if get_user_from_db(username=user.username, email=user.email):
-                # Raise an Exception
                 raise features.users.exceptions.UserAlreadyExists()
         except features.users.exceptions.UserDoesNotExistException:
-            # Create the new user
+            """Create the new user"""
             user.password = hash_password(password=user.password)
             db_user = User(username=user.username, email=user.email, password=user.password)
             session.add(db_user)
@@ -53,15 +71,25 @@ def create_new_user(user: RegisterUserInputModel) -> User:
 
 
 def signin_user(username: str, password: str) -> tuple:
-    # Get user and check if username and password are correct
+    """Get user and check if username and password are correct"""
+
     current_user = get_user_from_db(username=username)
     if not current_user or not check_password(current_user, password):
         features.users.exceptions.AccessDenied()
-    # Create jwt token
+    """Create jwt token"""
     return create_token(username)
 
 
 def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
+    """
+    Get user from DB by pk, username or email
+
+    :param pk:
+    :param username:
+    :param email:
+    :return:
+    """
+
     with get_session() as session:
         query = session.query(User)
         filters = []
@@ -84,14 +112,25 @@ def get_user_from_db(*, pk: int = None, username: str = None, email: str = None)
 
 
 def get_all_users() -> list:
+    """Fetch all the users from the DB"""
+
     with get_session() as session:
-        # Fetch all the users from the db
         all_users = session.query(User).all()
 
     return all_users
 
 
-def update_user(user_id: int, field: str, value: str, updated_by: str = '') -> Type[User]:
+def update_user(user_id: int, field: str, value: str, updated_by: int = 1) -> Type[User]:
+    """
+    Update user
+
+    :param user_id:
+    :param field:
+    :param value:
+    :param updated_by:
+    :return:
+    """
+
     user = get_user_from_db(pk=user_id)
     with get_session() as session:
         session.execute(update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}])
@@ -100,6 +139,15 @@ def update_user(user_id: int, field: str, value: str, updated_by: str = '') -> T
 
 
 def create_token(subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True) -> tuple:
+    """
+    Create JWT Token
+
+    :param subject:
+    :param expires_delta:
+    :param access:
+    :return:
+    """
+
     minutes = config.jwt.access_token_expire_minutes if access else config.jwt.refresh_token_expire_minutes
     secret_key = config.jwt.secret_key if access else config.jwt.refresh_secret_key
     algorithm = config.jwt.algorithm
@@ -116,6 +164,14 @@ def create_token(subject: Union[str, Any], expires_delta: timedelta = None, acce
 
 
 async def send_email(*, subject: str, content: str, recipient: str):
+    """
+    Send email for email confirmation or reset password
+
+    :param subject:
+    :param content:
+    :param recipient:
+    """
+
     # TODO: setup from_email
     message = Mail(
         from_email='your@example.com',
@@ -134,9 +190,17 @@ async def send_email(*, subject: str, content: str, recipient: str):
 
 
 def generate_email_confirmation_token(user: User, expiration_days: int = 7):
+    """
+    Generate email confirmation token
+
+    :param user:
+    :param expiration_days:
+    :return:
+    """
+
     token = secrets.token_urlsafe(32)
 
-    # Calculate the expiration datetime
+    """Calculate the expiration datetime"""
     expiration_time = datetime.utcnow() + timedelta(days=expiration_days)
 
     with get_session() as session:
@@ -152,19 +216,25 @@ def generate_email_confirmation_token(user: User, expiration_days: int = 7):
 
 
 def get_token_from_db(token: str, token_type: str):
-    # Get the token from db if exists, check if token is expired and delete it
+    """
+    Get the token from db if exists, check if token is expired and delete it
+
+    :param token:
+    :param token_type:
+    :return:
+    """
 
     model = EmailConfirmationToken if token_type == 'email' else PasswordResetToken
     current_datetime = datetime.utcnow()
 
     with get_session() as session:
-        # Fetch the token object
+        """Fetch the token object from DB"""
         token = session.query(model).filter(
             model.email_confirmation_token == token
         ).first() if token_type == 'email' else session.query(model).filter(
             model.reset_token == token
         ).first()
-        # If token and it is expired delete the token
+        """If token and it is expired delete the token"""
         if token and token.expired_on < current_datetime:
             session.delete(token)
             session.commit()
@@ -174,7 +244,12 @@ def get_token_from_db(token: str, token_type: str):
 
 
 def confirm_email(user_id: int) -> User:
-    # Mark the user email as confirmed and delete the token
+    """
+    Mark the user email as confirmed and delete the token
+
+    :param user_id:
+    :return:
+    """
 
     user = get_user_from_db(pk=user_id)
     user.is_email_confirmed = True
@@ -190,7 +265,13 @@ def confirm_email(user_id: int) -> User:
 
 
 def generate_password_reset_token(user: User, expiration_hours: int = 1) -> str:
-    # Generate password reset token and set expiration time
+    """
+    Generate password reset token and set expiration time
+
+    :param user:
+    :param expiration_hours:
+    :return:
+    """
 
     token = secrets.token_urlsafe(32)
     expiration_time = datetime.utcnow() + timedelta(hours=expiration_hours)
@@ -208,9 +289,14 @@ def generate_password_reset_token(user: User, expiration_hours: int = 1) -> str:
 
 
 def update_user_password(user: User, new_password: str) -> User:
-    # Check if the new password does not match the old password
-    # Hash the new password
-    # Change the password for the requested user and delete the token
+    """
+    Check if the new password does not match the old password
+    Hash the new password
+    Change the password for the requested user and delete the token
+
+    :param user:
+    :param new_password:
+    """
 
     if check_password(user, new_password):
         raise features.users.exceptions.SamePasswordsException()

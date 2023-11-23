@@ -1,3 +1,6 @@
+"""Users feature exceptions"""
+
+
 class UserDoesNotExistException(Exception):
     ...
 
