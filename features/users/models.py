@@ -12,6 +12,7 @@ import datetime
 
 
 class User(DbBaseModel):
+    """User DB model"""
     __tablename__ = 'Users'
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
@@ -22,6 +23,7 @@ class User(DbBaseModel):
 
 
 class EmailConfirmationToken(DbBaseModel):
+    """Email confirmation token DB model"""
     __tablename__ = 'TOKEN'
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
@@ -34,6 +36,7 @@ class EmailConfirmationToken(DbBaseModel):
 
 
 class Role(DbBaseModel):
+    """Password reset token DB model"""
     __tablename__ = 'Roles'
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)

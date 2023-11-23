@@ -76,6 +76,7 @@ class PostgresConfig(BaseModel):
 
 
 class JwtToken(BaseModel):
+    """JWT Token options"""
     access_token_expire_minutes: int
     refresh_token_expire_minutes: int
     algorithm: str
@@ -84,12 +85,14 @@ class JwtToken(BaseModel):
 
 
 class CorsSettings(BaseModel):
+    """CORSMiddleware options"""
     allow_origins: List[str]
     allow_methods: List[str]
     allow_headers: List[str]
 
 
 class SendGrid(BaseModel):
+    """SendGrid options"""
     send_grid_api_key: str
 
 
