@@ -114,6 +114,7 @@ async def confirm_email(token: str):
     :param token:
     :return:
     """
+
     token = features.users.operations.get_token_from_db(token=token, token_type='email')
     if not token:
         raise HTTPException(
@@ -128,6 +129,13 @@ async def confirm_email(token: str):
 
 @user_router.post("/request-password-reset", response_model=dict)
 async def request_password_reset(email: str):
+    """
+    Request password reset
+
+    :param email:
+    :return:
+    """
+
     db_user = get_user_from_db(email=email)
     if db_user:
         reset_token = features.users.operations.generate_password_reset_token(db_user)
@@ -144,11 +152,19 @@ async def request_password_reset(email: str):
         )
         return {"message": "Password reset email sent"}
     else:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
 @user_router.post("/reset-password/{token}", response_model=dict)
 async def reset_password(token: str, new_password: str):
+    """
+    Reset password
+
+    :param token:
+    :param new_password:
+    :return:
+    """
+
     reset_token = features.users.operations.get_token_from_db(token=token, token_type='password')
 
     if not reset_token:
@@ -156,8 +172,20 @@ async def reset_password(token: str, new_password: str):
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired confirmation token"
         )
+    try:
+        user = get_user_from_db(pk=reset_token.user_id)
+        features.users.operations.update_user_password(user, new_password)
 
-    user = get_user_from_db(pk=reset_token.user_id)
-    features.users.operations.update_user_password(user, new_password)
+    except features.users.exceptions.UserDoesNotExistException:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    except features.users.exceptions.SamePasswordsException:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_403_FORBIDDEN,
+            detail="The new password can not be the same as the old password"
+        )
 
     return {"message": "Password reset successful"}
