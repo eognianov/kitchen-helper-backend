@@ -8,6 +8,11 @@ config = configuration.Config()
 CONNECTION_STRING = config.connection_string
 
 
+def _get_test_engine() -> sqlalchemy.Engine:
+    return sqlalchemy.create_engine(CONNECTION_STRING, echo=False, connect_args={"check_same_thread": False},
+                                    poolclass=sqlalchemy.StaticPool)
+
+
 def get_engine() -> sqlalchemy.Engine:
     """
     Return engine
@@ -16,8 +21,7 @@ def get_engine() -> sqlalchemy.Engine:
 
     echo = config.context == configuration.ContextOptions.DEV
     if config.database == configuration.DbTypeOptions.SQLITE and config.sqlite.is_in_memory:
-        return sqlalchemy.create_engine(CONNECTION_STRING, echo=echo, connect_args={"check_same_thread": False},
-                                        poolclass=sqlalchemy.StaticPool)
+        return _get_test_engine()
     return sqlalchemy.create_engine(CONNECTION_STRING, echo=echo)
 
 
