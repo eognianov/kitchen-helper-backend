@@ -1,8 +1,9 @@
 """Users feature input model"""
-from pydantic import BaseModel, EmailStr, Field, field_validator
-from email_validator import validate_email
-
 import re
+
+from email_validator import validate_email
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
 import configuration
 
 config = configuration.Config()
@@ -70,3 +71,18 @@ class UpdateUserInputModel(BaseModel):
             raise ValueError(f"Invalid email address: {e}")
 
         return value
+
+
+class CreateUserRole(BaseModel):
+    name: str
+
+
+class AddRoleToUser(BaseModel):
+    user_id: int
+    role_id: int
+    added_by: str
+
+
+class RemoveRoleFromUser(BaseModel):
+    user_id: int
+    role_id: int
