@@ -6,8 +6,7 @@ from sqlalchemy import update
 import db.connection
 from .exceptions import IngredientIntegrityViolation, IngredientCategoryNotFoundException, \
     IngredientCategoryIntegrityViolation, IngredientCategoryNameViolation
-from .models import Ingredient
-from .responses import Ingredient
+from features.ingredients_api.models import Ingredient
 from .models import IngredientCategory
 from sqlalchemy.exc import IntegrityError
 

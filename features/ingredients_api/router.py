@@ -2,8 +2,8 @@
 from typing import List
 
 import fastapi
-import features.ingredients_api.operations
-from features.ingredients_api.responses import Ingredient, IngredientCategory
+from features.ingredients_api.operations import *
+from features.ingredients_api.responses import IngredientCategory
 import features.ingredients_api.exceptions
 from .input_models import PatchIngredientInputModel, CreateIngredientInputModel, PatchIngredientCategoryInputModel
 

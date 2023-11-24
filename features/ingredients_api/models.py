@@ -30,7 +30,7 @@ class Ingredient(DbBaseModel):
 
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key= True)
     name: Mapped[str] = mapped_column(String, index=True, nullable=False)
-    category = Mapped[IngredientCategory] = relationship("IngredientCategory", back_populates="ingredients", lazy="selectin")
+    # category = Mapped[IngredientCategory] = relationship("IngredientCategory", back_populates="ingredients", lazy="selectin")
     calories: Mapped[float] = mapped_column(Float, nullable=False)
     carbo: Mapped[float] = mapped_column(Float, nullable=False)
     fats: Mapped[float] = mapped_column(Float, nullable=False)

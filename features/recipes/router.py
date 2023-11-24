@@ -2,10 +2,10 @@
 
 import fastapi
 
-import features.recipes.operations
-import features.recipes.responses
-import features.recipes.exceptions
-from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
+import features.recipes
+from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, \
+    UpgradeRecipeInputModel
+from .responses import Recipe
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
@@ -124,8 +124,8 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
             detail=f"Category with id {create_recipe_input_model.category_id} does not exist"
         )
 
-@recipes_router.patch('/{recipe_id}', response_model=features.recipes.responses.Recipe)
-def update_recipe(recipe_id: int = fastapi.Path(), upgrade_recipe_input_model: features.recipes.input_models.UpgradeRecipeInputModel = fastapi.Body()):
+@recipes_router.patch('/{recipe_id}', response_model=Recipe)
+def update_recipe(recipe_id: int = fastapi.Path(), upgrade_recipe_input_model: UpgradeRecipeInputModel = fastapi.Body()):
     """
     Update recipe
 

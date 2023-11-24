@@ -11,18 +11,18 @@ class PatchIngredientCategoryInputModel(BaseModel):
     field: str
     value: str
 
-    @pydantic.validator('field')
-    @validator('field')
-    def validate_field(cls, field: str):
-
-        allowed_fields_to_edit = [
-            'NAME'
-        ]
-
-        if field.upper() not in allowed_fields_to_edit:
-            raise ValueError(f"You are not allowed to edit {field} column")
-
-        raise field
+    # @pydantic.validator('field')
+    # @validator('field')
+    # def validate_field(cls, field: str):
+    #
+    #     allowed_fields_to_edit = [
+    #         'NAME'
+    #     ]
+    #
+    #     if field.upper() not in allowed_fields_to_edit:
+    #         raise ValueError(f"You are not allowed to edit {field} column")
+    #
+    #     raise field
 
 class CreateIngredientCategoryInputModel(BaseModel):
     """Create ingredient category"""
@@ -54,12 +54,12 @@ class UpgradeIngredientInputModel(BaseModel):
 
     name: Optional[str] = Field(None, max_length=255)
     category: Optional[str] = Field(None, max_length=255)
-    calories:Optional[float] = Field(None, ge=0)
-    carbo:Optional[float] = Field(None, ge=0)
-    fats:Optional[float] = Field(None, ge=0)
-    proteins:Optional[float] = Field(None, ge=0)
-    cholesterol:Optional[float] = Field(None, ge=0)
-    measurement:Optional[float] = Field(None, ge=0)
+    calories: Optional[float] = Field(None, ge=0)
+    carbo: Optional[float] = Field(None, ge=0)
+    fats: Optional[float] = Field(None, ge=0)
+    proteins: Optional[float] = Field(None, ge=0)
+    cholesterol: Optional[float] = Field(None, ge=0)
+    measurement: Optional[float] = Field(None, ge=0)
 
     @validator('name')
     def validate_name(cls, name):

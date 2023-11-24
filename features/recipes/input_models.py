@@ -57,14 +57,6 @@ class UpgradeRecipeInputModel(pydantic.BaseModel):
     time_to_prepare: Optional[int] = pydantic.Field(gt=0)
     category_id: Optional[int] = None
 
-    @pydantic.validator('recipe_id')
-    @classmethod
-    def validate_recipe_id(cls, recipe_id: int):
-        if not recipe_id:
-            raise ValueError("Recipe id is required")
-
-        return recipe_id
-
     @pydantic.validator('name')
     @classmethod
     def validate_name(cls, name: str):
