@@ -249,7 +249,7 @@ def update_instruction(recipe_id: int, instruction_id, field: str, value: str):
     instruction = get_instruction_by_id(instruction_id)
     recipe = get_recipe_by_id(recipe_id)
 
-    if instruction.id != recipe_id:
+    if instruction.recipe_id != recipe_id:
         raise RecipeWithInstructionNotFoundException
 
     try:
@@ -286,4 +286,20 @@ def create_instruction(recipe_id: int, instruction_request):
         session.add(instruction)
         session.commit()
         session.refresh(instruction)
+
+        update_recipe(recipe_id=recipe_id)
     return instruction
+
+
+def delete_instruction(recipe_id: int, instruction_id):
+    recipe = get_recipe_by_id(recipe_id)
+    instruction = get_instruction_by_id(instruction_id)
+
+    if instruction.recipe_id != recipe_id:
+        raise RecipeWithInstructionNotFoundException
+
+    with db.connection.get_session() as session:
+        session.delete(instruction)
+        session.commit()
+
+        update_recipe(recipe_id=recipe_id)

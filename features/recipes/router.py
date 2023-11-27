@@ -187,8 +187,8 @@ def update_instructions(recipe_id: int = fastapi.Path(),
 
 
 @recipes_router.post('/{recipe_id}/instructions/', response_model=InstructionResponse)
-def create_instructions(recipe_id: int = fastapi.Path(),
-                        create_instruction_input_model: CreateInstructionInputModel = fastapi.Body()):
+def create_instruction(recipe_id: int = fastapi.Path(),
+                       create_instruction_input_model: CreateInstructionInputModel = fastapi.Body()):
     """
     Create instructions
 
@@ -205,4 +205,32 @@ def create_instructions(recipe_id: int = fastapi.Path(),
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Recipe with id {recipe_id} does not exist"
+        )
+
+
+@recipes_router.delete('/{recipe_id}/instructions/{instruction_id}', status_code=fastapi.status.HTTP_204_NO_CONTENT)
+def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id=fastapi.Path()):
+    """
+    Delete instruction
+
+    :param recipe_id:
+    :param instruction_id:
+    :return:
+    """
+    try:
+        features.recipes.operations.delete_instruction(recipe_id, instruction_id)
+    except features.recipes.exceptions.InstructionNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Instruction with id {instruction_id} does not exist"
+        )
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with id {recipe_id} does not exist"
+        )
+    except features.recipes.exceptions.RecipeWithInstructionNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Combination of {recipe_id=} and {instruction_id=} does not exist"
         )
