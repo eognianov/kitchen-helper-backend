@@ -264,3 +264,26 @@ def update_instruction(recipe_id: int, instruction_id, field: str, value: str):
 
     except sqlalchemy.exc.IntegrityError as ex:
         raise InstructionNameViolationException(ex)
+
+
+def create_instruction(recipe_id: int, instruction_request):
+    """
+    Create instructions
+    :param recipe_id:
+    :param instruction_request:
+    """
+
+    recipe = get_recipe_by_id(recipe_id)
+    instruction = RecipeInstruction(
+        instruction=instruction_request.instruction,
+        time=instruction_request.time,
+        complexity=instruction_request.complexity,
+        category=instruction_request.category,
+    )
+
+    with db.connection.get_session() as session:
+        instruction.recipe_id = recipe.id
+        session.add(instruction)
+        session.commit()
+        session.refresh(instruction)
+    return instruction

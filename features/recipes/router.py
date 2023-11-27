@@ -7,7 +7,7 @@ import features.recipes.operations
 import features.recipes.responses
 from features.recipes.responses import InstructionResponse
 from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, \
-    UpdateInstructionInputModel, PatchInstructionInputModel
+    UpdateInstructionInputModel, PatchInstructionInputModel, CreateInstructionInputModel
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
@@ -183,4 +183,26 @@ def update_instructions(recipe_id: int = fastapi.Path(),
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Combination of {recipe_id=} and {instruction_id=} does not exist"
+        )
+
+
+@recipes_router.post('/{recipe_id}/instructions/', response_model=InstructionResponse)
+def create_instructions(recipe_id: int = fastapi.Path(),
+                        create_instruction_input_model: CreateInstructionInputModel = fastapi.Body()):
+    """
+    Create instructions
+
+    :param recipe_id:
+    :param create_instruction_input_model:
+    :return:
+    """
+    try:
+        updated_instruction = features.recipes.operations.create_instruction(
+            recipe_id, create_instruction_input_model
+        )
+        return updated_instruction
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with id {recipe_id} does not exist"
         )
