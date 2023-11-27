@@ -5,7 +5,8 @@ import sqlalchemy.exc
 from sqlalchemy import update, delete
 
 import db.connection
-from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException
+from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
+    InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException
 from .input_models import CreateInstructionInputModel, UpdateInstructionInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse
@@ -162,7 +163,6 @@ def create_instructions(instructions_request: list[CreateInstructionInputModel],
     """
 
     with db.connection.get_session() as session:
-
         for instruction in instructions_request:
             new_instruction = RecipeInstruction(**instruction.model_dump())
             new_instruction.recipe_id = recipe.id
@@ -225,3 +225,42 @@ def update_instructions(instructions_request: list[UpdateInstructionInputModel],
         session.refresh(recipe)
 
         return recipe.instructions
+
+
+def get_instruction_by_id(instruction_id: int):
+    """Get instruction by id"""
+
+    with db.connection.get_session() as session:
+        instruction = session.query(RecipeInstruction).filter(RecipeInstruction.id == instruction_id).first()
+        if not instruction:
+            raise InstructionNotFoundException
+        return instruction
+
+
+def update_instruction(recipe_id: int, instruction_id, field: str, value: str):
+    """
+    Update instruction
+    :param recipe_id:
+    :param instruction_id:
+    :param field:
+    :param value:
+    """
+
+    instruction = get_instruction_by_id(instruction_id)
+    recipe = get_recipe_by_id(recipe_id)
+
+    if instruction.id != recipe_id:
+        raise RecipeWithInstructionNotFoundException
+
+    try:
+        with db.connection.get_session() as session:
+            session.execute(update(RecipeInstruction), [{"id": instruction.id, f"{field}": value}])
+            session.commit()
+            RecipeInstruction.__setattr__(instruction, field, value)
+
+            update_recipe(recipe_id=recipe_id)
+
+            return instruction
+
+    except sqlalchemy.exc.IntegrityError as ex:
+        raise InstructionNameViolationException(ex)

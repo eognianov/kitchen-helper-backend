@@ -1,7 +1,9 @@
 """Recipe feature input model"""
-from typing import Optional
+from typing import Optional, Union
 
 import pydantic
+
+INSTRUCTION_CATEGORIES = ('BREAKFAST', 'LUNCH', 'DINNER')
 
 
 class PatchCategoryInputModel(pydantic.BaseModel):
@@ -36,6 +38,13 @@ class CreateInstructionInputModel(pydantic.BaseModel):
     time: int = pydantic.Field(ge=1, lt=100)
     complexity: float = pydantic.Field(ge=1, le=5)
 
+    @pydantic.field_validator('category', mode='after')
+    @classmethod
+    def validate_category(cls, field: str):
+        if field.upper() not in INSTRUCTION_CATEGORIES:
+            raise ValueError(f"{field} is not valid category")
+        return field.capitalize()
+
 
 class UpdateInstructionInputModel(pydantic.BaseModel):
     """Update instruction"""
@@ -60,3 +69,42 @@ class CreateRecipeInputModel(pydantic.BaseModel):
     time_to_prepare: int = pydantic.Field(gt=0)
     category_id: Optional[int] = None
     instructions: Optional[list[CreateInstructionInputModel]] = None
+
+
+class PatchInstructionInputModel(pydantic.BaseModel):
+    """Update instruction"""
+
+    field: str
+    value: Union[str, int]
+
+    @pydantic.model_validator(mode='after')
+    def check_fields(self) -> 'PatchInstructionInputModel':
+        allowed_fields_to_edit = [
+            'INSTRUCTION', 'CATEGORY', 'TIME', 'COMPLEXITY'
+        ]
+
+        field = self.field
+        value = self.value
+
+        if field.upper() not in allowed_fields_to_edit:
+            raise ValueError(f"You are not allowed to edit {field} column")
+
+        if field.upper() in ['TIME', 'COMPLEXITY']:
+            try:
+                value = int(value)
+            except ValueError:
+                raise ValueError(f"{field} must be an integer")
+            if value < 1:
+                raise ValueError(f"{field} must be greater then 1")
+            if field.upper() == 'TIME' and value > 99:
+                raise ValueError(f"Time must be less then 100")
+            if field.upper() == 'COMPLEXITY' and value > 5:
+                raise ValueError(f"Complexity must be less then 6")
+
+        if field.upper() == 'CATEGORY':
+            if value.upper() not in INSTRUCTION_CATEGORIES:
+                raise ValueError(f"{value} is not valid category")
+
+            self.value = self.value.capitalize()
+
+        return self
