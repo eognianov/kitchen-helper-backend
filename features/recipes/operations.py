@@ -2,12 +2,12 @@
 from typing import Type
 
 import sqlalchemy.exc
-from sqlalchemy import update, delete
+from sqlalchemy import update
 
 import db.connection
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
     InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException
-from .input_models import CreateInstructionInputModel, UpdateInstructionInputModel
+from .input_models import CreateInstructionInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse
 
@@ -170,61 +170,6 @@ def create_instructions(instructions_request: list[CreateInstructionInputModel],
             session.commit()
 
     update_recipe(recipe_id=recipe.id)
-
-
-def update_instructions(instructions_request: list[UpdateInstructionInputModel], recipe_id: int):
-    """
-    Update instructions
-
-    :param instructions_request:
-    :param recipe_id:
-    :return:
-    """
-    with db.connection.get_session() as session:
-
-        recipe = session.query(Recipe).filter(Recipe.id == recipe_id).first()
-
-        instructions_ids_to_remove = [UpdateInstructionInputModel(**x.__dict__).id for x in recipe.instructions]
-
-        for request in instructions_request:
-
-            instruction = session.query(RecipeInstruction).filter(RecipeInstruction.id == request.id).first()
-
-            if instruction in recipe.instructions:
-                instruction.instruction = request.instruction
-                instruction.category = request.category
-                instruction.time = request.time
-                instruction.complexity = request.complexity
-
-                instructions_ids_to_remove.remove(instruction.id)
-
-                session.add(instruction)
-                session.commit()
-                session.refresh(instruction)
-            else:
-                new_data = {
-                    "instruction": request.instruction,
-                    "category": request.category,
-                    "time": request.time,
-                    "complexity": request.complexity
-                }
-                new_instruction = RecipeInstruction(**new_data)
-                new_instruction.recipe_id = recipe.id
-                session.add(new_instruction)
-                session.commit()
-                session.refresh(new_instruction)
-
-        if instructions_ids_to_remove:
-            stmt = delete(RecipeInstruction).where(
-                RecipeInstruction.id.in_(instructions_ids_to_remove)
-            )
-            session.execute(stmt)
-            session.commit()
-
-        update_recipe(recipe_id=recipe.id)
-        session.refresh(recipe)
-
-        return recipe.instructions
 
 
 def get_instruction_by_id(instruction_id: int):

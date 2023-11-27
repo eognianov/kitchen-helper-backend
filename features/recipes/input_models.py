@@ -46,15 +46,6 @@ class CreateInstructionInputModel(pydantic.BaseModel):
         return field.capitalize()
 
 
-class UpdateInstructionInputModel(pydantic.BaseModel):
-    """Update instruction"""
-    id: int = pydantic.Field()
-    instruction: str = pydantic.Field(max_length=300)
-    category: str = pydantic.Field(max_length=100)
-    time: int = pydantic.Field(ge=1, lt=100)
-    complexity: float = pydantic.Field(ge=1, le=5)
-
-
 class CreateRecipeInputModel(pydantic.BaseModel):
     """Create recipe"""
 
