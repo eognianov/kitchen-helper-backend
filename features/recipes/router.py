@@ -3,29 +3,30 @@
 import fastapi
 
 import features.recipes.exceptions
+import features.recipes.exceptions
 import features.recipes.operations
 import features.recipes.responses
+from features.recipes.responses import Category
 from features.recipes.responses import InstructionResponse
-from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, \
-    PatchInstructionInputModel, CreateInstructionInputModel
+from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
+from .input_models import PatchInstructionInputModel, CreateInstructionInputModel
+from .responses import Recipe
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
 
 
-@categories_router.get('/')
+@categories_router.get('/', response_model=list[Category])
 def get_all_categories():
     """
     Get all categories
     :return:
     """
 
-    categories = features.recipes.operations.get_all_recipe_categories()
-
-    return [features.recipes.responses.Category(**_.__dict__) for _ in categories]
+    return features.recipes.operations.get_all_recipe_categories()
 
 
-@categories_router.get('/{category_id}')
+@categories_router.get('/{category_id}', response_model=Category)
 def get_category(category_id: int = fastapi.Path()):
     """
     Get category
@@ -35,8 +36,7 @@ def get_category(category_id: int = fastapi.Path()):
     """
 
     try:
-        category = features.recipes.operations.get_category_by_id(category_id)
-        return features.recipes.responses.Category(**category.__dict__)
+        return features.recipes.operations.get_category_by_id(category_id)
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -44,7 +44,7 @@ def get_category(category_id: int = fastapi.Path()):
         )
 
 
-@categories_router.post('/')
+@categories_router.post('/', response_model=Category)
 def create_category(create_category_input_model: CreateCategoryInputModel):
     """
     Crate category
@@ -54,8 +54,7 @@ def create_category(create_category_input_model: CreateCategoryInputModel):
     """
 
     try:
-        created_category = features.recipes.operations.create_category(create_category_input_model.name)
-        return features.recipes.responses.Category(**created_category.__dict__)
+        return features.recipes.operations.create_category(create_category_input_model.name)
     except features.recipes.exceptions.CategoryNameViolationException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
@@ -63,7 +62,7 @@ def create_category(create_category_input_model: CreateCategoryInputModel):
         )
 
 
-@categories_router.patch('/{category_id}')
+@categories_router.patch('/{category_id}', response_model=Category)
 def update_category(category_id: int = fastapi.Path(),
                     patch_category_input_model: PatchCategoryInputModel = fastapi.Body()):
     """
@@ -74,9 +73,8 @@ def update_category(category_id: int = fastapi.Path(),
     :return:
     """
     try:
-        updated_category = features.recipes.operations.update_category(category_id,
+        return features.recipes.operations.update_category(category_id=category_id,
                                                                        **patch_category_input_model.model_dump())
-        return features.recipes.responses.Category(**updated_category.__dict__)
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -89,20 +87,18 @@ def update_category(category_id: int = fastapi.Path(),
         )
 
 
-@recipes_router.get('/')
+@recipes_router.get('/', response_model=list[Recipe])
 def get_all_recipes():
     """Get all recipes"""
-    all_recipes = features.recipes.operations.get_all_recipes()
-    return [features.recipes.responses.Recipe(**_.__dict__) for _ in all_recipes]
+    return features.recipes.operations.get_all_recipes()
 
 
-@recipes_router.get('/{recipe_id}')
+@recipes_router.get('/{recipe_id}', response_model=Recipe)
 def get_recipe(recipe_id: int = fastapi.Path()):
     """Get recipe"""
 
     try:
-        recipe = features.recipes.operations.get_recipe_by_id(recipe_id)
-        return features.recipes.responses.Recipe(**recipe.__dict__)
+        return features.recipes.operations.get_recipe_by_id(recipe_id)
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -110,7 +106,7 @@ def get_recipe(recipe_id: int = fastapi.Path()):
         )
 
 
-@recipes_router.post('/')
+@recipes_router.post('/', response_model=Recipe)
 def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
     """
     Create recipe
@@ -119,9 +115,8 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
     :return:
     """
     try:
-        created_recipe = features.recipes.operations.create_recipe(**create_recipe_input_model.__dict__)
+        return features.recipes.operations.create_recipe(**create_recipe_input_model.__dict__)
 
-        return features.recipes.responses.Recipe(**created_recipe.__dict__)
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
@@ -210,4 +205,24 @@ def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id=fastapi.P
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Combination of {recipe_id=} and {instruction_id=} does not exist"
+        )
+
+
+
+@recipes_router.delete('/{recipe_id}', response_model=Recipe)
+def delete_recipe(recipe_id: int, user_id: int = 1):
+    """
+    Delete recipe
+
+    :param recipe_id
+    :param user_id
+    :return:
+    """
+
+    try:
+        return features.recipes.operations.delete_recipe(recipe_id=recipe_id, deleted_by=user_id)
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with {recipe_id=} does not exist"
         )
