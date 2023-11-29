@@ -1,3 +1,4 @@
+import os
 import secrets
 
 from sqlalchemy import update
@@ -19,7 +20,8 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 from .input_models import RegisterUserInputModel
-from .models import User, EmailConfirmationToken, PasswordResetToken
+from .models import User, Token
+from .constants import TokenTypes
 
 import configuration
 import db.connection
@@ -27,8 +29,6 @@ import features.users.exceptions
 from db.connection import get_session
 from .input_models import RegisterUserInputModel
 from .models import User, Role, UserRole
-
-config = configuration.Config()
 
 
 def hash_password(password: str) -> bytes:
@@ -57,24 +57,27 @@ def check_password(user: User, password: str) -> bool:
 
 def create_new_user(user: RegisterUserInputModel) -> User:
     """
-    Create user
+    Create user and send confirmations email
 
     :param user:
     :return:
     """
 
     with get_session() as session:
-        try:
-            """ Check if the username or email already exists"""
-            if get_user_from_db(username=user.username, email=user.email):
-                raise features.users.exceptions.UserAlreadyExists()
-        except features.users.exceptions.UserDoesNotExistException:
-            """Create the new user"""
-            user.password = hash_password(password=user.password)
-            db_user = User(username=user.username, email=user.email, password=user.password)
-            session.add(db_user)
-            session.commit()
-            session.refresh(db_user)
+
+        if get_user_from_db(username=user.username, email=user.email):
+            raise features.users.exceptions.UserAlreadyExists()
+
+        user.password = hash_password(password=user.password)
+        db_user = User(username=user.username, email=user.email, password=user.password)
+        session.add(db_user)
+        session.commit()
+        session.refresh(db_user)
+
+        features.users.operations.generate_email_password_token(
+            db_user,
+            token_type=TokenTypes.EMAIL_CONFIRMATION
+        )
 
     return db_user
 
@@ -85,7 +88,7 @@ def signin_user(username: str, password: str) -> tuple:
     current_user = get_user_from_db(username=username)
     if not current_user or not check_password(current_user, password):
         features.users.exceptions.AccessDenied()
-    """Create jwt token"""
+
     return create_token(username)
 
 
@@ -157,9 +160,11 @@ def create_token(subject: Union[str, Any], expires_delta: timedelta = None, acce
     :return:
     """
 
-    minutes = config.jwt.access_token_expire_minutes if access else config.jwt.refresh_token_expire_minutes
-    secret_key = config.jwt.secret_key if access else config.jwt.refresh_secret_key
-    algorithm = config.jwt.algorithm
+    jwt_config = configuration.JwtToken()
+
+    minutes = jwt_config.access_token_expire_minutes if access else jwt_config.refresh_token_expire_minutes
+    secret_key = jwt_config.secret_key if access else jwt_config.refresh_secret_key
+    algorithm = jwt_config.algorithm
     token_type = "jwt access token" if access else "jwt refresh token"
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
@@ -296,23 +301,47 @@ def remove_user_from_role(user_id: int, role_id: int) -> None:
 
 
 async def send_email(*, subject: str, content: str, recipient: str):
+def send_email(*, token_type: str, token: str, recipient: User):
     """
     Send email for email confirmation or reset password
 
-    :param subject:
-    :param content:
+    :param token_type:
+    :param token:
     :param recipient:
     """
 
-    # TODO: setup from_email
+    config = configuration.Config()
+    send_grid = configuration.SendGrid()
+
+    email_subject = ''
+    email_content = ''
+
+    if token_type == TokenTypes.EMAIL_CONFIRMATION:
+        email_content = features.users.constants.EmailDetails.EMAIL_CONFIRMATION_CONTENT.format(
+            recipient.username,
+            config.server.host,
+            config.server.port,
+            token
+        )
+        email_subject = features.users.constants.EmailDetails.EMAIL_CONFIRMATION_SUBJECT
+
+    elif token_type == TokenTypes.PASSWORD_RESET:
+        email_content = features.users.constants.EmailDetails.PASSWORD_RESET_CONTENT.format(
+            recipient.username,
+            config.server.host,
+            config.server.port,
+            token
+        )
+        email_subject = features.users.constants.EmailDetails.PASSWORD_RESET_SUBJECT
+
     message = Mail(
-        from_email='your@example.com',
-        to_emails=recipient,
-        subject=subject,
-        html_content=content
+        from_email='dimitrov.mitko.md@gmail.com',
+        to_emails=recipient.email,
+        subject=email_subject,
+        html_content=email_content
     )
 
-    sg = SendGridAPIClient(api_key=config.grid.send_grid_api_key)
+    sg = SendGridAPIClient(api_key=send_grid.send_grid_api_key)
 
     try:
         response = sg.send(message)
@@ -321,114 +350,96 @@ async def send_email(*, subject: str, content: str, recipient: str):
         return {"message": "An error occurred", "error": str(e)}
 
 
-def generate_email_confirmation_token(user: User, expiration_days: int = 7):
+def generate_email_password_token(user: User, token_type: str):
     """
-    Generate email confirmation token
+    Generate email confirmation token or password reset token
+    Send email to the user
 
     :param user:
-    :param expiration_days:
-    :return:
-    """
-
-    token = secrets.token_urlsafe(32)
-
-    """Calculate the expiration datetime"""
-    expiration_time = datetime.utcnow() + timedelta(days=expiration_days)
-
-    with get_session() as session:
-        token_obj = EmailConfirmationToken(
-            email_confirmation_token=token,
-            user_id=user.id,
-            expired_on=expiration_time
-        )
-        session.add(token_obj)
-        session.commit()
-
-    return token
-
-
-def get_token_from_db(token: str, token_type: str):
-    """
-    Get the token from db if exists, check if token is expired and delete it
-
-    :param token:
     :param token_type:
     :return:
     """
 
-    model = EmailConfirmationToken if token_type == 'email' else PasswordResetToken
-    current_datetime = datetime.utcnow()
+    confirmation_token = configuration.ConfirmationToken()
+
+    expiration_minutes = None
+
+    if token_type == TokenTypes.EMAIL_CONFIRMATION:
+        expiration_minutes = confirmation_token.email_token_expiration
+    elif token_type == TokenTypes.PASSWORD_RESET:
+        expiration_minutes = confirmation_token.password_token_expiration
+
+    token = secrets.token_urlsafe(32)
+
+    expiration_time = datetime.utcnow() + timedelta(minutes=expiration_minutes)
 
     with get_session() as session:
-        """Fetch the token object from DB"""
-        token = session.query(model).filter(
-            model.email_confirmation_token == token
-        ).first() if token_type == 'email' else session.query(model).filter(
-            model.reset_token == token
-        ).first()
-        """If token and it is expired delete the token"""
-        if token and token.expired_on < current_datetime:
-            session.delete(token)
-            session.commit()
-            return None
+        token_obj = Token(
+            token=token,
+            user_id=user.id,
+            expired_on=expiration_time,
+            token_type=token_type
+        )
+
+        session.add(token_obj)
+        session.commit()
+
+    send_email(token_type=token_type, token=token, recipient=user)
 
     return token
 
 
-def confirm_email(user_id: int) -> User:
+def check_if_token_is_valid(token: str):
     """
-    Mark the user email as confirmed and delete the token
+    Get the token from db if exists, check if token is expired
 
-    :param user_id:
+    :param token:
     :return:
     """
 
-    user = get_user_from_db(pk=user_id)
-    user.is_email_confirmed = True
+    current_datetime = datetime.utcnow()
 
     with get_session() as session:
-        token = session.query(
-            EmailConfirmationToken
-        ).filter(EmailConfirmationToken.user_id == user.id).first()
-        session.delete(token)
+        token = (
+            session.query(Token)
+            .filter(Token.token == token, Token.expired_on > current_datetime)
+            .first()
+        )
+
+    return token or None
+
+
+def confirm_email(token: Type[Token]) -> User:
+    """
+    Mark the user email as confirmed and delete the token
+
+    :param token:
+    :return:
+    """
+    with get_session() as session:
+        user = get_user_from_db(pk=token.user_id)
+        user.is_email_confirmed = True
+        token.expired_on = datetime.utcnow()
+        session.add(user)
+        session.add(token)
         session.commit()
 
     return user
 
 
-def generate_password_reset_token(user: User, expiration_hours: int = 1) -> str:
-    """
-    Generate password reset token and set expiration time
-
-    :param user:
-    :param expiration_hours:
-    :return:
-    """
-
-    token = secrets.token_urlsafe(32)
-    expiration_time = datetime.utcnow() + timedelta(hours=expiration_hours)
-
-    with get_session() as session:
-        reset_token = PasswordResetToken(
-            user_id=user.id,
-            reset_token=token,
-            expired_on=expiration_time
-        )
-        session.add(reset_token)
-        session.commit()
-
-    return token
-
-
 def update_user_password(user: User, new_password: str) -> User:
     """
+    Validate the new password
     Check if the new password does not match the old password
     Hash the new password
-    Change the password for the requested user and delete the token
+    Change the password for the requested user and expire the token
 
     :param user:
     :param new_password:
+    :return:
     """
+
+    RegisterUserInputModel.validate_password(new_password)
 
     if check_password(user, new_password):
         raise features.users.exceptions.SamePasswordsException()
@@ -438,9 +449,11 @@ def update_user_password(user: User, new_password: str) -> User:
 
     with get_session() as session:
         token = session.query(
-            PasswordResetToken
-        ).filter(PasswordResetToken.user_id == user.id).first()
-        session.delete(token)
+            Token
+        ).filter(Token.user_id == user.id).first()
+        token.expired_on = datetime.utcnow()
+        session.add(user)
+        session.add(token)
         session.commit()
 
     return user

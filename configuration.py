@@ -1,9 +1,14 @@
 """Configuation module"""
+import os
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
 from pydantic import BaseModel, model_validator, Field
 from typing import Optional, List
 from enum import StrEnum, auto
+from dotenv import load_dotenv
+
+load_dotenv('.env.dev')
 
 _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
@@ -77,23 +82,34 @@ class PostgresConfig(BaseModel):
 
 class JwtToken(BaseModel):
     """JWT Token options"""
-    access_token_expire_minutes: int
-    refresh_token_expire_minutes: int
-    algorithm: str
-    secret_key: str
-    refresh_secret_key: str
+    access_token_expire_minutes: int = os.getenv('jwt_access_token_expire_minutes')
+    refresh_token_expire_minutes: int = os.getenv('jwt_refresh_token_expire_minutes')
+    algorithm: str = os.getenv('jwt_algorithm')
+    secret_key: str = os.getenv('jwt_secret_key')
+    refresh_secret_key: str = os.getenv('jwt_refresh_secret_key')
 
 
 class CorsSettings(BaseModel):
     """CORSMiddleware options"""
-    allow_origins: List[str]
-    allow_methods: List[str]
-    allow_headers: List[str]
+    allow_origins: List[str] = os.getenv('cors__allow_origins', '').split(' ')
+    allow_methods: List[str] = os.getenv('cors__allow_methods', '').split(' ')
+    allow_headers: List[str] = os.getenv('cors__allow_headers', '').split(' ')
 
 
 class SendGrid(BaseModel):
     """SendGrid options"""
-    send_grid_api_key: str
+    send_grid_api_key: str = os.getenv('send_grid_api_key')
+
+
+class ConfirmationToken(BaseModel):
+    """Email confirmation and password reset token"""
+    email_token_expiration: int = int(os.getenv('email_token_expiration_minutes'))
+    password_token_expiration: int = int(os.getenv('password_token_expiration_minutes'))
+
+
+class ServerConfiguration(BaseModel):
+    host: str = os.getenv('host')
+    port: str = os.getenv('port')
 
 
 class Config(BaseSettings):
@@ -103,9 +119,9 @@ class Config(BaseSettings):
     database: DbTypeOptions = DbTypeOptions.SQLITE
     sqlite: SqliteConfig
     postgres: PostgresConfig
-    jwt: JwtToken
-    cors: CorsSettings
-    grid: SendGrid
+    server: ServerConfiguration
+
+
 
     @property
     def connection_string(self):
