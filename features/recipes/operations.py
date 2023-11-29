@@ -155,7 +155,11 @@ def update_recipe(recipe_id: int) -> None:
         complexity_len = (len([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
         time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in recipe.instructions]))
 
-        recipe.complexity = round(total_complexity / complexity_len, 1)
+        if complexity_len == 0:
+            recipe.complexity = 0
+        else:
+            recipe.complexity = round(total_complexity / complexity_len, 1)
+
         recipe.time_to_prepare = time_to_prepare
 
         session.add(recipe)
@@ -192,7 +196,7 @@ def get_instruction_by_id(instruction_id: int):
         return instruction
 
 
-def update_instruction(recipe_id: int, instruction_id, field: str, value: str):
+def update_instruction(recipe_id: int, instruction_id: int, field: str, value: str):
     """
     Update instruction
     :param recipe_id:
@@ -246,7 +250,7 @@ def create_instruction(recipe_id: int, instruction_request):
     return instruction
 
 
-def delete_instruction(recipe_id: int, instruction_id):
+def delete_instruction(recipe_id: int, instruction_id: int):
     recipe = get_recipe_by_id(recipe_id)
     instruction = get_instruction_by_id(instruction_id)
 

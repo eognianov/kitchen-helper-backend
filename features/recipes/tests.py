@@ -234,6 +234,56 @@ class TestInstructionsOperations:
         operations.delete_instruction(recipe_id=1, instruction_id=2)
 
         with db.connection.get_session() as session:
-
             instructions = session.query(RecipeInstruction).all()
         assert len(instructions) == 1
+
+
+class TestInstructionsEndpoints:
+    def setup(self):
+        self.client = TestClient(app)
+        self.recipe = {
+            'name': 'name',
+            'time_to_prepare': 0,
+            'category_id': 1,
+            'picture': '',
+            'summary': 'summary',
+            'calories': 1,
+            'carbo': 1,
+            'fats': 1,
+            'proteins': 1,
+            'cholesterol': 1,
+            'created_by': 1,
+            'instructions': []
+        }
+        self.new_instruction = {
+            'instruction': 'instruction',
+            'category': 'lunch',
+            'time': 10,
+            'complexity': 5
+        }
+
+    def test_patch_instruction_success(self, use_test_db, mocker):
+        operations.create_category('Category')
+        created_recipe = operations.create_recipe(**self.recipe)
+        created_instruction = operations.create_instruction(recipe_id=1, instruction_request=CreateInstructionInputModel(**self.new_instruction))
+
+        patch_payload = {
+            'field': 'instruction',
+            'value': 'updated'
+        }
+
+        update_instruction_spy = mocker.spy(operations, 'update_instruction')
+        response = self.client.patch(f'/recipes/{created_recipe.id}/instructions/{created_instruction.id}',
+                                     json=patch_payload)
+        assert response.status_code == 200
+        update_instruction_spy.assert_called_with(recipe_id=1, instruction_id=1, field='instruction', value='updated')
+
+    def test_delete_instruction_success(self, use_test_db, mocker):
+        operations.create_category('Category')
+        created_recipe = operations.create_recipe(**self.recipe)
+        created_instruction = operations.create_instruction(recipe_id=1, instruction_request=CreateInstructionInputModel(**self.new_instruction))
+
+        delete_instruction_spy = mocker.spy(operations, 'delete_instruction')
+        response = self.client.delete(f'/recipes/{created_recipe.id}/instructions/{created_instruction.id}')
+        assert response.status_code == 204
+        delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=1)
