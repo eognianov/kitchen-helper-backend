@@ -7,6 +7,7 @@ from features.recipes.models import RecipeCategory, RecipeInstruction, Recipe
 from features.recipes.exceptions import CategoryNameViolationException, CategoryNotFoundException
 from fastapi.testclient import TestClient
 from api import app
+import features
 
 
 class TestCategoryOperations:
@@ -265,7 +266,9 @@ class TestInstructionsEndpoints:
     def test_patch_instruction_success(self, use_test_db, mocker):
         operations.create_category('Category')
         created_recipe = operations.create_recipe(**self.recipe)
-        created_instruction = operations.create_instruction(recipe_id=1, instruction_request=CreateInstructionInputModel(**self.new_instruction))
+        created_instruction = operations.create_instruction(recipe_id=1,
+                                                            instruction_request=CreateInstructionInputModel(
+                                                                **self.new_instruction))
 
         patch_payload = {
             'field': 'instruction',
@@ -278,12 +281,70 @@ class TestInstructionsEndpoints:
         assert response.status_code == 200
         update_instruction_spy.assert_called_with(recipe_id=1, instruction_id=1, field='instruction', value='updated')
 
+    def test_patch_instruction_with_wrong_field_fail(self, use_test_db, mocker):
+        operations.create_category('Category')
+        created_recipe = operations.create_recipe(**self.recipe)
+        created_instruction = operations.create_instruction(recipe_id=1,
+                                                            instruction_request=CreateInstructionInputModel(
+                                                                **self.new_instruction))
+
+        patch_payload = {
+            'field': 'test',
+            'value': 'updated'
+        }
+
+        response = self.client.patch(f'/recipes/{created_recipe.id}/instructions/{created_instruction.id}',
+                                     json=patch_payload)
+        assert response.status_code == 422
+
     def test_delete_instruction_success(self, use_test_db, mocker):
         operations.create_category('Category')
         created_recipe = operations.create_recipe(**self.recipe)
-        created_instruction = operations.create_instruction(recipe_id=1, instruction_request=CreateInstructionInputModel(**self.new_instruction))
+        created_instruction = operations.create_instruction(recipe_id=1,
+                                                            instruction_request=CreateInstructionInputModel(
+                                                                **self.new_instruction))
 
         delete_instruction_spy = mocker.spy(operations, 'delete_instruction')
         response = self.client.delete(f'/recipes/{created_recipe.id}/instructions/{created_instruction.id}')
         assert response.status_code == 204
         delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=1)
+
+    def test_delete_instruction_with_non_existing_recipe_fail(self, use_test_db, mocker):
+        operations.create_category('Category')
+        created_recipe = operations.create_recipe(**self.recipe)
+        created_instruction = operations.create_instruction(recipe_id=1,
+                                                            instruction_request=CreateInstructionInputModel(
+                                                                **self.new_instruction))
+
+        delete_instruction_spy = mocker.spy(operations, 'delete_instruction')
+        response = self.client.delete(f'/recipes/{2}/instructions/{created_instruction.id}')
+        assert response.status_code == 404
+        delete_instruction_spy.assert_called_with(recipe_id=2, instruction_id=1)
+
+    def test_delete_instruction_with_non_existing_instruction_fail(self, use_test_db, mocker):
+        operations.create_category('Category')
+        created_recipe = operations.create_recipe(**self.recipe)
+        created_instruction = operations.create_instruction(recipe_id=1,
+                                                            instruction_request=CreateInstructionInputModel(
+                                                                **self.new_instruction))
+
+        delete_instruction_spy = mocker.spy(operations, 'delete_instruction')
+        response = self.client.delete(f'/recipes/{created_recipe.id}/instructions/{2}')
+        assert response.status_code == 404
+        delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2)
+
+    def test_delete_instruction_with_wrong_recipe_fail(self, use_test_db, mocker):
+        operations.create_category('Category')
+        operations.create_recipe(**self.recipe)
+        operations.create_recipe(**self.recipe)
+        operations.create_instruction(recipe_id=1,
+                                      instruction_request=CreateInstructionInputModel(
+                                          **self.new_instruction))
+        operations.create_instruction(recipe_id=2,
+                                      instruction_request=CreateInstructionInputModel(
+                                          **self.new_instruction))
+
+        delete_instruction_spy = mocker.spy(operations, 'delete_instruction')
+        response = self.client.delete(f'/recipes/{1}/instructions/{2}')
+        assert response.status_code == 404
+        delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2)
