@@ -43,7 +43,7 @@ async def signin(request: Annotated[OAuth2PasswordRequestForm, fastapi.Depends()
     try:
         # Sign in user and create jwt token
         token, token_type = signin_user(request.username, request.password)
-        return JwtTokenResponseModel(token_value=token, token_type=token_type)
+        return {"access_token": token, "token_type": token_type}
     except features.users.exceptions.AccessDenied:
         raise HTTPException(
             status_code=fastapi.status.HTTP_403_FORBIDDEN,

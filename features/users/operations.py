@@ -52,7 +52,7 @@ def signin_user(username: str, password: str) -> tuple:
     if not current_user or not check_password(current_user, password):
         features.users.exceptions.AccessDenied()
     # Create jwt token
-    return create_token(username)
+    return create_token(current_user.id)
 
 
 def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
@@ -97,7 +97,7 @@ def create_token(subject: Union[str, Any], expires_delta: timedelta = None, acce
     minutes = config.jwt.access_token_expire_minutes if access else config.jwt.refresh_token_expire_minutes
     secret_key = config.jwt.secret_key if access else config.jwt.refresh_secret_key
     algorithm = config.jwt.algorithm
-    token_type = "jwt access token" if access else "jwt refresh token"
+    token_type = "Bearer" if access else "Refresh"
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
     else:
