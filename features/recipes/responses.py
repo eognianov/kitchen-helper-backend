@@ -6,6 +6,7 @@ import pydantic
 
 class Category(pydantic.BaseModel):
     """Category response"""
+
     id: int
     name: str
     created_by: str

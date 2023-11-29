@@ -24,7 +24,7 @@ def hash_password(password: str) -> bytes:
 
 def check_password(user: User, password: str) -> bool:
     # Check if passwords match (for login)
-    return bcrypt.checkpw(password.encode('utf-8'), user.password)
+    return bcrypt.checkpw(password.encode("utf-8"), user.password)
 
 
 def create_new_user(user: RegisterUserInputModel) -> User:
@@ -38,7 +38,9 @@ def create_new_user(user: RegisterUserInputModel) -> User:
         except features.users.exceptions.UserDoesNotExistException:
             # Create the new user
             user.password = hash_password(password=user.password)
-            db_user = User(username=user.username, email=user.email, password=user.password)
+            db_user = User(
+                username=user.username, email=user.email, password=user.password
+            )
             session.add(db_user)
             session.commit()
             session.refresh(db_user)
@@ -55,7 +57,9 @@ def signin_user(username: str, password: str) -> tuple:
     return create_token(username)
 
 
-def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
+def get_user_from_db(
+    *, pk: int = None, username: str = None, email: str = None
+) -> User | None:
     with get_session() as session:
         query = session.query(User)
         filters = []
@@ -85,16 +89,26 @@ def get_all_users() -> list:
     return all_users
 
 
-def update_user(user_id: int, field: str, value: str, updated_by: str = '') -> Type[User]:
+def update_user(
+    user_id: int, field: str, value: str, updated_by: str = ""
+) -> Type[User]:
     user = get_user_from_db(pk=user_id)
     with get_session() as session:
-        session.execute(update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}])
+        session.execute(
+            update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}]
+        )
         session.commit()
         return session.query(User).where(User.id == user_id).first()
 
 
-def create_token(subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True) -> tuple:
-    minutes = config.jwt.access_token_expire_minutes if access else config.jwt.refresh_token_expire_minutes
+def create_token(
+    subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True
+) -> tuple:
+    minutes = (
+        config.jwt.access_token_expire_minutes
+        if access
+        else config.jwt.refresh_token_expire_minutes
+    )
     secret_key = config.jwt.secret_key if access else config.jwt.refresh_secret_key
     algorithm = config.jwt.algorithm
     token_type = "jwt access token" if access else "jwt refresh token"
@@ -111,9 +125,9 @@ def create_token(subject: Union[str, Any], expires_delta: timedelta = None, acce
 
 def get_all_roles() -> list:
     """
-        Get all roles
+    Get all roles
 
-        :return:
+    :return:
     """
     with db.connection.get_session() as session:
         roles = session.query(Role).all()
@@ -122,11 +136,11 @@ def get_all_roles() -> list:
 
 def get_role(pk: int = None, role_name: str = None) -> Role | None:
     """
-        Get role by id or name
+    Get role by id or name
 
-        :param pk:
-        :param role_name:
-        :return:
+    :param pk:
+    :param role_name:
+    :return:
     """
     if not pk and not role_name:
         raise ValidationError("Neither pk nor role_name is provided")
@@ -153,11 +167,11 @@ def get_role(pk: int = None, role_name: str = None) -> Role | None:
 
 def check_user_role(user_id: int, role_id: int) -> bool:
     """
-        Create role
+    Create role
 
-        :param user_id:
-        :param role_id:
-        :return:
+    :param user_id:
+    :param role_id:
+    :return:
     """
 
     user = get_user_from_db(pk=user_id)
@@ -168,13 +182,13 @@ def check_user_role(user_id: int, role_id: int) -> bool:
     return True
 
 
-def create_role(name: str, created_by: str = 'me') -> Role:
+def create_role(name: str, created_by: str = "me") -> Role:
     """
-        Create role
+    Create role
 
-        :param name:
-        :param created_by:
-        :return:
+    :param name:
+    :param created_by:
+    :return:
     """
     try:
         role = get_role(role_name=name)
@@ -189,14 +203,14 @@ def create_role(name: str, created_by: str = 'me') -> Role:
         return role
 
 
-def add_user_to_role(user_id: int, role_id: int, added_by: str = 'me') -> None:
+def add_user_to_role(user_id: int, role_id: int, added_by: str = "me") -> None:
     """
-        Assign role to user
+    Assign role to user
 
-        :param user_id:
-        :param role_id:
-        :param added_by:
-        :return:
+    :param user_id:
+    :param role_id:
+    :param added_by:
+    :return:
     """
     user = get_user_from_db(pk=user_id)
     role = get_role(pk=role_id)
@@ -212,11 +226,11 @@ def add_user_to_role(user_id: int, role_id: int, added_by: str = 'me') -> None:
 
 def remove_user_from_role(user_id: int, role_id: int) -> None:
     """
-        Remove user from role
+    Remove user from role
 
-        :param user_id:
-        :param role_id:
-        :return:
+    :param user_id:
+    :param role_id:
+    :return:
     """
     user = get_user_from_db(pk=user_id)
     role = get_role(pk=role_id)

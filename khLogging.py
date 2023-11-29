@@ -10,7 +10,6 @@ class Logger:
     logger = None
 
     def __init__(self, log_name: str, child_logger=False):
-
         if not child_logger:
             self.logger = logging.getLogger(log_name)
             self.logger.setLevel(logging.DEBUG)
@@ -19,10 +18,12 @@ class Logger:
             logs_folder.mkdir(exist_ok=True)
             log_file = f"{configuration.ROOT_PATH}/logs/{log_name}.log"
 
-            log_handler = TimedRotatingFileHandler(log_file, when='midnight', utc=True, encoding='utf-8')
+            log_handler = TimedRotatingFileHandler(
+                log_file, when="midnight", utc=True, encoding="utf-8"
+            )
 
             log_formatter = logging.Formatter(
-                '%(asctime)s - %(process)s - %(thread)s - %(name)s - %(levelname)s - %(message)s'
+                "%(asctime)s - %(process)s - %(thread)s - %(name)s - %(levelname)s - %(message)s"
             )
             log_handler.setFormatter(log_formatter)
             self.logger.addHandler(log_handler)
@@ -34,7 +35,10 @@ class Logger:
 
     def register_parent_logger(self):
         parent_logger = Logger.logger
-        if parent_logger and parent_logger not in Logger.child_logger_registration[self.name]:
+        if (
+            parent_logger
+            and parent_logger not in Logger.child_logger_registration[self.name]
+        ):
             self.child_logger = logging.getLogger(f"{parent_logger.name}.{self.name}")
             Logger.child_logger_registration[self.name].append(parent_logger)
 
@@ -44,23 +48,23 @@ class Logger:
             getattr(self.child_logger, level)(*args)
         else:
             if not Logger.logger:
-                Logger('undefined')
+                Logger("undefined")
             getattr(Logger.logger, level)(*args)
 
     def debug(self, *args):
-        self._log('debug', *args)
+        self._log("debug", *args)
 
     def info(self, *args):
-        self._log('info', *args)
+        self._log("info", *args)
 
     def warning(self, *args):
-        self._log('warning', *args)
+        self._log("warning", *args)
 
     def error(self, *args):
-        self._log('error', *args)
+        self._log("error", *args)
 
     def exception(self, *args, **kwargs):
-        self._log('error', *args, **kwargs)
+        self._log("error", *args, **kwargs)
 
     @classmethod
     def get_child_logger(cls, log_name: str):

@@ -24,6 +24,7 @@ class PatchIngredientCategoryInputModel(BaseModel):
     #
     #     raise field
 
+
 class CreateIngredientCategoryInputModel(BaseModel):
     """Create ingredient category"""
 
@@ -37,6 +38,7 @@ class PatchIngredientInputModel(BaseModel):
     field: str = Field(max_length=255)
     value: str = Field(max_length=255)
 
+
 class CreateIngredientInputModel(BaseModel):
     """Create ingredient"""
 
@@ -48,6 +50,7 @@ class CreateIngredientInputModel(BaseModel):
     proteins: float = Field(default=0, ge=0)
     cholesterol: float = Field(default=0, ge=0)
     measurement: float = Field(default=0, ge=0)
+
 
 class UpgradeIngredientInputModel(BaseModel):
     """Update ingredient"""
@@ -61,7 +64,7 @@ class UpgradeIngredientInputModel(BaseModel):
     cholesterol: Optional[float] = Field(None, ge=0)
     measurement: Optional[float] = Field(None, ge=0)
 
-    @validator('name')
+    @validator("name")
     def validate_name(cls, name):
         if name is not None and len(name) < 3:
             raise ValueError("Name must be at least 3 characters long")

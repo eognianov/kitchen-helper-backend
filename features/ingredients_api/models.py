@@ -8,27 +8,39 @@ import datetime
 
 Base = declarative_base()
 
+
 class IngredientCategory(DbBaseModel):
 
     """Ingredient category model"""
 
     __tablename__ = "INGREDIENT_CATEGORIES"
 
-    id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key= True, init=False)
+    id: Mapped[int] = mapped_column(
+        Integer, autoincrement=True, primary_key=True, init=False
+    )
     name: Mapped[str] = mapped_column(String(50), unique=True)
     created_by: Mapped[str] = mapped_column(String(30))
-    created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
-    updated_by: Mapped[Optional[str]] = mapped_column(String(30), nullable=True, init=False)
-    updated_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(),
-                                                          onupdate=func.current_timestamp(), init=False)
-    ingredients: Mapped[list["Ingredient"]] = relationship("Ingredient", back_populates="ingredient", init=False, lazy="selectin")
+    created_on: Mapped[datetime.datetime] = mapped_column(
+        DateTime, server_default=func.current_timestamp(), init=False
+    )
+    updated_by: Mapped[Optional[str]] = mapped_column(
+        String(30), nullable=True, init=False
+    )
+    updated_on: Mapped[datetime.datetime] = mapped_column(
+        DateTime,
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
+        init=False,
+    )
+    ingredients: Mapped[list["Ingredient"]] = relationship(
+        "Ingredient", back_populates="ingredient", init=False, lazy="selectin"
+    )
 
 
 class Ingredient(DbBaseModel):
-
     __tablename__ = "INGREDIENTS"
 
-    id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key= True)
+    id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
     name: Mapped[str] = mapped_column(String, index=True, nullable=False)
     # category = Mapped[IngredientCategory] = relationship("IngredientCategory", back_populates="ingredients", lazy="selectin")
     calories: Mapped[float] = mapped_column(Float, nullable=False)

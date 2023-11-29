@@ -37,4 +37,6 @@ class RolesWithUsersResponseModel(BaseModel):
 
     def model_post_init(self, __context: Any):
         if self.users:
-            self.users = [UsersResponseModelWithoutRoles(**_.__dict__) for _ in self.users]
+            self.users = [
+                UsersResponseModelWithoutRoles(**_.__dict__) for _ in self.users
+            ]

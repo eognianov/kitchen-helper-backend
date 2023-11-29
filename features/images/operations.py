@@ -5,7 +5,11 @@ from pathlib import Path
 import db.connection
 from .constants import IMAGES_DIR
 from .models import Image
-from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable, ImageNotFoundException
+from .exceptions import (
+    InvalidCreationInputException,
+    ImageUrlIsNotReachable,
+    ImageNotFoundException,
+)
 from PIL import Image as PImage
 from httpx import AsyncClient, HTTPStatusError, RequestError
 import aiofiles
@@ -24,15 +28,11 @@ async def _get_image_metadata(image_content: io.BytesIO):
 
 
 def upload_image_to_cloud(content: bytes, image_name: str, uploader: str) -> bool:
-    cloudinary.config(
-        **configuration.Cloudinary().model_dump()
-    )
+    cloudinary.config(**configuration.Cloudinary().model_dump())
     response = cloudinary.uploader.upload(
-        content,
-        public_id=image_name.split('.')[0],
-        context=f"uploader={uploader}"
+        content, public_id=image_name.split(".")[0], context=f"uploader={uploader}"
     )
-    return bool(response.get('secure_url'))
+    return bool(response.get("secure_url"))
 
 
 async def _download_image_from_url(url: str) -> bytes:
@@ -45,11 +45,10 @@ async def _download_image_from_url(url: str) -> bytes:
 
     async with AsyncClient() as client:
         try:
-
             response = await client.get(url)
             response.raise_for_status()
 
-            if 'image' not in response.headers.get('Content-Type', ''):
+            if "image" not in response.headers.get("Content-Type", ""):
                 raise ValueError("URL does not point to a valid image file.")
 
             return response.content
@@ -59,7 +58,7 @@ async def _download_image_from_url(url: str) -> bytes:
             raise ImageUrlIsNotReachable
 
 
-async def add_image(url: str = None, image: bytes = None, added_by: int = '1'):
+async def add_image(url: str = None, image: bytes = None, added_by: int = "1"):
     """
     Add image
 
@@ -75,15 +74,15 @@ async def add_image(url: str = None, image: bytes = None, added_by: int = '1'):
         image = await _download_image_from_url(url)
 
     size, extension = await _get_image_metadata(io.BytesIO(image))
-    file_name = str(uuid.uuid4()) + f'.{extension}'
+    file_name = str(uuid.uuid4()) + f".{extension}"
     file_path = Path.joinpath(IMAGES_DIR, file_name)
     await _save_file_to_disk(file_path, image)
 
     image_metadata = {
-        'name': file_name,
-        'width': size[0],
-        'height': size[0],
-        'uploaded_by': added_by
+        "name": file_name,
+        "width": size[0],
+        "height": size[0],
+        "uploaded_by": added_by,
     }
 
     with db.connection.get_session() as session:

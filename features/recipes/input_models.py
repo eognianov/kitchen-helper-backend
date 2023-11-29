@@ -10,12 +10,10 @@ class PatchCategoryInputModel(pydantic.BaseModel):
     field: str
     value: str
 
-    @pydantic.field_validator('field')
+    @pydantic.field_validator("field")
     @classmethod
     def validate_field(cls, field: str):
-        allowed_fields_to_edit = [
-            'NAME'
-        ]
+        allowed_fields_to_edit = ["NAME"]
 
         if field.upper() not in allowed_fields_to_edit:
             raise ValueError(f"You are not allowed to edit {field} column")
@@ -43,6 +41,7 @@ class CreateRecipeInputModel(pydantic.BaseModel):
     time_to_prepare: int = pydantic.Field(gt=0)
     category_id: Optional[int] = None
 
+
 class UpgradeRecipeInputModel(pydantic.BaseModel):
     """Update recipe"""
 
@@ -57,7 +56,7 @@ class UpgradeRecipeInputModel(pydantic.BaseModel):
     time_to_prepare: Optional[int] = pydantic.Field(gt=0)
     category_id: Optional[int] = None
 
-    @pydantic.validator('name')
+    @pydantic.validator("name")
     @classmethod
     def validate_name(cls, name: str):
         if not name:
@@ -65,7 +64,7 @@ class UpgradeRecipeInputModel(pydantic.BaseModel):
 
         return name
 
-    @pydantic.validator('time_to_prepare')
+    @pydantic.validator("time_to_prepare")
     @classmethod
     def validate_time_to_prepare(cls, time_to_prepare: int):
         if not time_to_prepare:

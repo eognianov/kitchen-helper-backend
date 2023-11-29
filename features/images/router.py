@@ -1,17 +1,24 @@
 import fastapi
 import features.images.operations
 from .responses import ImageResponse
-from .exceptions import InvalidCreationInputException, ImageUrlIsNotReachable, ImageNotFoundException
+from .exceptions import (
+    InvalidCreationInputException,
+    ImageUrlIsNotReachable,
+    ImageNotFoundException,
+)
 import khLogging
 
 router = fastapi.APIRouter()
 
 
-logging = khLogging.Logger.get_child_logger('images')
+logging = khLogging.Logger.get_child_logger("images")
 
 
-@router.post('/', response_model=ImageResponse)
-async def upload_image(url: str = fastapi.Form(default=None), file: fastapi.UploadFile = fastapi.File(default=None)):
+@router.post("/", response_model=ImageResponse)
+async def upload_image(
+    url: str = fastapi.Form(default=None),
+    file: fastapi.UploadFile = fastapi.File(default=None),
+):
     """
     Upload image
     :param url:
@@ -28,21 +35,21 @@ async def upload_image(url: str = fastapi.Form(default=None), file: fastapi.Uplo
     except InvalidCreationInputException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail="You have to provide url or file!"
+            detail="You have to provide url or file!",
         )
     except ValueError as err:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail=f"Can not process the image! {err}"
+            detail=f"Can not process the image! {err}",
         )
     except ImageUrlIsNotReachable:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_424_FAILED_DEPENDENCY,
-            detail="Can not get image from the url!"
+            detail="Can not get image from the url!",
         )
 
 
-@router.get('/{image_id}', response_model=ImageResponse)
+@router.get("/{image_id}", response_model=ImageResponse)
 async def get_image(image_id: int = fastapi.Path()):
     """
     Get image
@@ -55,11 +62,11 @@ async def get_image(image_id: int = fastapi.Path()):
     except ImageNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Image with id: {image_id} does not exist!"
+            detail=f"Image with id: {image_id} does not exist!",
         )
 
 
-@router.get('/', response_model=list[ImageResponse])
+@router.get("/", response_model=list[ImageResponse])
 async def get_images():
     """
     Get images

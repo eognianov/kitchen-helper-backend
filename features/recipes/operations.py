@@ -3,11 +3,16 @@ from fastapi import HTTPException
 
 import db.connection
 from .models import RecipeCategory, Recipe
-from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException
+from .exceptions import (
+    CategoryNotFoundException,
+    CategoryNameViolationException,
+    RecipeNotFoundException,
+)
 from typing import Type
 from sqlalchemy import update, and_
 import sqlalchemy.exc
 from datetime import datetime
+
 
 def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
     """
@@ -27,18 +32,27 @@ def get_category_by_id(category_id: int) -> Type[RecipeCategory]:
     """
 
     with db.connection.get_session() as session:
-        category = session.query(RecipeCategory).where(RecipeCategory.id == category_id).first()
+        category = (
+            session.query(RecipeCategory)
+            .where(RecipeCategory.id == category_id)
+            .first()
+        )
         if not category:
             raise CategoryNotFoundException()
         return category
 
 
-def update_category(category_id: int, field: str, value: str, updated_by: str = 'me') -> Type[RecipeCategory]:
+def update_category(
+    category_id: int, field: str, value: str, updated_by: str = "me"
+) -> Type[RecipeCategory]:
     """Update category"""
     category = get_category_by_id(category_id)
     try:
         with db.connection.get_session() as session:
-            session.execute(update(RecipeCategory), [{"id": category.id, f"{field}": value, "updated_by": updated_by}])
+            session.execute(
+                update(RecipeCategory),
+                [{"id": category.id, f"{field}": value, "updated_by": updated_by}],
+            )
             session.commit()
             RecipeCategory.__setattr__(category, field, value)
             return category
@@ -46,7 +60,7 @@ def update_category(category_id: int, field: str, value: str, updated_by: str = 
         raise CategoryNameViolationException(ex)
 
 
-def create_category(category_name: str, created_by: str = 'me') -> RecipeCategory:
+def create_category(category_name: str, created_by: str = "me") -> RecipeCategory:
     """Create category"""
 
     try:
@@ -60,8 +74,20 @@ def create_category(category_name: str, created_by: str = 'me') -> RecipeCategor
         raise CategoryNameViolationException(ex)
 
 
-def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
-                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0, created_by: str = 'me'):
+def create_recipe(
+    *,
+    name: str,
+    time_to_prepare: int,
+    category_id: int = None,
+    picture: str = None,
+    summary: str = None,
+    calories: float = 0,
+    carbo: float = 0,
+    fats: float = 0,
+    proteins: float = 0,
+    cholesterol: float = 0,
+    created_by: str = "me",
+):
     """
     Create recipe
 
@@ -94,7 +120,7 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
         fats=fats,
         proteins=proteins,
         cholesterol=cholesterol,
-        created_by=created_by
+        created_by=created_by,
     )
 
     with db.connection.get_session() as session:
@@ -119,15 +145,17 @@ def get_recipe_by_id(recipe_id: int):
     """Get recipe by id"""
 
     with db.connection.get_session() as session:
-
-        recipe = (session.query(Recipe)
-                  .join(Recipe.category, isouter=True)
-                  .where(Recipe.id==recipe_id)
-                  .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
-                  .first())
+        recipe = (
+            session.query(Recipe)
+            .join(Recipe.category, isouter=True)
+            .where(Recipe.id == recipe_id)
+            .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+            .first()
+        )
         if not recipe:
             raise RecipeNotFoundException
         return recipe
+
 
 def update_recipe(recipe_id: int, field: str, value: str, updated_by: str):
     """Update recipe"""
@@ -140,7 +168,11 @@ def update_recipe(recipe_id: int, field: str, value: str, updated_by: str):
 
         try:
             # Build the update statement
-            stmt = update(Recipe).where(Recipe.id == recipe_id).values({field: value, 'updated_by': updated_by})
+            stmt = (
+                update(Recipe)
+                .where(Recipe.id == recipe_id)
+                .values({field: value, "updated_by": updated_by})
+            )
             session.execute(stmt)
 
             # Update the corresponding attribute in the SQLAlchemy model
@@ -161,14 +193,15 @@ def delete_recipe(*, recipe_id: int, deleted_by: int):
 
     with db.connection.get_session() as session:
         session.execute(
-            update(Recipe), [{
+            update(Recipe),
+            [
+                {
                     "id": recipe.id,
                     "is_deleted": True,
                     "deleted_on": datetime.utcnow(),
-                    "deleted_by": deleted_by
-                }]
+                    "deleted_by": deleted_by,
+                }
+            ],
         )
         session.commit()
         return recipe
-
-
