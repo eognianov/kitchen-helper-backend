@@ -4,6 +4,7 @@ import fastapi
 from fastapi import APIRouter, HTTPException
 
 import features.users.exceptions
+from .constants import TokenTypes
 from .input_models import RegisterUserInputModel, UpdateUserInputModel
 from .responses import UsersResponseModel, JwtTokenResponseModel
 
@@ -22,14 +23,6 @@ async def signup(user: RegisterUserInputModel):
     """
     try:
         db_user = create_new_user(user)
-        token = features.users.operations.generate_email_confirmation_token(db_user)
-        email_content = (f'Thank you for registering!\n\n Please click the link below to confirm your email:'
-                         f'\nhttp://127.0.0.1:8000/users/confirm-email/{token}')
-        await features.users.operations.send_email(
-            content=email_content,
-            subject='Email confirmation',
-            recipient=db_user.email
-        )
         return db_user
     except features.users.exceptions.UserAlreadyExists:
         raise HTTPException(
@@ -115,19 +108,19 @@ async def confirm_email(token: str):
     :return:
     """
 
-    token = features.users.operations.get_token_from_db(token=token, token_type='email')
-    if not token:
+    confirm_token = features.users.operations.check_if_token_is_valid(token=token)
+    if confirm_token is None:
         raise HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired confirmation token"
+            detail="Invalid token"
         )
 
-    user = features.users.operations.confirm_email(token.user_id)
+    features.users.operations.confirm_email(confirm_token)
 
-    return {"message": "Email confirmed successfully", "email": user.email}
+    return fastapi.status.HTTP_200_OK
 
 
-@user_router.post("/request-password-reset", response_model=dict)
+@user_router.post("/request-password-reset")
 async def request_password_reset(email: str):
     """
     Request password reset
@@ -138,24 +131,14 @@ async def request_password_reset(email: str):
 
     db_user = get_user_from_db(email=email)
     if db_user:
-        reset_token = features.users.operations.generate_password_reset_token(db_user)
-        reset_url = f'http://127.0.0.1:8000/users/reset-password/{reset_token}'
-        email_content = (f'Hello {db_user.username},\n\n'
-                         f'We received a request to reset your password. '
-                         f'Please click the link below to reset your password:\n\n'
-                         f'{reset_url}\n\nIf you did not request a password reset, please ignore this email.'
-                         f'\n\nThank you!\nPassword Reset Request')
-        await features.users.operations.send_email(
-            content=email_content,
-            subject='Password reset',
-            recipient=db_user.email
-        )
-        return {"message": "Password reset email sent"}
+        features.users.operations.generate_email_password_token(db_user, TokenTypes.PASSWORD_RESET)
+
+        return fastapi.status.HTTP_200_OK
     else:
         raise HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
-@user_router.post("/reset-password/{token}", response_model=dict)
+@user_router.post("/reset-password/{token}")
 async def reset_password(token: str, new_password: str):
     """
     Reset password
@@ -165,16 +148,22 @@ async def reset_password(token: str, new_password: str):
     :return:
     """
 
-    reset_token = features.users.operations.get_token_from_db(token=token, token_type='password')
+    reset_token = features.users.operations.check_if_token_is_valid(token=token)
 
-    if not reset_token:
+    if reset_token is None:
         raise HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired confirmation token"
+            detail="Invalid token"
         )
     try:
         user = get_user_from_db(pk=reset_token.user_id)
         features.users.operations.update_user_password(user, new_password)
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=e.args
+        )
 
     except features.users.exceptions.UserDoesNotExistException:
         raise HTTPException(
@@ -188,4 +177,4 @@ async def reset_password(token: str, new_password: str):
             detail="The new password can not be the same as the old password"
         )
 
-    return {"message": "Password reset successful"}
+    return fastapi.status.HTTP_200_OK

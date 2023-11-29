@@ -1,9 +1,12 @@
-from sqlalchemy import String, LargeBinary, ForeignKey, Boolean, DateTime, func
+from pydantic import field_validator
+from sqlalchemy import String, LargeBinary, ForeignKey, Boolean, DateTime, func, Enum, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
 from features import DbBaseModel
 
 import datetime
+
+from features.users.constants import TokenTypes
 
 
 class User(DbBaseModel):
@@ -17,23 +20,12 @@ class User(DbBaseModel):
     is_email_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
-class EmailConfirmationToken(DbBaseModel):
-    """Email confirmation token DB model"""
-    __tablename__ = 'TOKEN'
-
-    id: Mapped[int] = mapped_column(primary_key=True, init=False)
-    email_confirmation_token: Mapped[str] = mapped_column(String(43), unique=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
+class Token(DbBaseModel):
+    """Token DB model"""
+    __tablename__ = 'CONFIRMATION_TOKEN'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, init=False)
+    token: Mapped[str] = mapped_column(String(43), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"), nullable=False)
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
-    expired_on: Mapped[datetime.datetime] = mapped_column(DateTime)
-
-
-class PasswordResetToken(DbBaseModel):
-    """Password reset token DB model"""
-    __tablename__ = 'PASSWORD_TOKEN'
-
-    id: Mapped[int] = mapped_column(primary_key=True, init=False)
-    reset_token: Mapped[str] = mapped_column(String(43), unique=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
-    created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
-    expired_on: Mapped[datetime.datetime] = mapped_column(DateTime)
+    expired_on: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    token_type: Mapped[str] = mapped_column(String(20), nullable=False)
