@@ -300,7 +300,6 @@ def remove_user_from_role(user_id: int, role_id: int) -> None:
         session.commit()
 
 
-async def send_email(*, subject: str, content: str, recipient: str):
 def send_email(*, token_type: str, token: str, recipient: User):
     """
     Send email for email confirmation or reset password

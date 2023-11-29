@@ -33,7 +33,8 @@ class Token(DbBaseModel):
     token: Mapped[str] = mapped_column(String(43), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"), nullable=False)
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
-    expired_on: Mapped[datetime.datetime] = mapped_column(DateTime)
+    expired_on: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    token_type: Mapped[str] = mapped_column(String(20), nullable=False)
 
     roles = relationship('Role', secondary='user_roles', back_populates='users', lazy='selectin')
 
@@ -58,5 +59,3 @@ class UserRole(DbBaseModel):
     added_by: Mapped[str] = mapped_column(String(50))
     added_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
 
-    expired_on: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
-    token_type: Mapped[str] = mapped_column(String(20), nullable=False)
