@@ -7,6 +7,8 @@ import features.users.exceptions
 from .input_models import RegisterUserInputModel, UpdateUserInputModel, CreateUserRole
 from .operations import create_new_user, signin_user, get_all_users, get_user_from_db
 from .responses import UsersResponseModel, JwtTokenResponseModel, RolesResponseModel, RolesWithUsersResponseModel
+from typing import Annotated
+from fastapi.security import OAuth2PasswordRequestForm
 
 user_router = APIRouter()
 roles_router = APIRouter()
@@ -31,17 +33,16 @@ async def signup(user: RegisterUserInputModel):
 
 
 @user_router.post("/signin", response_model=JwtTokenResponseModel)
-async def signin(username: str, password: str):
+async def signin(request: Annotated[OAuth2PasswordRequestForm, fastapi.Depends()]):
     """
     Sing in user
 
-    :param username:
-    :param password:
+    :param request:
     :return:
     """
     try:
         # Sign in user and create jwt token
-        token, token_type = signin_user(username, password)
+        token, token_type = signin_user(request.username, request.password)
         return JwtTokenResponseModel(token_value=token, token_type=token_type)
     except features.users.exceptions.AccessDenied:
         raise HTTPException(
