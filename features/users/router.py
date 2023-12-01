@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 import features.users.exceptions
 from .constants import TokenTypes
 from .input_models import RegisterUserInputModel, UpdateUserInputModel, CreateUserRole
-from .operations import create_new_user, signin_user, get_all_users, get_user_from_db
+from .operations import create_new_user, signin_user, get_all_users, get_user_from_db, create_token
 from .responses import UsersResponseModel, JwtTokenResponseModel, RolesResponseModel, RolesWithUsersResponseModel
 
 user_router = APIRouter()
@@ -23,6 +23,14 @@ async def signup(user: RegisterUserInputModel):
     """
     try:
         db_user = create_new_user(user)
+        token = features.users.operations.generate_email_password_token(
+            user=db_user,
+            token_type=TokenTypes.EMAIL_CONFIRMATION
+        )
+        await features.users.operations.send_email(
+            token=token.token_type,
+            recipient=db_user
+        )
         return db_user
     except features.users.exceptions.UserAlreadyExists:
         raise HTTPException(
@@ -42,7 +50,8 @@ async def signin(username: str, password: str):
     """
     try:
         # Sign in user and create jwt token
-        token, token_type = signin_user(username, password)
+        user = signin_user(username, password)
+        token, token_type = create_token(user.username)
         return JwtTokenResponseModel(token_value=token, token_type=token_type)
     except features.users.exceptions.AccessDenied:
         raise HTTPException(
@@ -227,13 +236,15 @@ async def request_password_reset(email: str):
     :param email:
     :return:
     """
-
-    db_user = get_user_from_db(email=email)
-    if db_user:
-        features.users.operations.generate_email_password_token(db_user, TokenTypes.PASSWORD_RESET)
-
+    try:
+        db_user = get_user_from_db(email=email)
+        token = features.users.operations.generate_email_password_token(
+            user=db_user, token_type=TokenTypes.PASSWORD_RESET
+        )
+        await features.users.operations.send_email(token=token, recipient=db_user)
         return fastapi.status.HTTP_200_OK
-    else:
+
+    except features.users.exceptions.UserDoesNotExistException:
         raise HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
@@ -272,7 +283,7 @@ async def reset_password(token: str, new_password: str):
 
     except features.users.exceptions.SamePasswordsException:
         raise HTTPException(
-            status_code=fastapi.status.HTTP_403_FORBIDDEN,
+            status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="The new password can not be the same as the old password"
         )
 

@@ -1,12 +1,9 @@
 import os
 import secrets
 
-from sqlalchemy import update
-
 import features.users.exceptions
 from db.connection import get_session
 
-import bcrypt
 import datetime
 
 from datetime import datetime, timedelta
@@ -16,19 +13,18 @@ import bcrypt
 from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy import update, delete, insert
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from fastapi.templating import Jinja2Templates
+from httpx import AsyncClient
+from fastapi import HTTPException
 
-from .input_models import RegisterUserInputModel
-from .models import User, Token
-from .constants import TokenTypes
 
 import configuration
 import db.connection
 import features.users.exceptions
 from db.connection import get_session
 from .input_models import RegisterUserInputModel
-from .models import User, Role, UserRole
+from .models import User, Role, UserRole, ConfirmationToken
+from .constants import TokenTypes
 
 
 def hash_password(password: str) -> bytes:
@@ -57,7 +53,7 @@ def check_password(user: User, password: str) -> bool:
 
 def create_new_user(user: RegisterUserInputModel) -> User:
     """
-    Create user and send confirmations email
+    Create user
 
     :param user:
     :return:
@@ -74,22 +70,23 @@ def create_new_user(user: RegisterUserInputModel) -> User:
         session.commit()
         session.refresh(db_user)
 
-        features.users.operations.generate_email_password_token(
-            db_user,
-            token_type=TokenTypes.EMAIL_CONFIRMATION
-        )
-
     return db_user
 
 
-def signin_user(username: str, password: str) -> tuple:
-    """Get user and check if username and password are correct"""
+def signin_user(username: str, password: str) -> User:
+    """
+    Get user and check if username and password are correct
+
+    :param username:
+    :param password:
+    :return:
+    """
 
     current_user = get_user_from_db(username=username)
     if not current_user or not check_password(current_user, password):
-        features.users.exceptions.AccessDenied()
+        raise features.users.exceptions.AccessDenied()
 
-    return create_token(username)
+    return current_user
 
 
 def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
@@ -124,7 +121,11 @@ def get_user_from_db(*, pk: int = None, username: str = None, email: str = None)
 
 
 def get_all_users() -> list:
-    """Fetch all the users from the DB"""
+    """
+    Fetch all the users from the DB
+
+    :return:
+    """
 
     with get_session() as session:
         all_users = session.query(User).all()
@@ -300,64 +301,92 @@ def remove_user_from_role(user_id: int, role_id: int) -> None:
         session.commit()
 
 
-def send_email(*, token_type: str, token: str, recipient: User):
+async def send_email(*, token: ConfirmationToken, recipient: User):
     """
     Send email for email confirmation or reset password
 
-    :param token_type:
     :param token:
     :param recipient:
     """
 
+    brevo = configuration.BrevoSettings()
     config = configuration.Config()
-    send_grid = configuration.SendGrid()
 
-    email_subject = ''
-    email_content = ''
+    templates = Jinja2Templates('templates')
+    template_path = 'confirmation-email-template.html' if token.token_type == TokenTypes.EMAIL_CONFIRMATION \
+        else 'password-reset-email.html'
+    template = templates.get_template(template_path)
 
-    if token_type == TokenTypes.EMAIL_CONFIRMATION:
-        email_content = features.users.constants.EmailDetails.EMAIL_CONFIRMATION_CONTENT.format(
-            recipient.username,
-            config.server.host,
-            config.server.port,
-            token
-        )
-        email_subject = features.users.constants.EmailDetails.EMAIL_CONFIRMATION_SUBJECT
+    confirmation_link = f'{config.server.host}:{config.server.port}/users/confirm-email/{token.token}'
 
-    elif token_type == TokenTypes.PASSWORD_RESET:
-        email_content = features.users.constants.EmailDetails.PASSWORD_RESET_CONTENT.format(
-            recipient.username,
-            config.server.host,
-            config.server.port,
-            token
-        )
-        email_subject = features.users.constants.EmailDetails.PASSWORD_RESET_SUBJECT
-
-    message = Mail(
-        from_email='dimitrov.mitko.md@gmail.com',
-        to_emails=recipient.email,
-        subject=email_subject,
-        html_content=email_content
+    html_content = template.render(
+        recipient_name=recipient.username,
+        token_confirmation_link=confirmation_link,
     )
 
-    sg = SendGridAPIClient(api_key=send_grid.send_grid_api_key)
+    api_url = brevo.api_url
+    headers = {
+        "Content-Type": "application/json",
+        "api-key": brevo.api_key,
+        "Accept": "application/json",
+    }
 
-    try:
-        response = sg.send(message)
-        return {"message": "Email sent successfully", "status_code": response.status_code}
-    except Exception as e:
-        return {"message": "An error occurred", "error": str(e)}
+    payload = {
+        "sender": {"name": brevo.email_sender, "email": brevo.email_from},
+        "to": [{"email": recipient.email, "name": recipient.username}],
+        "subject": features.users.constants.email_subjects[token.token_type],
+        "htmlContent": html_content,
+    }
+
+    async with AsyncClient() as client:
+        response = await client.post(api_url, headers=headers, json=payload)
+
+        if response.status_code != 201:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Failed to send email: {response.text}",
+            )
+
+        result = response.json()
+        return result
 
 
-def generate_email_password_token(user: User, token_type: str):
+def expire_all_existing_tokens_for_user(*, user: User, token_type) -> None:
     """
-    Generate email confirmation token or password reset token
-    Send email to the user
+    Expire all existing tokens if exists for the user of the requested type
 
     :param user:
     :param token_type:
     :return:
     """
+
+    with get_session() as session:
+        current_datetime = datetime.utcnow()
+        tokens = (
+            session.query(ConfirmationToken)
+            .filter(ConfirmationToken.user_id == user.id,
+                    ConfirmationToken.token_type == token_type,
+                    ConfirmationToken.expired_on > current_datetime
+                    )
+            .all()
+        )
+        if tokens:
+            for token in tokens:
+                token.expired_on = datetime.utcnow()
+                session.add(token)
+                session.commit()
+
+
+def generate_email_password_token(*, user: User, token_type: str) -> ConfirmationToken:
+    """
+    Generate new token of the requested type
+
+    :param user:
+    :param token_type:
+    :return:
+    """
+
+    expire_all_existing_tokens_for_user(user=user, token_type=token_type)
 
     confirmation_token = configuration.ConfirmationToken()
 
@@ -370,10 +399,11 @@ def generate_email_password_token(user: User, token_type: str):
 
     token = secrets.token_urlsafe(32)
 
-    expiration_time = datetime.utcnow() + timedelta(minutes=expiration_minutes)
+    expiration_time = datetime.utcnow() + timedelta(minutes=int(expiration_minutes))
 
     with get_session() as session:
-        token_obj = Token(
+
+        token_obj = ConfirmationToken(
             token=token,
             user_id=user.id,
             expired_on=expiration_time,
@@ -382,13 +412,12 @@ def generate_email_password_token(user: User, token_type: str):
 
         session.add(token_obj)
         session.commit()
+        session.refresh(token_obj)
 
-    send_email(token_type=token_type, token=token, recipient=user)
-
-    return token
+    return token_obj
 
 
-def check_if_token_is_valid(token: str):
+def check_if_token_is_valid(token: str) -> ConfirmationToken | None:
     """
     Get the token from db if exists, check if token is expired
 
@@ -399,16 +428,17 @@ def check_if_token_is_valid(token: str):
     current_datetime = datetime.utcnow()
 
     with get_session() as session:
+
         token = (
-            session.query(Token)
-            .filter(Token.token == token, Token.expired_on > current_datetime)
+            session.query(ConfirmationToken)
+            .filter(ConfirmationToken.token == token, ConfirmationToken.expired_on > current_datetime)
             .first()
         )
 
     return token or None
 
 
-def confirm_email(token: Type[Token]) -> User:
+def confirm_email(token: ConfirmationToken) -> User:
     """
     Mark the user email as confirmed and delete the token
 
@@ -448,11 +478,11 @@ def update_user_password(user: User, new_password: str) -> User:
 
     with get_session() as session:
         token = session.query(
-            Token
-        ).filter(Token.user_id == user.id).first()
+            ConfirmationToken
+        ).filter(ConfirmationToken.user_id == user.id).first()
         token.expired_on = datetime.utcnow()
-        session.add(user)
         session.add(token)
+        session.add(user)
         session.commit()
 
     return user

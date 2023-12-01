@@ -21,11 +21,13 @@ logging = khLogging.Logger('api')
 app = fastapi.FastAPI()
 
 # Configure CORS middleware
+cors = configuration.CorsSettings()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_config.allow_origins,
-    allow_methods=cors_config.allow_methods,
-    allow_headers=cors_config.allow_headers,
+    allow_origins=cors.allow_origins,
+    allow_methods=cors.allow_methods,
+    allow_headers=cors.allow_headers,
 )
 
 

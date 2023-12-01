@@ -1,14 +1,11 @@
 """Configuation module"""
-import os
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
 from pydantic import BaseModel, model_validator, Field
 from typing import Optional, List
 from enum import StrEnum, auto
-from dotenv import load_dotenv
 
-load_dotenv('.env.dev')
 
 _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
@@ -80,36 +77,54 @@ class PostgresConfig(BaseModel):
         return self.host and self.port and self.user and self.password and self.database
 
 
-class JwtToken(BaseModel):
+class JwtToken(BaseSettings):
     """JWT Token options"""
-    access_token_expire_minutes: int = os.getenv('jwt_access_token_expire_minutes')
-    refresh_token_expire_minutes: int = os.getenv('jwt_refresh_token_expire_minutes')
-    algorithm: str = os.getenv('jwt_algorithm')
-    secret_key: str = os.getenv('jwt_secret_key')
-    refresh_secret_key: str = os.getenv('jwt_refresh_secret_key')
+    access_token_expire_minutes: int = Field(default_factory=int, alias='jwt_access_token_expire_minutes')
+    refresh_token_expire_minutes: int = Field(default_factory=int, alias='jwt_refresh_token_expire_minutes')
+    algorithm: str = Field(alias='jwt_algorithm')
+    secret_key: str = Field(alias='jwt_secret_key')
+    refresh_secret_key: str = Field(alias='jwt_refresh_secret_key')
+
+    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
+                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
 
-class CorsSettings(BaseModel):
+class CorsSettings(BaseSettings):
     """CORSMiddleware options"""
-    allow_origins: List[str] = os.getenv('cors__allow_origins', '').split(' ')
-    allow_methods: List[str] = os.getenv('cors__allow_methods', '').split(' ')
-    allow_headers: List[str] = os.getenv('cors__allow_headers', '').split(' ')
+    allow_origins: List[str] = Field(default_factory=list, alias='cors_allow_origins')
+    allow_methods: List[str] = Field(default_factory=list, alias='cors_allow_methods')
+    allow_headers: List[str] = Field(default_factory=list, alias='cors_allow_headers')
+
+    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
+                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
 
-class SendGrid(BaseModel):
-    """SendGrid options"""
-    send_grid_api_key: str = os.getenv('send_grid_api_key')
+class BrevoSettings(BaseSettings):
+    """Brevo settings"""
+    api_url: str = Field(alias='brevo_api_url')
+    api_key: str = Field(alias='brevo_api_key')
+    email_sender: str = Field(alias='brevo_email_sender')
+    email_from: str = Field(alias='brevo_email_from')
+
+    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
+                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
 
-class ConfirmationToken(BaseModel):
+class ConfirmationToken(BaseSettings):
     """Email confirmation and password reset token"""
-    email_token_expiration: int = int(os.getenv('email_token_expiration_minutes'))
-    password_token_expiration: int = int(os.getenv('password_token_expiration_minutes'))
+    email_token_expiration: int = Field(alias='email_token_expiration_minutes')
+    password_token_expiration: int = Field(alias='password_token_expiration_minutes')
+
+    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
+                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
 
 class ServerConfiguration(BaseModel):
-    host: str = os.getenv('host')
-    port: str = os.getenv('port')
+    host: str
+    port: int
+
+    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
+                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
 
 class Config(BaseSettings):
