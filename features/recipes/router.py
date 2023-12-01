@@ -123,6 +123,7 @@ def get_all_recipes(
             detail=f"Invalid ordering column"
         )
 
+
 @recipes_router.get('/{recipe_id}', response_model=RecipeResponse)
 def get_recipe(recipe_id: int = fastapi.Path()):
     """Get recipe"""

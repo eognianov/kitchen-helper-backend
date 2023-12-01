@@ -118,6 +118,52 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     return recipe
 
 
+def sort_recipes(filtered_recipes, sort, sort_direction):
+    if sort_direction and sort_direction.lower() not in ['asc', 'desc']:
+        raise InvalidSortDirection
+
+    if sort:
+        column = getattr(Recipe, sort, None)
+        if column is not None:
+            ordering = desc(column) if sort_direction == 'desc' else asc(column)
+            filtered_recipes = filtered_recipes.order_by(ordering)
+        else:
+            raise InvalidColumn
+    return filtered_recipes
+
+
+def paginate_recipes(filtered_recipes, page_num, page_size, request):
+    start = (page_num - 1) * page_size
+    end = start + page_size
+
+    current_page = page_num
+
+    previous_page = current_page - 1 if current_page - 1 > 0 else None
+    if previous_page:
+        previous_page = f'{request.base_url}recipes/?page_num={previous_page}&page_size={page_size}'
+
+    next_page = current_page + 1 if filtered_recipes[end: end + page_size] != [] else None
+    if next_page:
+        next_page = f'{request.base_url}recipes/?page_num={next_page}&page_size={page_size}'
+
+    total_pages = math.ceil(filtered_recipes.count() / page_size)
+    total_items = int(filtered_recipes.count())
+
+    if current_page > total_pages:
+        raise InvalidPageNumber
+
+    response = PageResponse(
+        page_number=current_page,
+        page_size=page_size,
+        previous_page=previous_page,
+        next_page=next_page,
+        total_pages=total_pages,
+        total_items=total_items,
+        recipes=[RecipeResponse(**r.__dict__) for r in filtered_recipes[start:end]],
+    )
+    return response
+
+
 def get_all_recipes(page_num, page_size, sort, sort_direction, request):
     """
     Get all recipes
@@ -127,53 +173,15 @@ def get_all_recipes(page_num, page_size, sort, sort_direction, request):
     :param sort_direction:
     :param request:
     """
-    print(str(request.base_url))
-    print(str(request.query_params))
 
     with db.connection.get_session() as session:
         filtered_recipes = session.query(Recipe) \
             .join(Recipe.category, isouter=True) \
             .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
 
-        if sort_direction and sort_direction.lower() not in ['asc', 'desc']:
-            raise InvalidSortDirection
+        filtered_recipes = sort_recipes(filtered_recipes, sort, sort_direction)
 
-        if sort:
-            column = getattr(Recipe, sort, None)
-            if column is not None:
-                ordering = desc(column) if sort_direction == 'desc' else asc(column)
-                filtered_recipes = filtered_recipes.order_by(ordering)
-            else:
-                raise InvalidColumn
-
-        start = (page_num - 1) * page_size
-        end = start + page_size
-
-        current_page = page_num
-
-        previous_page = current_page - 1 if current_page - 1 > 0 else None
-        if previous_page:
-            previous_page = f'{request.base_url}recipes/?page_num={previous_page}&page_size={page_size}'
-
-        next_page = current_page + 1 if filtered_recipes[end: end + page_size] != [] else None
-        if next_page:
-            next_page = f'{request.base_url}recipes/?page_num={next_page}&page_size={page_size}'
-
-        total_pages = math.ceil(filtered_recipes.count() / page_size)
-        total_items = int(filtered_recipes.count())
-
-        if current_page > total_pages:
-            raise InvalidPageNumber
-
-        response = PageResponse(
-            page_number=current_page,
-            page_size=page_size,
-            previous_page=previous_page,
-            next_page=next_page,
-            total_pages=total_pages,
-            total_items=total_items,
-            recipes=[RecipeResponse(**r.__dict__) for r in filtered_recipes[start:end]],
-        )
+        response = paginate_recipes(filtered_recipes, page_num, page_size, request)
 
         return response
 
