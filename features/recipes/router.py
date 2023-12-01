@@ -3,14 +3,13 @@
 import fastapi
 
 import features.recipes.exceptions
-import features.recipes.exceptions
+from features.recipes.exceptions import InvalidPageNumber
 import features.recipes.operations
 import features.recipes.responses
 from features.recipes.responses import Category
-from features.recipes.responses import InstructionResponse
+from features.recipes.responses import InstructionResponse, PageResponse, RecipeResponse
 from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel
-from .responses import Recipe
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
@@ -74,7 +73,7 @@ def update_category(category_id: int = fastapi.Path(),
     """
     try:
         return features.recipes.operations.update_category(category_id=category_id,
-                                                                       **patch_category_input_model.model_dump())
+                                                           **patch_category_input_model.model_dump())
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -87,13 +86,24 @@ def update_category(category_id: int = fastapi.Path(),
         )
 
 
-@recipes_router.get('/', response_model=list[Recipe])
-def get_all_recipes():
+@recipes_router.get('/', response_model=PageResponse)
+def get_all_recipes(
+        page_num: int = fastapi.Query(1, ge=0),
+        page_size: int = fastapi.Query(10),
+        sort: str = fastapi.Query(None),
+        filter: int = fastapi.Query(None),
+        ):
     """Get all recipes"""
-    return features.recipes.operations.get_all_recipes()
+    try:
+        return features.recipes.operations.get_all_recipes(page_num, page_size, sort, filter)
+    except features.recipes.exceptions.InvalidPageNumber:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Invalid page number"
+        )
 
 
-@recipes_router.get('/{recipe_id}', response_model=Recipe)
+@recipes_router.get('/{recipe_id}', response_model=RecipeResponse)
 def get_recipe(recipe_id: int = fastapi.Path()):
     """Get recipe"""
 
@@ -106,7 +116,7 @@ def get_recipe(recipe_id: int = fastapi.Path()):
         )
 
 
-@recipes_router.post('/', response_model=Recipe)
+@recipes_router.post('/', response_model=RecipeResponse)
 def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
     """
     Create recipe
@@ -208,8 +218,7 @@ def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id=fastapi.P
         )
 
 
-
-@recipes_router.delete('/{recipe_id}', response_model=Recipe)
+@recipes_router.delete('/{recipe_id}', response_model=RecipeResponse)
 def delete_recipe(recipe_id: int, user_id: int = 1):
     """
     Delete recipe

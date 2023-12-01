@@ -1,16 +1,20 @@
 """Recipes feature business logic"""
+import math
 from typing import Type
 
 import sqlalchemy.exc
-from sqlalchemy import update, and_
+from sqlalchemy import update, and_, select, func
 
 import db.connection
+import features.recipes.responses
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
-    InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException
+    InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException, \
+    InvalidPageNumber
 from .input_models import CreateInstructionInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
-from .responses import InstructionResponse
+from .responses import InstructionResponse, PageResponse, RecipeResponse
 from datetime import datetime
+
 
 def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
     """
@@ -99,7 +103,8 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
         fats=fats,
         proteins=proteins,
         cholesterol=cholesterol,
-        created_by=created_by
+        created_by=created_by,
+        is_published=True
     )
 
     with db.connection.get_session() as session:
@@ -113,15 +118,37 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     return recipe
 
 
-def get_all_recipes():
+def get_all_recipes(page_num, page_size, sort, filter):
     """Get all recipes"""
 
     with db.connection.get_session() as session:
-        return (
-            session.query(Recipe)
-            .join(Recipe.category, isouter=True)
+        filtered_recipes = session.query(Recipe) \
+            .join(Recipe.category, isouter=True) \
             .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+
+        start = (page_num - 1) * page_size
+        end = start + page_size
+
+        current_page = page_num
+        previous_page = current_page - 1 if current_page - 1 > 0 else None
+        next_page = current_page + 1 if filtered_recipes[end: end + page_size] != [] else None
+        total_pages = math.ceil(filtered_recipes.count() / page_size)
+        total_items = int(filtered_recipes.count())
+
+        if current_page > total_pages:
+            raise InvalidPageNumber
+
+        response = PageResponse(
+            page_number=current_page,
+            page_size=page_size,
+            previous_page=previous_page,
+            next_page=next_page,
+            total_pages=total_pages,
+            total_items=total_items,
+            recipes=[RecipeResponse(**r.__dict__) for r in filtered_recipes[start:end]],
         )
+
+        return response
 
 
 def get_recipe_by_id(recipe_id: int):
@@ -258,20 +285,17 @@ def delete_instruction(recipe_id: int, instruction_id):
         update_recipe(recipe_id=recipe_id)
 
 
-
 def delete_recipe(*, recipe_id: int, deleted_by: int):
     recipe = get_recipe_by_id(recipe_id)
 
     with db.connection.get_session() as session:
         session.execute(
             update(Recipe), [{
-                    "id": recipe.id,
-                    "is_deleted": True,
-                    "deleted_on": datetime.utcnow(),
-                    "deleted_by": deleted_by
-                }]
+                "id": recipe.id,
+                "is_deleted": True,
+                "deleted_on": datetime.utcnow(),
+                "deleted_by": deleted_by
+            }]
         )
         session.commit()
         return recipe
-
-

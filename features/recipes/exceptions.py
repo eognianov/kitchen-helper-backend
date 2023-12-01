@@ -23,3 +23,7 @@ class InstructionNameViolationException(Exception):
 
 class RecipeWithInstructionNotFoundException(Exception):
     ...
+
+
+class InvalidPageNumber(Exception):
+    ...

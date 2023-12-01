@@ -8,9 +8,9 @@ class Category(pydantic.BaseModel):
     """Category response"""
     id: int
     name: str
-    created_by: str
+    created_by: int
     created_on: datetime.datetime
-    updated_by: Optional[str] = None
+    updated_by: Optional[int] = None
     updated_on: Optional[datetime.datetime] = None
 
 
@@ -25,7 +25,7 @@ class InstructionResponse(pydantic.BaseModel):
     recipe_id: int
 
 
-class Recipe(pydantic.BaseModel):
+class RecipeResponse(pydantic.BaseModel):
     """Recipe response"""
 
     id: int
@@ -38,9 +38,9 @@ class Recipe(pydantic.BaseModel):
     proteins: Optional[float] = pydantic.Field(default=0, ge=0)
     cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
     time_to_prepare: int = pydantic.Field(gt=0)
-    created_by: str
+    created_by: int
     created_on: datetime.datetime
-    updated_by: Optional[str]
+    updated_by: Optional[int]
     updated_on: datetime.datetime
     category: Category | Any = None
     instructions: list[InstructionResponse] | Any = None
@@ -51,3 +51,14 @@ class Recipe(pydantic.BaseModel):
 
         if self.instructions:
             self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]
+
+
+class PageResponse(pydantic.BaseModel):
+    """Recipe pagination and filtering response"""
+    page_number: int
+    page_size: int
+    previous_page: int | None
+    next_page: int | None
+    total_pages: int
+    total_items: int
+    recipes: list[RecipeResponse]
