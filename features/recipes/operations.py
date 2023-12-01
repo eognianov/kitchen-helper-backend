@@ -3,13 +3,13 @@ import math
 from typing import Type
 
 import sqlalchemy.exc
-from sqlalchemy import update, and_, select, func
+from sqlalchemy import update, and_, select, func, desc, asc
 
 import db.connection
 import features.recipes.responses
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
     InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException, \
-    InvalidPageNumber
+    InvalidPageNumber, InvalidSortDirection, InvalidColumn
 from .input_models import CreateInstructionInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse, PageResponse, RecipeResponse
@@ -118,14 +118,33 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     return recipe
 
 
-def get_all_recipes(page_num, page_size, sort, filter, request):
-    """Get all recipes"""
+def get_all_recipes(page_num, page_size, sort, sort_direction, request):
+    """
+    Get all recipes
+    :param page_num:
+    :param page_size:
+    :param sort:
+    :param sort_direction:
+    :param request:
+    """
     print(str(request.base_url))
     print(str(request.query_params))
+
     with db.connection.get_session() as session:
         filtered_recipes = session.query(Recipe) \
             .join(Recipe.category, isouter=True) \
             .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+
+        if sort_direction and sort_direction.lower() not in ['asc', 'desc']:
+            raise InvalidSortDirection
+
+        if sort:
+            column = getattr(Recipe, sort, None)
+            if column is not None:
+                ordering = desc(column) if sort_direction == 'desc' else asc(column)
+                filtered_recipes = filtered_recipes.order_by(ordering)
+            else:
+                raise InvalidColumn
 
         start = (page_num - 1) * page_size
         end = start + page_size

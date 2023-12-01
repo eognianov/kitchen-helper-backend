@@ -92,18 +92,36 @@ def get_all_recipes(
         page_num: int = fastapi.Query(1, ge=0),
         page_size: int = fastapi.Query(10),
         sort: str = fastapi.Query(None),
-        filter: int = fastapi.Query(None),
+        sort_direction: str = fastapi.Query(None),
 ):
-    """Get all recipes"""
+    """
+    Get all recipes
+
+    :param request:
+    :param page_num:
+    :param page_size:
+    :param sort:
+    :param sort_direction:
+    """
 
     try:
-        return features.recipes.operations.get_all_recipes(page_num, page_size, sort, filter, request)
+        return features.recipes.operations.get_all_recipes(
+            page_num=page_num, page_size=page_size, sort=sort, sort_direction=sort_direction, request=request)
     except features.recipes.exceptions.InvalidPageNumber:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Invalid page number"
         )
-
+    except features.recipes.exceptions.InvalidSortDirection:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Invalid ordering direction"
+        )
+    except features.recipes.exceptions.InvalidColumn:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Invalid ordering column"
+        )
 
 @recipes_router.get('/{recipe_id}', response_model=RecipeResponse)
 def get_recipe(recipe_id: int = fastapi.Path()):

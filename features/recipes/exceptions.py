@@ -27,3 +27,11 @@ class RecipeWithInstructionNotFoundException(Exception):
 
 class InvalidPageNumber(Exception):
     ...
+
+
+class InvalidSortDirection(Exception):
+    ...
+
+
+class InvalidColumn(Exception):
+    ...
