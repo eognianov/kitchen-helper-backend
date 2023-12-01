@@ -1,0 +1,22 @@
+  [tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+  \.git
+| \.hg
+| \.mypy_cache
+| \.tox
+| \.venv
+| _build
+| buck-out
+| build
+| dist
+)/
+'''
+[tool.pre_commit]
+exclude = '^$'
+version = '2'
+[build-system]
+requires = ['setuptools>=40.3.0', 'wheel']
+build-backend = 'setuptools.build_meta'
