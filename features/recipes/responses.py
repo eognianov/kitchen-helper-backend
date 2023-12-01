@@ -57,8 +57,8 @@ class PageResponse(pydantic.BaseModel):
     """Recipe pagination and filtering response"""
     page_number: int
     page_size: int
-    previous_page: int | None
-    next_page: int | None
+    previous_page: str | None
+    next_page: str | None
     total_pages: int
     total_items: int
     recipes: list[RecipeResponse]

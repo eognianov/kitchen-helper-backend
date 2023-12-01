@@ -118,9 +118,10 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     return recipe
 
 
-def get_all_recipes(page_num, page_size, sort, filter):
+def get_all_recipes(page_num, page_size, sort, filter, request):
     """Get all recipes"""
-
+    print(str(request.base_url))
+    print(str(request.query_params))
     with db.connection.get_session() as session:
         filtered_recipes = session.query(Recipe) \
             .join(Recipe.category, isouter=True) \
@@ -130,8 +131,15 @@ def get_all_recipes(page_num, page_size, sort, filter):
         end = start + page_size
 
         current_page = page_num
+
         previous_page = current_page - 1 if current_page - 1 > 0 else None
+        if previous_page:
+            previous_page = f'{request.base_url}recipes/?page_num={previous_page}&page_size={page_size}'
+
         next_page = current_page + 1 if filtered_recipes[end: end + page_size] != [] else None
+        if next_page:
+            next_page = f'{request.base_url}recipes/?page_num={next_page}&page_size={page_size}'
+
         total_pages = math.ceil(filtered_recipes.count() / page_size)
         total_items = int(filtered_recipes.count())
 

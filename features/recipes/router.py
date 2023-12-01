@@ -88,14 +88,16 @@ def update_category(category_id: int = fastapi.Path(),
 
 @recipes_router.get('/', response_model=PageResponse)
 def get_all_recipes(
+        request: fastapi.Request,
         page_num: int = fastapi.Query(1, ge=0),
         page_size: int = fastapi.Query(10),
         sort: str = fastapi.Query(None),
         filter: int = fastapi.Query(None),
-        ):
+):
     """Get all recipes"""
+
     try:
-        return features.recipes.operations.get_all_recipes(page_num, page_size, sort, filter)
+        return features.recipes.operations.get_all_recipes(page_num, page_size, sort, filter, request)
     except features.recipes.exceptions.InvalidPageNumber:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
