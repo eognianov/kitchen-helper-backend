@@ -11,15 +11,3 @@ class CategoryNameViolationException(Exception):
 
 class RecipeNotFoundException(Exception):
     ...
-
-
-class InstructionNotFoundException(Exception):
-    ...
-
-
-class InstructionNameViolationException(Exception):
-    ...
-
-
-class RecipeWithInstructionNotFoundException(Exception):
-    ...
