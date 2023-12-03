@@ -13,10 +13,20 @@ from db.connection import get_session
 from .input_models import RegisterUserInputModel
 from .models import User, Role, UserRole
 
+import khLogging
+
+logging = khLogging.Logger.get_child_logger(__file__)
+
 config = configuration.Config()
 
 
-def hash_password(password: str) -> bytes:
+def _hash_password(password: str) -> bytes:
+    """
+    Hash password
+
+    :param password:
+    :return:
+    """
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
     return hashed_password
@@ -33,11 +43,9 @@ def create_new_user(user: RegisterUserInputModel) -> User:
         try:
             # Check if the username or email already exists
             if get_user_from_db(username=user.username, email=user.email):
-                # Raise an Exception
                 raise features.users.exceptions.UserAlreadyExists()
         except features.users.exceptions.UserDoesNotExistException:
-            # Create the new user
-            user.password = hash_password(password=user.password)
+            user.password = _hash_password(password=user.password)
             db_user = User(username=user.username, email=user.email, password=user.password)
             session.add(db_user)
             session.commit()
@@ -47,15 +55,29 @@ def create_new_user(user: RegisterUserInputModel) -> User:
 
 
 def signin_user(username: str, password: str) -> tuple:
-    # Get user and check if username and password are correct
+    """
+    Validate user password and generate token
+
+    :param username:
+    :param password:
+    :return:
+    """
     current_user = get_user_from_db(username=username)
-    if not current_user or not check_password(current_user, password):
+    if not current_user or not bcrypt.checkpw(password.encode('utf-8'), current_user.password):
+        logging.warning(f"Failed logging attempt for {username}")
         features.users.exceptions.AccessDenied()
-    # Create jwt token
     return create_token(username)
 
 
 def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
+    """
+    Get user from db
+
+    :param pk:
+    :param username:
+    :param email:
+    :return:
+    """
     with get_session() as session:
         query = session.query(User)
         filters = []
@@ -78,19 +100,25 @@ def get_user_from_db(*, pk: int = None, username: str = None, email: str = None)
 
 
 def get_all_users() -> list:
+    """
+    Get all users
+
+    :return:
+    """
     with get_session() as session:
-        # Fetch all the users from the db
         all_users = session.query(User).all()
 
     return all_users
 
 
-def update_user(user_id: int, field: str, value: str, updated_by: str = '') -> Type[User]:
+def update_user(user_id: int, field: str, value: str, updated_by: str = '') -> User:
     user = get_user_from_db(pk=user_id)
     with get_session() as session:
         session.execute(update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}])
         session.commit()
-        return session.query(User).where(User.id == user_id).first()
+        user.__setattr__(field, value)
+        logging.info(f"User #{user.id} updated. {updated_by} set {field}={value}")
+        return user
 
 
 def create_token(subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True) -> tuple:
@@ -186,6 +214,7 @@ def create_role(name: str, created_by: str = 'me') -> Role:
             session.add(role)
             session.commit()
             session.refresh(role)
+        logging.info(f"Role {name} with #{role.id} was created by #{created_by}")
         return role
 
 
@@ -205,9 +234,10 @@ def add_user_to_role(user_id: int, role_id: int, added_by: str = 'me') -> None:
         raise features.users.exceptions.UserWithRoleExist
 
     with db.connection.get_session() as session:
-        user_role = UserRole(user_id=user_id, role_id=role_id, added_by=added_by)
+        user_role = UserRole(user_id=user.id, role_id=role.id, added_by=added_by)
         session.add(user_role)
         session.commit()
+    logging.info(f"User #{user.id} was add to role #{role.id} by #{added_by}")
 
 
 def remove_user_from_role(user_id: int, role_id: int) -> None:
@@ -230,3 +260,4 @@ def remove_user_from_role(user_id: int, role_id: int) -> None:
 
         session.add(user)
         session.commit()
+    logging.info(f"User #{user.id} was add to role #{role.id} by #{added_by}")
