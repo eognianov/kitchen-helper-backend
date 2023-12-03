@@ -118,7 +118,7 @@ def create_token(user_id: int, user_role_ids: list[int] = None, expires_delta: t
     else:
         expires_delta = datetime.utcnow() + timedelta(minutes=minutes)
 
-    to_encode = {"exp": expires_delta, "sub": user_id}
+    to_encode = {"exp": expires_delta, "sub": str(user_id)}
     if user_role_ids:
         to_encode["roles"] = user_role_ids
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm)

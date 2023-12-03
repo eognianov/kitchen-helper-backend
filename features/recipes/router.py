@@ -12,9 +12,9 @@ from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, Cre
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel
 from .responses import Recipe
 from typing import Annotated
-from features.users.models import User
-from features.users.authentication import get_current_user
 
+
+from common.authentication import Authenticate, AuthenticatedUser
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
 
@@ -110,11 +110,12 @@ def get_recipe(recipe_id: int = fastapi.Path()):
 
 
 @recipes_router.post('/', response_model=Recipe)
-def create_recipe(create_recipe_input_model: CreateRecipeInputModel, created_by: Annotated[User, fastapi.Depends(get_current_user)]):
+def create_recipe(create_recipe_input_model: CreateRecipeInputModel, created_by: Annotated[AuthenticatedUser, fastapi.Depends(Authenticate(optional=False))]):
     """
     Create recipe
 
     :param create_recipe_input_model:
+    :param created_by:
     :return:
     """
     try:
