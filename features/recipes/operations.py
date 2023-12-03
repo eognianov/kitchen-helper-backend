@@ -1,19 +1,19 @@
 """Recipes feature business logic"""
 import math
+from datetime import datetime
 from typing import Type
 
 import sqlalchemy.exc
-from sqlalchemy import update, and_, select, func, desc, asc
+from sqlalchemy import update, and_, desc, asc
+from sqlalchemy.orm import Query
 
 import db.connection
-import features.recipes.responses
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
     InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException, \
     InvalidPageNumber, InvalidSortDirection, InvalidColumn
 from .input_models import CreateInstructionInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse, PageResponse, RecipeResponse
-from datetime import datetime
 
 
 def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
@@ -69,7 +69,7 @@ def create_category(category_name: str, created_by: str = 'me') -> RecipeCategor
 
 def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
                   calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0,
-                  created_by: str = 'me', instructions: list[CreateInstructionInputModel]):
+                  created_by: int = 1, instructions: list[CreateInstructionInputModel]):
     """
     Create recipe
 
@@ -118,39 +118,63 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     return recipe
 
 
-def sort_recipes(filtered_recipes, sort, sort_direction):
+def sort_recipes(filtered_recipes: Query, sort: str, sort_direction: str) -> Query:
+    """"
+    Sort recipes
+
+    :param filtered_recipes:
+    :param sort:
+    :param sort_direction:
+    :return:
+    """
     if sort_direction and sort_direction.lower() not in ['asc', 'desc']:
         raise InvalidSortDirection
 
     if sort:
         column = getattr(Recipe, sort, None)
-        if column is not None:
-            ordering = desc(column) if sort_direction == 'desc' else asc(column)
-            filtered_recipes = filtered_recipes.order_by(ordering)
-        else:
+
+        if column is None:
             raise InvalidColumn
+
+        ordering = desc(column) if sort_direction == 'desc' else asc(column)
+        filtered_recipes = filtered_recipes.order_by(ordering)
     return filtered_recipes
 
 
-def paginate_recipes(filtered_recipes, page_num, page_size, request):
+def paginate_recipes(filtered_recipes: Query, page_num: int, page_size: int, sort: str,
+                     sort_direction: str) -> PageResponse:
+    """"
+    Paginate recipes
+
+    :param filtered_recipes:
+    :param page_num:
+    :param page_size:
+    :param sort:
+    :param sort_direction:
+    :return:
+    """
     start = (page_num - 1) * page_size
     end = start + page_size
 
     current_page = page_num
 
-    previous_page = current_page - 1 if current_page - 1 > 0 else None
-    if previous_page:
-        previous_page = f'{request.base_url}recipes/?page_num={previous_page}&page_size={page_size}'
-
-    next_page = current_page + 1 if filtered_recipes[end: end + page_size] != [] else None
-    if next_page:
-        next_page = f'{request.base_url}recipes/?page_num={next_page}&page_size={page_size}'
-
-    total_pages = math.ceil(filtered_recipes.count() / page_size)
     total_items = int(filtered_recipes.count())
+    total_pages = math.ceil(total_items / page_size)
 
     if current_page > total_pages:
         raise InvalidPageNumber
+
+    previous_page = current_page - 1 if current_page - 1 > 0 else None
+    next_page = current_page + 1 if filtered_recipes[end: (end + page_size)] != [] else None
+
+    sort = f'&sort={sort}' if sort else ''
+    sort_direction = f'&sort_direction={sort_direction}' if sort_direction else ''
+
+    if previous_page:
+        previous_page = f'recipes/?page_num={previous_page}&page_size={page_size}{sort}{sort_direction}'
+
+    if next_page:
+        next_page = f'recipes/?page_num={next_page}&page_size={page_size}{sort}{sort_direction}'
 
     response = PageResponse(
         page_number=current_page,
@@ -164,14 +188,14 @@ def paginate_recipes(filtered_recipes, page_num, page_size, request):
     return response
 
 
-def get_all_recipes(page_num, page_size, sort, sort_direction, request):
+def get_all_recipes(page_num: int, page_size: int, sort: str, sort_direction: str) -> PageResponse:
     """
     Get all recipes
+
     :param page_num:
     :param page_size:
     :param sort:
     :param sort_direction:
-    :param request:
     """
 
     with db.connection.get_session() as session:
@@ -179,9 +203,10 @@ def get_all_recipes(page_num, page_size, sort, sort_direction, request):
             .join(Recipe.category, isouter=True) \
             .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
 
-        filtered_recipes = sort_recipes(filtered_recipes, sort, sort_direction)
+        if sort:
+            filtered_recipes = sort_recipes(filtered_recipes, sort, sort_direction)
 
-        response = paginate_recipes(filtered_recipes, page_num, page_size, request)
+        response = paginate_recipes(filtered_recipes, page_num, page_size, sort, sort_direction)
 
         return response
 
