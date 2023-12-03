@@ -26,6 +26,8 @@ async def extract_user_data_from_jwt(token: Annotated[str, fastapi.Depends(oauth
     :return:
     """
 
+    if not token:
+        return None
     try:
         payload = jwt.decode(token, config.jwt.secret_key, algorithms=[config.jwt.algorithm])
         user_id = int(payload.get("sub"))
@@ -48,3 +50,7 @@ class Authenticate:
         if not self.optional and not user:
             raise fastapi.HTTPException(status_code=fastapi.status.HTTP_401_UNAUTHORIZED)
         return user
+
+
+authenticated_user = Annotated[AuthenticatedUser, fastapi.Depends(Authenticate(optional=False))]
+optional_user = Annotated[AuthenticatedUser, fastapi.Depends(Authenticate(optional=True))]

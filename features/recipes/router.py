@@ -2,6 +2,7 @@
 
 import fastapi
 
+import common.authentication
 import features.recipes.exceptions
 import features.recipes.exceptions
 import features.recipes.operations
@@ -110,7 +111,7 @@ def get_recipe(recipe_id: int = fastapi.Path()):
 
 
 @recipes_router.post('/', response_model=Recipe)
-def create_recipe(create_recipe_input_model: CreateRecipeInputModel, created_by: Annotated[AuthenticatedUser, fastapi.Depends(Authenticate(optional=False))]):
+def create_recipe(create_recipe_input_model: CreateRecipeInputModel, created_by: common.authentication.authenticated_user):
     """
     Create recipe
 
@@ -210,7 +211,6 @@ def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id=fastapi.P
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Combination of {recipe_id=} and {instruction_id=} does not exist"
         )
-
 
 
 @recipes_router.delete('/{recipe_id}', response_model=Recipe)

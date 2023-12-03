@@ -59,10 +59,11 @@ async def _download_image_from_url(url: str) -> bytes:
             raise ImageUrlIsNotReachable
 
 
-async def add_image(url: str = None, image: bytes = None, added_by: int = '1'):
+async def add_image(added_by, url: str = None, image: bytes = None):
     """
     Add image
 
+    :param added_by:
     :param url:
     :param image:
     :return:
