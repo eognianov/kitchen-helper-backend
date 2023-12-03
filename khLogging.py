@@ -1,9 +1,6 @@
 import logging
-import sys
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
-
-import uvicorn.logging
 
 import configuration
 from collections import defaultdict
