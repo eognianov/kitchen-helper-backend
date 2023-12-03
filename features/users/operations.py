@@ -91,7 +91,7 @@ def get_all_users() -> list:
     return all_users
 
 
-def update_user(user_id: int, field: str, value: str, updated_by: str = '') -> Type[User]:
+def update_user(user_id: int, field: str, value: str, updated_by: int) -> Type[User]:
     user = get_user_from_db(pk=user_id)
     with get_session() as session:
         session.execute(update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}])

@@ -3,12 +3,14 @@
 import fastapi
 from fastapi import APIRouter, HTTPException
 
+import common.authentication
 import features.users.exceptions
 from .input_models import RegisterUserInputModel, UpdateUserInputModel, CreateUserRole
 from .operations import create_new_user, signin_user, get_all_users, get_user_from_db
 from .responses import UsersResponseModel, JwtTokenResponseModel, RolesResponseModel, RolesWithUsersResponseModel
 from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
+from .authentication import AdminOrMe
 
 user_router = APIRouter()
 roles_router = APIRouter()
@@ -63,7 +65,7 @@ async def show_all_users():
 
 
 @user_router.get("/{user_id}", response_model=UsersResponseModel)
-async def get_user(user_id: int):
+async def get_user(user_id: int, user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(AdminOrMe(identifier_variable='user_id'))]):
     """
     Show user details
 
@@ -81,7 +83,7 @@ async def get_user(user_id: int):
 
 
 @user_router.patch('/{user_id}')
-def patch_user(user_id: int = fastapi.Path(), update_user_input_model: UpdateUserInputModel = fastapi.Body()):
+def patch_user(user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(AdminOrMe(identifier_variable='user_id'))], user_id: int = fastapi.Path(), update_user_input_model: UpdateUserInputModel = fastapi.Body()):
     """
     Update user email
 
@@ -90,7 +92,7 @@ def patch_user(user_id: int = fastapi.Path(), update_user_input_model: UpdateUse
     :return:
     """
     try:
-        updated_user = features.users.operations.update_user(user_id, **update_user_input_model.model_dump())
+        updated_user = features.users.operations.update_user(user_id, **update_user_input_model.model_dump(), updated_by=user.id)
         return features.users.responses.UsersResponseModel(**updated_user.__dict__)
     except features.users.exceptions.UserDoesNotExistException:
         raise fastapi.HTTPException(
