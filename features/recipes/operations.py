@@ -12,6 +12,7 @@ from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse
 from datetime import datetime
 
+
 def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
     """
     Get all recipe categories
@@ -49,7 +50,7 @@ def update_category(category_id: int, field: str, value: str, updated_by: str = 
         raise CategoryNameViolationException(ex)
 
 
-def create_category(category_name: str, created_by: str = 'me') -> RecipeCategory:
+def create_category(category_name: str, created_by: int = 1) -> RecipeCategory:
     """Create category"""
 
     try:
@@ -65,7 +66,7 @@ def create_category(category_name: str, created_by: str = 'me') -> RecipeCategor
 
 def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
                   calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0,
-                  created_by: str = 'me', instructions: list[CreateInstructionInputModel]):
+                  created_by: int = 1, instructions: list[CreateInstructionInputModel]):
     """
     Create recipe
 
@@ -99,7 +100,8 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
         fats=fats,
         proteins=proteins,
         cholesterol=cholesterol,
-        created_by=created_by
+        created_by=created_by,
+        is_published=True
     )
 
     with db.connection.get_session() as session:
@@ -153,7 +155,11 @@ def update_recipe(recipe_id: int) -> None:
         complexity_len = (len([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
         time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in recipe.instructions]))
 
-        recipe.complexity = round(total_complexity / complexity_len, 1)
+        if complexity_len == 0:
+            recipe.complexity = 0
+        else:
+            recipe.complexity = round(total_complexity / complexity_len, 1)
+
         recipe.time_to_prepare = time_to_prepare
 
         session.add(recipe)
@@ -190,7 +196,7 @@ def get_instruction_by_id(instruction_id: int):
         return instruction
 
 
-def update_instruction(recipe_id: int, instruction_id, field: str, value: str):
+def update_instruction(recipe_id: int, instruction_id: int, field: str, value: str):
     """
     Update instruction
     :param recipe_id:
@@ -244,7 +250,7 @@ def create_instruction(recipe_id: int, instruction_request):
     return instruction
 
 
-def delete_instruction(recipe_id: int, instruction_id):
+def delete_instruction(recipe_id: int, instruction_id: int):
     recipe = get_recipe_by_id(recipe_id)
     instruction = get_instruction_by_id(instruction_id)
 
@@ -258,20 +264,17 @@ def delete_instruction(recipe_id: int, instruction_id):
         update_recipe(recipe_id=recipe_id)
 
 
-
 def delete_recipe(*, recipe_id: int, deleted_by: int):
     recipe = get_recipe_by_id(recipe_id)
 
     with db.connection.get_session() as session:
         session.execute(
             update(Recipe), [{
-                    "id": recipe.id,
-                    "is_deleted": True,
-                    "deleted_on": datetime.utcnow(),
-                    "deleted_by": deleted_by
-                }]
+                "id": recipe.id,
+                "is_deleted": True,
+                "deleted_on": datetime.utcnow(),
+                "deleted_by": deleted_by
+            }]
         )
         session.commit()
         return recipe
-
-

@@ -8,9 +8,9 @@ class Category(pydantic.BaseModel):
     """Category response"""
     id: int
     name: str
-    created_by: str
+    created_by: int
     created_on: datetime.datetime
-    updated_by: Optional[str] = None
+    updated_by: Optional[int] = None
     updated_on: Optional[datetime.datetime] = None
 
 
@@ -38,7 +38,7 @@ class Recipe(pydantic.BaseModel):
     proteins: Optional[float] = pydantic.Field(default=0, ge=0)
     cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
     time_to_prepare: int = pydantic.Field(gt=0)
-    created_by: str
+    created_by: int
     created_on: datetime.datetime
     updated_by: Optional[str]
     updated_on: datetime.datetime
