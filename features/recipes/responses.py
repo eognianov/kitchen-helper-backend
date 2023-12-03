@@ -8,9 +8,9 @@ class Category(pydantic.BaseModel):
     """Category response"""
     id: int
     name: str
-    created_by: str
+    created_by: int
     created_on: datetime.datetime
-    updated_by: Optional[str] = None
+    updated_by: Optional[int] = None
     updated_on: Optional[datetime.datetime] = None
 
 
