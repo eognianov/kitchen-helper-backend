@@ -35,7 +35,7 @@ app.include_router(features.users.role_router, prefix='/roles')
 app.include_router(features.recipes.category_router, prefix='/categories')
 app.include_router(features.recipes.recipes_router, prefix='/recipes')
 app.include_router(features.images.router, prefix='/images')
-app.mount('/media', fastapi.staticfiles.StaticFiles(directory='media'))
+app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 
 if __name__ == '__main__':
     uvicorn.run(app)
