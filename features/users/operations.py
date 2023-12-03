@@ -185,7 +185,7 @@ def check_user_role(user_id: int, role_id: int) -> bool:
     return True
 
 
-def create_role(name: str, created_by: str = 'me') -> Role:
+def create_role(name: str, created_by: int) -> Role:
     """
         Create role
 
@@ -206,7 +206,7 @@ def create_role(name: str, created_by: str = 'me') -> Role:
         return role
 
 
-def add_user_to_role(user_id: int, role_id: int, added_by: str = 'me') -> None:
+def add_user_to_role(user_id: int, role_id: int, added_by: int) -> None:
     """
         Assign role to user
 

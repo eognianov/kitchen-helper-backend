@@ -10,7 +10,7 @@ from .operations import create_new_user, signin_user, get_all_users, get_user_fr
 from .responses import UsersResponseModel, JwtTokenResponseModel, RolesResponseModel, RolesWithUsersResponseModel
 from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
-from .authentication import AdminOrMe
+from .authentication import AdminOrMe, Admin
 
 user_router = APIRouter()
 roles_router = APIRouter()
@@ -102,10 +102,11 @@ def patch_user(user: Annotated[common.authentication.AuthenticatedUser, fastapi.
 
 
 @roles_router.get('/')
-def get_all_roles(include_users: bool = False):
+def get_all_roles(user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(Admin)], include_users: bool = False):
     """
     Show all roles
 
+    :param user:
     :param include_users:
     :return:
     """
@@ -118,21 +119,29 @@ def get_all_roles(include_users: bool = False):
 
 
 @roles_router.get('/{role_id}', response_model=RolesWithUsersResponseModel)
-def get_role_with_users(role_id: int):
+def get_role_with_users(role_id: int, user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(Admin)]):
+    """
+    Get role
+
+    :param role_id:
+    :param user:
+    :return:
+    """
     role = features.users.operations.get_role(role_id)
     return role
 
 
 @roles_router.post('/', status_code=fastapi.status.HTTP_201_CREATED, response_model=RolesResponseModel)
-def create_role(role_request: CreateUserRole):
+def create_role(role_request: CreateUserRole, user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(Admin)],):
     """
         Create role
 
         :param role_request:
+        :param user:
         :return:
     """
     try:
-        role = features.users.operations.create_role(role_request.name)
+        role = features.users.operations.create_role(role_request.name, created_by=user.id)
     except features.users.exceptions.RoleAlreadyExists:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_409_CONFLICT,
@@ -143,17 +152,18 @@ def create_role(role_request: CreateUserRole):
 
 
 @user_router.post('/{user_id}/roles/{role_id}', status_code=fastapi.status.HTTP_201_CREATED)
-def add_user_to_role(user_id: int, role_id: int):
+def add_user_to_role(user_id: int, role_id: int, user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(Admin)],):
     """
         Add role to user
 
         :param user_id:
         :param role_id:
+        :param user:
         :return:
     """
 
     try:
-        features.users.operations.add_user_to_role(user_id, role_id)
+        features.users.operations.add_user_to_role(user_id, role_id, added_by=user.id)
     except features.users.exceptions.UserDoesNotExistException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -172,12 +182,13 @@ def add_user_to_role(user_id: int, role_id: int):
 
 
 @user_router.delete('/{user_id}/roles/{role_id}', status_code=fastapi.status.HTTP_204_NO_CONTENT)
-def remove_user_from_role(user_id: int, role_id: int):
+def remove_user_from_role(user_id: int, role_id: int, user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(Admin)],):
     """
         Remove user from role
 
         :param user_id:
         :param role_id:
+        :param user:
         :return:
     """
 
