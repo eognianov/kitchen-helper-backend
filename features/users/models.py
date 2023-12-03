@@ -17,6 +17,12 @@ class User(DbBaseModel):
 
     roles = relationship('Role', secondary='user_roles', back_populates='users', lazy='selectin')
 
+    @property
+    def user_role_ids(self) -> list[int]:
+        """Return list of roles ids"""
+
+        return [_.id for _ in self.roles]
+
 
 class Role(DbBaseModel):
     __tablename__ = 'Roles'

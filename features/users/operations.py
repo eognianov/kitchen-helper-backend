@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Union, Any, Type
+from typing import Union, Any, Type, Optional
 
 import bcrypt
 from jose import jwt
@@ -46,13 +46,19 @@ def create_new_user(user: RegisterUserInputModel) -> User:
     return db_user
 
 
-def signin_user(username: str, password: str) -> tuple:
-    # Get user and check if username and password are correct
+def signin_user(username: str, password: str) -> Optional[tuple]:
+    """
+    Return (token, token_type) if signin process is successful
+
+    :param username:
+    :param password:
+    :return:
+    """
+
     current_user = get_user_from_db(username=username)
     if not current_user or not check_password(current_user, password):
         features.users.exceptions.AccessDenied()
-    # Create jwt token
-    return create_token(current_user.id)
+    return create_token(current_user.id, current_user.user_role_ids)
 
 
 def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
@@ -93,7 +99,16 @@ def update_user(user_id: int, field: str, value: str, updated_by: str = '') -> T
         return session.query(User).where(User.id == user_id).first()
 
 
-def create_token(subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True) -> tuple:
+def create_token(user_id: int, user_role_ids: list[int] = None, expires_delta: timedelta = None, access: bool = True) -> tuple:
+    """
+    Create jwt token
+
+    :param user_id:
+    :param user_role_ids:
+    :param expires_delta:
+    :param access:
+    :return:
+    """
     minutes = config.jwt.access_token_expire_minutes if access else config.jwt.refresh_token_expire_minutes
     secret_key = config.jwt.secret_key if access else config.jwt.refresh_secret_key
     algorithm = config.jwt.algorithm
@@ -103,7 +118,9 @@ def create_token(subject: Union[str, Any], expires_delta: timedelta = None, acce
     else:
         expires_delta = datetime.utcnow() + timedelta(minutes=minutes)
 
-    to_encode = {"exp": expires_delta, "sub": str(subject)}
+    to_encode = {"exp": expires_delta, "sub": user_id}
+    if user_role_ids:
+        to_encode["roles"] = user_role_ids
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm)
 
     return encoded_jwt, token_type
