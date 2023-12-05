@@ -255,30 +255,54 @@ def fiter_recipes(filtered_recipes: Query, filters: str) -> Query:
     return filtered_recipes
 
 
-def get_all_recipes(page_num: int, page_size: int, sort: str, filters: str) -> PageResponse:
+def get_all_recipes(paginated_input_model) -> PageResponse:
     """
     Get all recipes
-    :param page_num:
-    :param page_size:
-    :param sort:
-    :param filters:
+    :param paginated_input_model:
     :return:
     """
 
     with db.connection.get_session() as session:
         filtered_recipes = session.query(Recipe) \
             .join(RecipeCategory) \
-            .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+            .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True))) \
 
-        if filters:
-            filtered_recipes = fiter_recipes(filtered_recipes, filters)
+        page_size = paginated_input_model.page_size
+        limit = paginated_input_model.page_size
+        ordering = paginated_input_model.sorting
+        offset = (paginated_input_model.page - 1) * limit
 
-        if sort and filtered_recipes.count() > 0:
-            filtered_recipes = sort_recipes(filtered_recipes, sort)
+        total_items = filtered_recipes.count()
+        total_pages = math.ceil(total_items / page_size)
+        [print('*'*50) for _ in range(5)]
+        print(paginated_input_model.sorting)
+        [print('*'*50) for _ in range(5)]
+        filtered_recipes = filtered_recipes.filter().order_by(*ordering).offset(offset).limit(limit)
 
-        response = paginate_recipes(filtered_recipes, page_num, page_size, sort, filters)
-
+        response = PageResponse(
+            page_number=paginated_input_model.page,
+            page_size=paginated_input_model.page_size,
+            previous_page="pr",
+            next_page='np',
+            total_pages=total_pages,
+            total_items=total_items,
+            recipes=[RecipeResponse(**r.__dict__) for r in filtered_recipes],
+        )
         return response
+    # with db.connection.get_session() as session:
+    #     filtered_recipes = session.query(Recipe) \
+    #         .join(RecipeCategory) \
+    #         .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+    #
+    #     if filters:
+    #         filtered_recipes = fiter_recipes(filtered_recipes, filters)
+    #
+    #     if sort and filtered_recipes.count() > 0:
+    #         filtered_recipes = sort_recipes(filtered_recipes, sort)
+    #
+    #     response = paginate_recipes(filtered_recipes, page_num, page_size, sort, filters)
+    #
+    #     return response
 
 
 def get_recipe_by_id(recipe_id: int):

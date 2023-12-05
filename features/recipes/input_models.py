@@ -2,6 +2,9 @@
 from typing import Optional, Union
 
 import pydantic
+from sqlalchemy import desc, asc
+
+from features.recipes.models import Recipe
 
 INSTRUCTION_CATEGORIES = ('BREAKFAST', 'LUNCH', 'DINNER')
 
@@ -99,3 +102,38 @@ class PatchInstructionInputModel(pydantic.BaseModel):
             self.value = self.value.capitalize()
 
         return self
+
+
+class PaginateRecipiesInputModel(pydantic.BaseModel):
+    """Paginate Recipes"""
+    page: Optional[int] = pydantic.Field(gt=0, default=1)
+    page_size: Optional[int] = pydantic.Field(gt=0, default=10)
+    sorting: Optional[str] = None
+    filters: Optional[str] = None
+
+    @pydantic.field_validator('sorting', mode='after')
+    @classmethod
+    def validate_sorting(cls, field: str):
+        order_expression = []
+        if field:
+            sorting = field.split(',')
+            for data in sorting:
+                data = data.split('-')
+                sort_column = data[0]
+                direction = data[1] if len(data) > 1 else None
+
+                if direction and direction.lower() not in ['asc', 'desc']:
+                    raise ValueError(f"Invalid sorting direction for {sort_column} column")
+
+                column = getattr(Recipe, sort_column, None)
+                ordering = desc(column) if direction == 'desc' else asc(column)
+                order_expression.append(ordering)
+            else:
+                order_expression.append(asc(Recipe.id))
+        return order_expression
+
+    @pydantic.field_validator('filters', mode='after')
+    @classmethod
+    def validate_filters(cls, field: str):
+        if field:
+            return field.upper()

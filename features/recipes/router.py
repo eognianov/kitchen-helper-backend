@@ -7,7 +7,8 @@ import features.recipes.operations
 import features.recipes.responses
 from features.recipes.responses import Category
 from features.recipes.responses import InstructionResponse, PageResponse, RecipeResponse
-from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
+from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, \
+    PaginateRecipiesInputModel
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel
 
 categories_router = fastapi.APIRouter()
@@ -86,25 +87,22 @@ def update_category(category_id: int = fastapi.Path(),
 
 
 @recipes_router.get('/', response_model=PageResponse)
-def get_all_recipes(
-        page_num: int = fastapi.Query(default=1, gt=0, description="Page number"),
-        page_size: int = fastapi.Query(default=10, gt=0, description="Items per page"),
-        sort: str = fastapi.Query(None, description="Sort criteria: category.name-asc,complexity-desc"),
-        filters: str = fastapi.Query(None,
-                                     description="Filters criteria: category=category1*category2,time_to_prepare=1-100,"
-                                                 "complexity=1-5,created_by=1")
-):
+def get_all_recipes(paginated_input_model: PaginateRecipiesInputModel = fastapi.Depends()
+                    # page_num: int = fastapi.Query(default=1, gt=0, description="Page number"),
+                    # page_size: int = fastapi.Query(default=10, gt=0, description="Items per page"),
+                    # sort: str = fastapi.Query(None, description="Sort criteria: category.name-asc,complexity-desc"),
+                    # filters: str = fastapi.Query(None,
+                    #                              description="Filters criteria: category=category1*category2,time_to_prepare=1-100,"
+                    #                                          "complexity=1-5,created_by=1"
+
+                    ):
     """
     Get all recipes
-    :param page_num:
-    :param page_size:
-    :param sort:
-    :param filters:
+
     """
 
     try:
-        return features.recipes.operations.get_all_recipes(page_num=page_num, page_size=page_size, sort=sort,
-                                                           filters=filters)
+        return features.recipes.operations.get_all_recipes(paginated_input_model)
     except features.recipes.exceptions.InvalidSortDirection:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
