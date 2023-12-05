@@ -14,6 +14,12 @@ class Category(pydantic.BaseModel):
     updated_on: Optional[datetime.datetime] = None
 
 
+class CategoryShortResponse(pydantic.BaseModel):
+    """Category response"""
+    id: int
+    name: str
+
+
 class InstructionResponse(pydantic.BaseModel):
     """Instruction response"""
 
@@ -38,16 +44,18 @@ class RecipeResponse(pydantic.BaseModel):
     proteins: Optional[float] = pydantic.Field(default=0, ge=0)
     cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
     time_to_prepare: int = pydantic.Field(gt=0)
+    complexity: int
     created_by: int
     created_on: datetime.datetime
     updated_by: Optional[int]
     updated_on: datetime.datetime
-    category: Category | Any = None
+
+    category: CategoryShortResponse | Any = None
     instructions: list[InstructionResponse] | Any = None
 
     def model_post_init(self, __context: Any):
         if self.category:
-            self.category = Category(**self.category.__dict__)
+            self.category = CategoryShortResponse(**self.category.__dict__)
 
         if self.instructions:
             self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]

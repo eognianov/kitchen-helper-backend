@@ -87,10 +87,13 @@ def update_category(category_id: int = fastapi.Path(),
 
 @recipes_router.get('/', response_model=PageResponse)
 def get_all_recipes(
-        page_num: int = fastapi.Query(default=1, ge=0),
-        page_size: int = fastapi.Query(default=10, ge=0),
-        sort: str = fastapi.Query(None),
-        sort_direction: str = fastapi.Query(None),
+        page_num: int = fastapi.Query(default=1, gt=0, description="Page number"),
+        page_size: int = fastapi.Query(default=10, gt=0, description="Items per page"),
+        sort: str = fastapi.Query(None, description="Sort criteria: sort=category.name+asc,complexity+desc"),
+        # sort_direction: str = fastapi.Query(None, description="Sort direction"),
+        category: str = fastapi.Query(None, description="Filter by category: category=category1,category2"),
+        time_to_prepare: str = fastapi.Query(None, description="Filter by time to prepare range: time_to_prepare=0,10"),
+        complexity: str = fastapi.Query(None, description="Filter by complexity range: complexity=1,5")
 ):
     """
     Get all recipes
@@ -98,12 +101,15 @@ def get_all_recipes(
     :param page_num:
     :param page_size:
     :param sort:
-    :param sort_direction:
+    :param category:
+    :param time_to_prepare:
+    :param complexity:
     """
 
     try:
         return features.recipes.operations.get_all_recipes(
-            page_num=page_num, page_size=page_size, sort=sort, sort_direction=sort_direction)
+            page_num=page_num, page_size=page_size, sort=sort, category=category,
+            time_to_prepare=time_to_prepare, complexity=complexity)
     except features.recipes.exceptions.InvalidPageNumber:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -119,7 +125,11 @@ def get_all_recipes(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Invalid ordering column"
         )
-
+    except features.recipes.exceptions.InvalidRange:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Invalid range for time to prepare or complexity"
+        )
 
 @recipes_router.get('/{recipe_id}', response_model=RecipeResponse)
 def get_recipe(recipe_id: int = fastapi.Path()):
