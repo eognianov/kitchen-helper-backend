@@ -146,7 +146,7 @@ def sort_recipes(filtered_recipes: Query, sort: str) -> Query:
             if column is None:
                 if sort_column == 'category.name':
                     column = getattr(RecipeCategory, 'name', None)
-                elif sort == 'category.id':
+                elif sort_column == 'category.id':
                     column = getattr(RecipeCategory, 'id', None)
                 else:
                     raise InvalidColumn
@@ -171,8 +171,6 @@ def paginate_recipes(filtered_recipes: Query, page_num: int, page_size: int, sor
     :param filters:
     :return:
     """
-    start = (page_num - 1) * page_size
-    end = start + page_size
 
     current_page = page_num
 
@@ -183,7 +181,10 @@ def paginate_recipes(filtered_recipes: Query, page_num: int, page_size: int, sor
         total_pages = 1
 
     if current_page > total_pages:
-        raise InvalidPageNumber
+        current_page = total_pages
+
+    start = (current_page - 1) * page_size
+    end = start + page_size
 
     previous_page = current_page - 1 if current_page - 1 > 0 else None
     next_page = current_page + 1 if filtered_recipes[end: (end + page_size)] != [] else None
