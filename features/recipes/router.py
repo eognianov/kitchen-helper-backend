@@ -92,14 +92,10 @@ def get_all_recipes(
         sort: str = fastapi.Query(None, description="Sort criteria: category.name-asc,complexity-desc"),
         filters: str = fastapi.Query(None,
                                      description="Filters criteria: category=category1*category2,time_to_prepare=1-100,"
-                                                 "complexity=1-5,created_by=1"),
-        # category: str = fastapi.Query(None, description="Filter by category: category1,category2"),
-        # time_to_prepare: str = fastapi.Query(None, description="Filter by time to prepare range: 0,200"),
-        # complexity: str = fastapi.Query(None, description="Filter by complexity range: 1,5")
+                                                 "complexity=1-5,created_by=1")
 ):
     """
     Get all recipes
-
     :param page_num:
     :param page_size:
     :param sort:
@@ -109,11 +105,6 @@ def get_all_recipes(
     try:
         return features.recipes.operations.get_all_recipes(page_num=page_num, page_size=page_size, sort=sort,
                                                            filters=filters)
-    except features.recipes.exceptions.InvalidPageNumber:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Invalid page number"
-        )
     except features.recipes.exceptions.InvalidSortDirection:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -168,7 +159,6 @@ def update_instructions(recipe_id: int = fastapi.Path(),
                         patch_instruction_input_model: PatchInstructionInputModel = fastapi.Body()):
     """
     Update instructions
-
     :param recipe_id:
     :param instruction_id:
     :param patch_instruction_input_model:
@@ -222,7 +212,6 @@ def create_instruction(recipe_id: int = fastapi.Path(),
 def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id=fastapi.Path()):
     """
     Delete instruction
-
     :param recipe_id:
     :param instruction_id:
     :return:

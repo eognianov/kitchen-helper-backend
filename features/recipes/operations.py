@@ -1,7 +1,7 @@
 """Recipes feature business logic"""
 import math
 from datetime import datetime
-from typing import Type, Any, List
+from typing import Type
 
 import sqlalchemy.exc
 from sqlalchemy import update, and_, desc, asc, or_
@@ -10,7 +10,7 @@ from sqlalchemy.orm import Query
 import db.connection
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
     InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException, \
-    InvalidPageNumber, InvalidSortDirection, InvalidColumn, InvalidRange
+    InvalidSortDirection, InvalidColumn, InvalidRange
 from .input_models import CreateInstructionInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse, PageResponse, RecipeResponse
@@ -121,40 +121,38 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
 def sort_recipes(filtered_recipes: Query, sort: str) -> Query:
     """"
     Sort recipes
-
     :param filtered_recipes:
     :param sort:
     :return:
     """
 
-    if sort:
-        sort = sort.split(',')
+    sort = sort.split(',')
 
-        order_expression = []
+    order_expression = []
 
-        for data in sort:
-            data = data.split('-')
+    for data in sort:
+        data = data.split('-')
 
-            sort_column = data[0]
-            direction = data[1] if len(data) > 1 else None
+        sort_column = data[0]
+        direction = data[1] if len(data) > 1 else None
 
-            if direction and direction.lower() not in ['asc', 'desc']:
-                raise InvalidSortDirection
+        if direction and direction.lower() not in ['asc', 'desc']:
+            raise InvalidSortDirection
 
-            column = getattr(Recipe, sort_column, None)
+        column = getattr(Recipe, sort_column, None)
 
-            if column is None:
-                if sort_column == 'category.name':
-                    column = getattr(RecipeCategory, 'name', None)
-                elif sort_column == 'category.id':
-                    column = getattr(RecipeCategory, 'id', None)
-                else:
-                    raise InvalidColumn
+        if column is None:
+            if sort_column == 'category.name':
+                column = getattr(RecipeCategory, 'name', None)
+            elif sort_column == 'category.id':
+                column = getattr(RecipeCategory, 'id', None)
+            else:
+                raise InvalidColumn
 
-            ordering = desc(column) if direction == 'desc' else asc(column)
-            order_expression.append(ordering)
+        ordering = desc(column) if direction == 'desc' else asc(column)
+        order_expression.append(ordering)
 
-        filtered_recipes = filtered_recipes.order_by(*order_expression)
+    filtered_recipes = filtered_recipes.order_by(*order_expression)
 
     return filtered_recipes
 
@@ -163,7 +161,6 @@ def paginate_recipes(filtered_recipes: Query, page_num: int, page_size: int, sor
                      filters: str) -> PageResponse:
     """"
     Paginate recipes
-
     :param filtered_recipes:
     :param page_num:
     :param page_size:
@@ -188,6 +185,9 @@ def paginate_recipes(filtered_recipes: Query, page_num: int, page_size: int, sor
 
     previous_page = current_page - 1 if current_page - 1 > 0 else None
     next_page = current_page + 1 if filtered_recipes[end: (end + page_size)] != [] else None
+
+    filters = f'&filters={filters}' if filters else ''
+    sort = f'&sort={sort}' if sort else ''
 
     if previous_page:
         previous_page = f'recipes/?page_num={previous_page}&page_size={page_size}{sort}{filters}'
@@ -217,8 +217,16 @@ def extract_range(data):
     return start, end
 
 
-def fiter_recipes(filtered_recipes, filters):
+def fiter_recipes(filtered_recipes: Query, filters: str) -> Query:
+    """
+    Get all recipes
+    :param filtered_recipes:
+    :param filters:
+    :return:
+    """
+
     filters = filters.split(',')
+
     for data in filters:
         data = data.split('=')
         filter_name = data[0]
@@ -250,11 +258,11 @@ def fiter_recipes(filtered_recipes, filters):
 def get_all_recipes(page_num: int, page_size: int, sort: str, filters: str) -> PageResponse:
     """
     Get all recipes
-
     :param page_num:
     :param page_size:
     :param sort:
     :param filters:
+    :return:
     """
 
     with db.connection.get_session() as session:
@@ -264,11 +272,9 @@ def get_all_recipes(page_num: int, page_size: int, sort: str, filters: str) -> P
 
         if filters:
             filtered_recipes = fiter_recipes(filtered_recipes, filters)
-        filters = f'&filters={filters}' if filters else ''
 
         if sort and filtered_recipes.count() > 0:
             filtered_recipes = sort_recipes(filtered_recipes, sort)
-        sort = f'&sort={sort}' if sort else ''
 
         response = paginate_recipes(filtered_recipes, page_num, page_size, sort, filters)
 
@@ -292,7 +298,6 @@ def get_recipe_by_id(recipe_id: int):
 def update_recipe(recipe_id: int) -> None:
     """
     Update recipe after adding or editing instructions
-
     :param recipe_id:
     :return:
     """
