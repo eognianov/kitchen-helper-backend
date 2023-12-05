@@ -89,11 +89,13 @@ def update_category(category_id: int = fastapi.Path(),
 def get_all_recipes(
         page_num: int = fastapi.Query(default=1, gt=0, description="Page number"),
         page_size: int = fastapi.Query(default=10, gt=0, description="Items per page"),
-        sort: str = fastapi.Query(None, description="Sort criteria: sort=category.name+asc,complexity+desc"),
-        # sort_direction: str = fastapi.Query(None, description="Sort direction"),
-        category: str = fastapi.Query(None, description="Filter by category: category=category1,category2"),
-        time_to_prepare: str = fastapi.Query(None, description="Filter by time to prepare range: time_to_prepare=0,10"),
-        complexity: str = fastapi.Query(None, description="Filter by complexity range: complexity=1,5")
+        sort: str = fastapi.Query(None, description="Sort criteria: category.name-asc,complexity-desc"),
+        filters: str = fastapi.Query(None,
+                                     description="Filters criteria: category=category1*category2,time_to_prepare=1-100,"
+                                                 "complexity=1-5,created_by=1"),
+        # category: str = fastapi.Query(None, description="Filter by category: category1,category2"),
+        # time_to_prepare: str = fastapi.Query(None, description="Filter by time to prepare range: 0,200"),
+        # complexity: str = fastapi.Query(None, description="Filter by complexity range: 1,5")
 ):
     """
     Get all recipes
@@ -101,15 +103,12 @@ def get_all_recipes(
     :param page_num:
     :param page_size:
     :param sort:
-    :param category:
-    :param time_to_prepare:
-    :param complexity:
+    :param filters:
     """
 
     try:
-        return features.recipes.operations.get_all_recipes(
-            page_num=page_num, page_size=page_size, sort=sort, category=category,
-            time_to_prepare=time_to_prepare, complexity=complexity)
+        return features.recipes.operations.get_all_recipes(page_num=page_num, page_size=page_size, sort=sort,
+                                                           filters=filters)
     except features.recipes.exceptions.InvalidPageNumber:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -128,8 +127,9 @@ def get_all_recipes(
     except features.recipes.exceptions.InvalidRange:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Invalid range for time to prepare or complexity"
+            detail=f"Invalid filter entry"
         )
+
 
 @recipes_router.get('/{recipe_id}', response_model=RecipeResponse)
 def get_recipe(recipe_id: int = fastapi.Path()):

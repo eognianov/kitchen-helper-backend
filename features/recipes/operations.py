@@ -138,6 +138,9 @@ def sort_recipes(filtered_recipes: Query, sort: str) -> Query:
             sort_column = data[0]
             direction = data[1] if len(data) > 1 else None
 
+            if direction and direction.lower() not in ['asc', 'desc']:
+                raise InvalidSortDirection
+
             column = getattr(Recipe, sort_column, None)
 
             if column is None:
@@ -157,7 +160,7 @@ def sort_recipes(filtered_recipes: Query, sort: str) -> Query:
 
 
 def paginate_recipes(filtered_recipes: Query, page_num: int, page_size: int, sort: str,
-                     category: str, time_to_prepare: str, complexity: str) -> PageResponse:
+                     filters: str) -> PageResponse:
     """"
     Paginate recipes
 
@@ -165,9 +168,7 @@ def paginate_recipes(filtered_recipes: Query, page_num: int, page_size: int, sor
     :param page_num:
     :param page_size:
     :param sort:
-    :param category:
-    :param time_to_prepare:
-    :param complexity:
+    :param filters:
     :return:
     """
     start = (page_num - 1) * page_size
@@ -188,12 +189,10 @@ def paginate_recipes(filtered_recipes: Query, page_num: int, page_size: int, sor
     next_page = current_page + 1 if filtered_recipes[end: (end + page_size)] != [] else None
 
     if previous_page:
-        previous_page = f'recipes/?page_num={previous_page}&page_size={page_size}{sort}' \
-                        f'{category}{time_to_prepare}{complexity}'
+        previous_page = f'recipes/?page_num={previous_page}&page_size={page_size}{sort}{filters}'
 
     if next_page:
-        next_page = f'recipes/?page_num={next_page}&page_size={page_size}{sort}' \
-                    f'{category}{time_to_prepare}{complexity}'
+        next_page = f'recipes/?page_num={next_page}&page_size={page_size}{sort}{filters}'
 
     response = PageResponse(
         page_number=current_page,
@@ -209,7 +208,7 @@ def paginate_recipes(filtered_recipes: Query, page_num: int, page_size: int, sor
 
 def extract_range(data):
     try:
-        start, end = data.split(',')
+        start, end = data.split('-')
         start = float(start)
         end = float(end)
     except ValueError:
@@ -217,17 +216,44 @@ def extract_range(data):
     return start, end
 
 
-def get_all_recipes(page_num: int, page_size: int, sort: str, category: str,
-                    time_to_prepare: str, complexity: str) -> PageResponse:
+def fiter_recipes(filtered_recipes, filters):
+    filters = filters.split(',')
+    for data in filters:
+        data = data.split('=')
+        filter_name = data[0]
+        conditions = data[1] if len(data) > 1 else None
+
+        if filter_name == 'category':
+            conditions = conditions.split('*')
+            filtered_recipes = filtered_recipes \
+                .filter(or_(RecipeCategory.name.ilike(x) for x in conditions))
+
+        if filter_name == 'complexity':
+            start, end = extract_range(conditions)
+            filtered_recipes = filtered_recipes.filter(Recipe.complexity.between(start, end))
+
+        if filter_name == 'time_to_prepare':
+            start, end = extract_range(conditions)
+            filtered_recipes = filtered_recipes.filter(Recipe.time_to_prepare.between(start, end))
+
+        if filter_name == 'created_by':
+            try:
+                creator_id = int(conditions)
+            except ValueError:
+                raise InvalidRange
+            filtered_recipes = filtered_recipes.filter(Recipe.created_by == creator_id)
+
+    return filtered_recipes
+
+
+def get_all_recipes(page_num: int, page_size: int, sort: str, filters: str) -> PageResponse:
     """
     Get all recipes
 
     :param page_num:
     :param page_size:
     :param sort:
-    :param category:
-    :param time_to_prepare:
-    :param complexity:
+    :param filters:
     """
 
     with db.connection.get_session() as session:
@@ -235,27 +261,15 @@ def get_all_recipes(page_num: int, page_size: int, sort: str, category: str,
             .join(RecipeCategory) \
             .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
 
-        if category:
-            filtered_recipes = filtered_recipes \
-                .filter(or_(RecipeCategory.name.ilike(x) for x in category.split(',')))
-        category = f'&category={category}' if category else ''
+        if filters:
+            filtered_recipes = fiter_recipes(filtered_recipes, filters)
+        filters = f'&filters={filters}' if filters else ''
 
-        if time_to_prepare:
-            start, end = extract_range(time_to_prepare)
-            filtered_recipes = filtered_recipes.filter(Recipe.time_to_prepare.between(start, end))
-        time_to_prepare = f'&time_to_prepare={time_to_prepare}' if time_to_prepare else ''
-
-        if complexity:
-            start, end = extract_range(complexity)
-            filtered_recipes = filtered_recipes.filter(Recipe.complexity.between(start, end))
-        complexity = f'&complexity={complexity}' if complexity else ''
-
-        if sort:
+        if sort and filtered_recipes.count() > 0:
             filtered_recipes = sort_recipes(filtered_recipes, sort)
         sort = f'&sort={sort}' if sort else ''
 
-        response = paginate_recipes(filtered_recipes, page_num, page_size, sort, category,
-                                    time_to_prepare, complexity)
+        response = paginate_recipes(filtered_recipes, page_num, page_size, sort, filters)
 
         return response
 
