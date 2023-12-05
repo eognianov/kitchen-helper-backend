@@ -267,7 +267,7 @@ async def reset_password(token: str, new_password: str):
         )
     try:
         user = get_user_from_db(pk=reset_token.user_id)
-        features.users.operations.update_user_password(user, new_password)
+        features.users.operations.update_user_password(user, new_password, reset_token)
 
     except ValueError as e:
         raise HTTPException(

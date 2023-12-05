@@ -17,7 +17,6 @@ from fastapi.templating import Jinja2Templates
 from httpx import AsyncClient
 from fastapi import HTTPException
 
-
 import configuration
 import db.connection
 import features.users.exceptions
@@ -60,7 +59,6 @@ def create_new_user(user: RegisterUserInputModel) -> User:
     """
 
     with get_session() as session:
-
         if get_user_from_db(username=user.username, email=user.email):
             raise features.users.exceptions.UserAlreadyExists()
 
@@ -301,40 +299,55 @@ def remove_user_from_role(user_id: int, role_id: int) -> None:
         session.commit()
 
 
-async def send_email(*, token: ConfirmationToken, recipient: User):
+def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
     """
-    Send email for email confirmation or reset password
+    Prepare email template
 
+    :param token_type:
     :param token:
     :param recipient:
+    :return:
     """
 
-    brevo = configuration.BrevoSettings()
     config = configuration.Config()
 
-    templates = Jinja2Templates('templates')
-    template_path = 'confirmation-email-template.html' if token.token_type == TokenTypes.EMAIL_CONFIRMATION \
+    templates = Jinja2Templates('features/users/templates')
+    template_path = 'confirmation-email-template.html' if token_type == TokenTypes.EMAIL_CONFIRMATION \
         else 'password-reset-email.html'
     template = templates.get_template(template_path)
 
-    confirmation_link = f'{config.server.host}:{config.server.port}/users/confirm-email/{token.token}'
+    confirmation_link = f'{config.server.host}:{config.server.port}/users/confirm-email/{token}'
 
     html_content = template.render(
-        recipient_name=recipient.username,
+        recipient_name=recipient,
         token_confirmation_link=confirmation_link,
     )
 
-    api_url = brevo.api_url
+    return html_content
+
+
+async def _send_mail(*, token_type: str, recipient_email: str, username: str, html_content):
+    """
+    Create headers, payload and send email
+
+    :param token_type:
+    :param recipient_email:
+    :param username:
+    :param html_content:
+    :return:
+    """
+    brevo = configuration.BrevoSettings()
+    api_url = brevo.email_api_url
     headers = {
         "Content-Type": "application/json",
-        "api-key": brevo.api_key,
+        "api-key": brevo.email_api_key,
         "Accept": "application/json",
     }
 
     payload = {
         "sender": {"name": brevo.email_sender, "email": brevo.email_from},
-        "to": [{"email": recipient.email, "name": recipient.username}],
-        "subject": features.users.constants.email_subjects[token.token_type],
+        "to": [{"email": recipient_email, "name": username}],
+        "subject": features.users.constants.EMAIL_SUBJECT[token_type],
         "htmlContent": html_content,
     }
 
@@ -349,6 +362,27 @@ async def send_email(*, token: ConfirmationToken, recipient: User):
 
         result = response.json()
         return result
+
+
+async def send_email(*, token: ConfirmationToken, recipient: User):
+    """
+    Send email for email confirmation or reset password
+
+    :param token:
+    :param recipient:
+    :return:
+    """
+
+    html_content = _prepare_mail_template(
+        token_type=token.token_type, token=token.token, recipient=recipient.username
+    )
+    response = await _send_mail(
+        token_type=token.token_type,
+        recipient_email=recipient.email,
+        username=recipient.username,
+        html_content=html_content
+    )
+    return response
 
 
 def expire_all_existing_tokens_for_user(*, user: User, token_type) -> None:
@@ -375,6 +409,7 @@ def expire_all_existing_tokens_for_user(*, user: User, token_type) -> None:
                 token.expired_on = datetime.utcnow()
                 session.add(token)
                 session.commit()
+                session.refresh(token)
 
 
 def generate_email_password_token(*, user: User, token_type: str) -> ConfirmationToken:
@@ -393,9 +428,9 @@ def generate_email_password_token(*, user: User, token_type: str) -> Confirmatio
     expiration_minutes = None
 
     if token_type == TokenTypes.EMAIL_CONFIRMATION:
-        expiration_minutes = confirmation_token.email_token_expiration
+        expiration_minutes = confirmation_token.email_token_expiration_minutes
     elif token_type == TokenTypes.PASSWORD_RESET:
-        expiration_minutes = confirmation_token.password_token_expiration
+        expiration_minutes = confirmation_token.password_token_expiration_minutes
 
     token = secrets.token_urlsafe(32)
 
@@ -428,7 +463,6 @@ def check_if_token_is_valid(token: str) -> ConfirmationToken | None:
     current_datetime = datetime.utcnow()
 
     with get_session() as session:
-
         token = (
             session.query(ConfirmationToken)
             .filter(ConfirmationToken.token == token, ConfirmationToken.expired_on > current_datetime)
@@ -456,7 +490,7 @@ def confirm_email(token: ConfirmationToken) -> User:
     return user
 
 
-def update_user_password(user: User, new_password: str) -> User:
+def update_user_password(user: User, new_password: str, token: ConfirmationToken) -> User:
     """
     Validate the new password
     Check if the new password does not match the old password
@@ -465,6 +499,7 @@ def update_user_password(user: User, new_password: str) -> User:
 
     :param user:
     :param new_password:
+    :param token:
     :return:
     """
 
@@ -477,9 +512,6 @@ def update_user_password(user: User, new_password: str) -> User:
     user.password = hashed_password
 
     with get_session() as session:
-        token = session.query(
-            ConfirmationToken
-        ).filter(ConfirmationToken.user_id == user.id).first()
         token.expired_on = datetime.utcnow()
         session.add(token)
         session.add(user)

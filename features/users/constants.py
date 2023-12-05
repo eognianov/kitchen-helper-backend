@@ -6,7 +6,7 @@ class TokenTypes(Enum):
     PASSWORD_RESET = 'password_reset'
 
 
-email_subjects = {
+EMAIL_SUBJECT = {
     'email_confirmation': 'Email confirmation',
     'password_reset': 'Password reset'
 }

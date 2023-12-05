@@ -2,7 +2,7 @@
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
-from pydantic import BaseModel, model_validator, Field
+from pydantic import BaseModel, model_validator
 from typing import Optional, List
 from enum import StrEnum, auto
 
@@ -15,6 +15,11 @@ _ENV_FILES_PATHS = (
     pathlib.Path(f'{ROOT_PATH}/.env.dev'),
     pathlib.Path(f'{ROOT_PATH}/.env.prod'),
 )
+
+
+class CustomBaseSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
+                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
 
 class CaseInsensitiveEnum(StrEnum):
@@ -77,57 +82,42 @@ class PostgresConfig(BaseModel):
         return self.host and self.port and self.user and self.password and self.database
 
 
-class JwtToken(BaseSettings):
-    """JWT Token options"""
-    access_token_expire_minutes: int = Field(default_factory=int, alias='jwt_access_token_expire_minutes')
-    refresh_token_expire_minutes: int = Field(default_factory=int, alias='jwt_refresh_token_expire_minutes')
-    algorithm: str = Field(alias='jwt_algorithm')
-    secret_key: str = Field(alias='jwt_secret_key')
-    refresh_secret_key: str = Field(alias='jwt_refresh_secret_key')
-
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
+class JwtToken(CustomBaseSettings):
+    """JWT Token settings"""
+    access_token_expire_minutes: int
+    refresh_token_expire_minutes: int
+    algorithm: str
+    secret_key: str
+    refresh_secret_key: str
 
 
-class CorsSettings(BaseSettings):
-    """CORSMiddleware options"""
-    allow_origins: List[str] = Field(default_factory=list, alias='cors_allow_origins')
-    allow_methods: List[str] = Field(default_factory=list, alias='cors_allow_methods')
-    allow_headers: List[str] = Field(default_factory=list, alias='cors_allow_headers')
-
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
+class CorsSettings(CustomBaseSettings):
+    """CORSMiddleware settings"""
+    allow_origins: List[str]
+    allow_methods: List[str]
+    allow_headers: List[str]
 
 
-class BrevoSettings(BaseSettings):
+class BrevoSettings(CustomBaseSettings):
     """Brevo settings"""
-    api_url: str = Field(alias='brevo_api_url')
-    api_key: str = Field(alias='brevo_api_key')
-    email_sender: str = Field(alias='brevo_email_sender')
-    email_from: str = Field(alias='brevo_email_from')
-
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
+    email_api_key: str
+    email_api_url: str
+    email_sender: str
+    email_from: str
 
 
-class ConfirmationToken(BaseSettings):
+class ConfirmationToken(CustomBaseSettings):
     """Email confirmation and password reset token"""
-    email_token_expiration: int = Field(alias='email_token_expiration_minutes')
-    password_token_expiration: int = Field(alias='password_token_expiration_minutes')
-
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
+    email_token_expiration_minutes: int
+    password_token_expiration_minutes: int
 
 
 class ServerConfiguration(BaseModel):
     host: str
     port: int
 
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
-
-class Config(BaseSettings):
+class Config(CustomBaseSettings):
     """Base configurations"""
 
     context: ContextOptions = ContextOptions.DEV
@@ -144,8 +134,6 @@ class Config(BaseSettings):
             return self.postgres.connection_string
         return self.sqlite.connection_string
 
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
     @model_validator(mode='after')
     def validate_db_configuration(self):
@@ -153,12 +141,9 @@ class Config(BaseSettings):
             raise ValueError('You have selected postgres as database but did not provide its configuration')
 
 
-class Cloudinary(BaseSettings):
+class Cloudinary(CustomBaseSettings):
     """Cloudinary settings"""
 
-    cloud_name: str = Field(alias='cloudinary__cloud_name')
-    api_key: str = Field(alias='cloudinary__api_key')
-    api_secret: str = Field(alias='cloudinary__api_secret')
-
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
+    cloud_name: str
+    api_key: str
+    api_secret: str
