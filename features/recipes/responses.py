@@ -71,15 +71,3 @@ class PageResponse(pydantic.BaseModel):
     total_pages: int
     total_items: int
     recipes: list[RecipeResponse]
-
-    def __post_init__(self):
-        [print('*' * 50) for _ in range(5)]
-        self.previous_page = 'previous page'
-        self.next_page = 'next page'
-
-    @pydantic.field_validator('previous_page', mode='after')
-    @classmethod
-    def replace_previous_page(cls, value):
-        # if cls.page_number > 1:
-        value = 'previous_page'
-        return value

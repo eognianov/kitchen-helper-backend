@@ -23,15 +23,3 @@ class InstructionNameViolationException(Exception):
 
 class RecipeWithInstructionNotFoundException(Exception):
     ...
-
-
-class InvalidSortDirection(Exception):
-    ...
-
-
-class InvalidColumn(Exception):
-    ...
-
-
-class InvalidRange(Exception):
-    ...

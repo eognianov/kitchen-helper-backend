@@ -1,10 +1,11 @@
 """Recipe feature input model"""
 from typing import Optional, Union
 
+import fastapi
 import pydantic
 from sqlalchemy import desc, asc
 
-from features.recipes.models import Recipe
+from features.recipes.models import Recipe, RecipeCategory
 
 INSTRUCTION_CATEGORIES = ('BREAKFAST', 'LUNCH', 'DINNER')
 
@@ -106,34 +107,23 @@ class PatchInstructionInputModel(pydantic.BaseModel):
 
 class PaginateRecipiesInputModel(pydantic.BaseModel):
     """Paginate Recipes"""
-    page: Optional[int] = pydantic.Field(gt=0, default=1)
-    page_size: Optional[int] = pydantic.Field(gt=0, default=10)
+    page: int = pydantic.Field(gt=0, default=1)
+    page_size: int = pydantic.Field(gt=0, default=10)
     sorting: Optional[str] = None
     filters: Optional[str] = None
 
     @pydantic.field_validator('sorting', mode='after')
     @classmethod
     def validate_sorting(cls, field: str):
-        order_expression = []
         if field:
-            sorting = field.split(',')
-            for data in sorting:
-                data = data.split('-')
-                sort_column = data[0]
+            check_sorting = field.split(',')
+            for data in check_sorting:
+                data = data.split(':')
+                column = data[0]
                 direction = data[1] if len(data) > 1 else None
-
-                if direction and direction.lower() not in ['asc', 'desc']:
-                    raise ValueError(f"Invalid sorting direction for {sort_column} column")
-
-                column = getattr(Recipe, sort_column, None)
-                ordering = desc(column) if direction == 'desc' else asc(column)
-                order_expression.append(ordering)
-            else:
-                order_expression.append(asc(Recipe.id))
-        return order_expression
-
-    @pydantic.field_validator('filters', mode='after')
-    @classmethod
-    def validate_filters(cls, field: str):
-        if field:
-            return field.upper()
+                if column not in ['name', 'id', 'category.name', 'category.id', 'created_by', 'time_to_prepare',
+                                  'created_on']:
+                    raise fastapi.HTTPException(status_code=422, detail=f"Invalid sorting column: {column}")
+                if direction and direction not in ['asc', 'desc']:
+                    raise fastapi.HTTPException(status_code=422, detail=f"Invalid sorting direction: {direction}")
+        return field
