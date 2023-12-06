@@ -123,6 +123,7 @@ def sort_recipes(sorting: str) -> list:
     :return:
     """
     order_expression = []
+
     if sorting:
         for data in sorting.split(','):
             data = data.split(':')
@@ -152,26 +153,26 @@ def fiter_recipes(filters: str) -> list:
     """
     filter_expression = []
 
-    filters = filters.split(',')
+    if filters:
+        filters = filters.split(',')
 
-    for data in filters:
-        data = data.split(':')
-        filter_name = data[0]
-        conditions = data[1]
+        for data in filters:
+            data = data.split(':')
+            filter_name = data[0]
+            conditions = data[1]
 
-        if filter_name == 'category':
-            conditions = conditions.split('*')
-            filter_expression.append(or_(RecipeCategory.name.ilike(x) for x in conditions))
-        elif filter_name == 'complexity':
-            start, end = conditions.split('-')
-            filter_expression.append(Recipe.complexity.between(int(start), int(end)))
-        elif filter_name == 'time_to_prepare':
-            start, end = conditions.split('-')
-            filter_expression.append(Recipe.time_to_prepare.between(int(start), int(end)))
-        elif filter_name == 'created_by':
-            creator_id = int(conditions)
-
-            filter_expression.append(Recipe.created_by == creator_id)
+            if filter_name == 'category':
+                conditions = conditions.split('*')
+                filter_expression.append(or_(RecipeCategory.name.ilike(x) for x in conditions))
+            elif filter_name == 'complexity':
+                start, end = conditions.split('-')
+                filter_expression.append(Recipe.complexity.between(int(start), int(end)))
+            elif filter_name == 'time_to_prepare':
+                start, end = conditions.split('-')
+                filter_expression.append(Recipe.time_to_prepare.between(int(start), int(end)))
+            elif filter_name == 'created_by':
+                creator_id = int(conditions)
+                filter_expression.append(Recipe.created_by == creator_id)
 
     return filter_expression
 
@@ -184,11 +185,9 @@ def get_all_recipes(paginated_input_model) -> PageResponse:
     """
     current_page = paginated_input_model.page
     page_size = paginated_input_model.page_size
-    sorting = paginated_input_model.sorting
-    filters = paginated_input_model.filters
 
-    order_expression = sort_recipes(sorting)
-    filter_expression = fiter_recipes(filters)
+    order_expression = sort_recipes(paginated_input_model.sorting)
+    filter_expression = fiter_recipes(paginated_input_model.filters)
 
     with db.connection.get_session() as session:
         filtered_recipes = session.query(Recipe) \
@@ -199,8 +198,7 @@ def get_all_recipes(paginated_input_model) -> PageResponse:
         total_items = filtered_recipes.count()
         total_pages = math.ceil(total_items / page_size)
 
-        if current_page > total_pages:
-            current_page = total_pages
+        current_page = total_pages if current_page > total_pages else current_page
 
         if total_items > 0:
             limit = page_size
@@ -208,8 +206,8 @@ def get_all_recipes(paginated_input_model) -> PageResponse:
 
             filtered_recipes = filtered_recipes.offset(offset).limit(limit)
 
-        sorting = f'&sorting={sorting}' if sorting else ''
-        filters = f'&filters={filters}' if filters else ''
+        sorting = f'&sorting={paginated_input_model.sorting}' if paginated_input_model.sorting else ''
+        filters = f'&filters={paginated_input_model.filters}' if paginated_input_model.filters else ''
 
         response = PageResponse(
             page_number=current_page,
