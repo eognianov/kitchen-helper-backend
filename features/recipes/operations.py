@@ -5,7 +5,6 @@ from typing import Type
 
 import sqlalchemy.exc
 from sqlalchemy import update, and_, desc, asc, or_
-from sqlalchemy.orm import Query
 
 import db.connection
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
@@ -117,133 +116,12 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     return recipe
 
 
-# def sort_recipes(filtered_recipes: Query, sort: str) -> Query:
-#     """"
-#     Sort recipes
-#     :param filtered_recipes:
-#     :param sort:
-#     :return:
-#     """
-#
-#     sort = sort.split(',')
-#
-#     order_expression = []
-#
-#     for data in sort:
-#         data = data.split('-')
-#
-#         sort_column = data[0]
-#         direction = data[1] if len(data) > 1 else None
-#
-#         column = getattr(Recipe, sort_column, None)
-#
-#         if column is None:
-#             if sort_column == 'category.name':
-#                 column = getattr(RecipeCategory, 'name', None)
-#             elif sort_column == 'category.id':
-#                 column = getattr(RecipeCategory, 'id', None)
-#
-#         ordering = desc(column) if direction == 'desc' else asc(column)
-#         order_expression.append(ordering)
-#
-#     filtered_recipes = filtered_recipes.order_by(*order_expression)
-#
-#     return filtered_recipes
-
-
-# def paginate_recipes(filtered_recipes: Query, page_num: int, page_size: int, sort: str,
-#                      filters: str) -> PageResponse:
-#     """"
-#     Paginate recipes
-#     :param filtered_recipes:
-#     :param page_num:
-#     :param page_size:
-#     :param sort:
-#     :param filters:
-#     :return:
-#     """
-#
-#     current_page = page_num
-#
-#     total_items = int(filtered_recipes.count())
-#     total_pages = math.ceil(total_items / page_size)
-#
-#     if total_pages == 0:
-#         total_pages = 1
-#
-#     if current_page > total_pages:
-#         current_page = total_pages
-#
-#     start = (current_page - 1) * page_size
-#     end = start + page_size
-#
-#     previous_page = current_page - 1 if current_page - 1 > 0 else None
-#     next_page = current_page + 1 if filtered_recipes[end: (end + page_size)] != [] else None
-#
-#     filters = f'&filters={filters}' if filters else ''
-#     sort = f'&sort={sort}' if sort else ''
-#
-#     if previous_page:
-#         previous_page = f'recipes/?page_num={previous_page}&page_size={page_size}{sort}{filters}'
-#
-#     if next_page:
-#         next_page = f'recipes/?page_num={next_page}&page_size={page_size}{sort}{filters}'
-#
-#     response = PageResponse(
-#         page_number=current_page,
-#         page_size=page_size,
-#         previous_page=previous_page,
-#         next_page=next_page,
-#         total_pages=total_pages,
-#         total_items=total_items,
-#         recipes=[RecipeResponse(**r.__dict__) for r in filtered_recipes[start:end]],
-#     )
-#     return response
-
-
-# def extract_range(data):
-#     start, end = data.split('-')
-#     start = float(start)
-#     end = float(end)
-
-
-# def fiter_recipes(filtered_recipes: Query, filters: str) -> Query:
-#     """
-#     Get all recipes
-#     :param filtered_recipes:
-#     :param filters:
-#     :return:
-#     """
-#
-#     filters = filters.split(',')
-#
-#     for data in filters:
-#         data = data.split('=')
-#         filter_name = data[0]
-#         conditions = data[1] if len(data) > 1 else None
-#
-#         if filter_name == 'category':
-#             conditions = conditions.split('*')
-#             filtered_recipes = filtered_recipes \
-#                 .filter(or_(RecipeCategory.name.ilike(x) for x in conditions))
-#
-#         if filter_name == 'complexity':
-#             start, end = extract_range(conditions)
-#             filtered_recipes = filtered_recipes.filter(Recipe.complexity.between(start, end))
-#
-#         if filter_name == 'time_to_prepare':
-#             start, end = extract_range(conditions)
-#             filtered_recipes = filtered_recipes.filter(Recipe.time_to_prepare.between(start, end))
-#
-#         if filter_name == 'created_by':
-#             creator_id = int(conditions)
-#
-#             filtered_recipes = filtered_recipes.filter(Recipe.created_by == creator_id)
-#
-#     return filtered_recipes
-
 def sort_recipes(sorting: str) -> list:
-    """Create order expression"""
+    """
+    Create order expression
+    :param sorting:
+    :return:
+    """
     order_expression = []
     if sorting:
         for data in sorting.split(','):
@@ -266,29 +144,51 @@ def sort_recipes(sorting: str) -> list:
     return order_expression
 
 
+def fiter_recipes(filters: str) -> list:
+    """
+    Create filter expression
+    :param filters:
+    :return:
+    """
+    filter_expression = []
+
+    filters = filters.split(',')
+
+    for data in filters:
+        data = data.split(':')
+        filter_name = data[0]
+        conditions = data[1]
+
+        if filter_name == 'category':
+            conditions = conditions.split('*')
+            filter_expression.append(or_(RecipeCategory.name.ilike(x) for x in conditions))
+        elif filter_name == 'complexity':
+            start, end = conditions.split('-')
+            filter_expression.append(Recipe.complexity.between(int(start), int(end)))
+        elif filter_name == 'time_to_prepare':
+            start, end = conditions.split('-')
+            filter_expression.append(Recipe.time_to_prepare.between(int(start), int(end)))
+        elif filter_name == 'created_by':
+            creator_id = int(conditions)
+
+            filter_expression.append(Recipe.created_by == creator_id)
+
+    return filter_expression
+
+
 def get_all_recipes(paginated_input_model) -> PageResponse:
     """
-    Get all recipes
+    Get all recipes paginated, sortd, and filtered
     :param paginated_input_model:
     :return:
     """
-
-    page_size = paginated_input_model.page_size
-    limit = paginated_input_model.page_size
-    offset = (paginated_input_model.page - 1) * limit
-    sorting = paginated_input_model.sorting
-    filters = paginated_input_model.filters
     current_page = paginated_input_model.page
     page_size = paginated_input_model.page_size
+    sorting = paginated_input_model.sorting
+    filters = paginated_input_model.filters
 
     order_expression = sort_recipes(sorting)
-    filter_expression = []
-
-    # [print('8' * 50) for _ in range(5)]
-    # print()
-    # print(sorting)
-    # print()
-    # [print('8' * 50) for _ in range(5)]
+    filter_expression = fiter_recipes(filters)
 
     with db.connection.get_session() as session:
         filtered_recipes = session.query(Recipe) \
@@ -299,32 +199,28 @@ def get_all_recipes(paginated_input_model) -> PageResponse:
         total_items = filtered_recipes.count()
         total_pages = math.ceil(total_items / page_size)
 
-        filtered_recipes = filtered_recipes.offset(offset).limit(limit)
+        if current_page > total_pages:
+            current_page = total_pages
+
+        if total_items > 0:
+            limit = page_size
+            offset = (current_page - 1) * limit
+
+            filtered_recipes = filtered_recipes.offset(offset).limit(limit)
+
+        sorting = f'&sorting={sorting}' if sorting else ''
+        filters = f'&filters={filters}' if filters else ''
 
         response = PageResponse(
             page_number=current_page,
             page_size=page_size,
-            previous_page=f"recipes/?page:{current_page - 1}&page_size={page_size}&sorting={sorting}" if current_page - 1 > 0 else None,
-            next_page=f"recipes/?page:{current_page + 1}&page_size={page_size}&sorting={sorting}" if current_page < total_pages else None,
+            previous_page=f"recipes/?page={current_page - 1}&page_size={page_size}{sorting}{filters}" if current_page - 1 > 0 else None,
+            next_page=f"recipes/?page={current_page + 1}&page_size={page_size}{sorting}{filters}" if current_page < total_pages else None,
             total_pages=total_pages,
             total_items=total_items,
             recipes=[RecipeResponse(**r.__dict__) for r in filtered_recipes],
         )
         return response
-    # with db.connection.get_session() as session:
-    #     filtered_recipes = session.query(Recipe) \
-    #         .join(RecipeCategory) \
-    #         .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
-    #
-    #     if filters:
-    #         filtered_recipes = fiter_recipes(filtered_recipes, filters)
-    #
-    #     if sort and filtered_recipes.count() > 0:
-    #         filtered_recipes = sort_recipes(filtered_recipes, sort)
-    #
-    #     response = paginate_recipes(filtered_recipes, page_num, page_size, sort, filters)
-    #
-    #     return response
 
 
 def get_recipe_by_id(recipe_id: int):

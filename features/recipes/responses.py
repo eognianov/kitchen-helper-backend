@@ -1,8 +1,8 @@
 """Recipes feature responses"""
 import datetime
 from typing import Optional, Any
+
 import pydantic
-from pydantic import validator
 
 
 class Category(pydantic.BaseModel):
@@ -63,7 +63,7 @@ class RecipeResponse(pydantic.BaseModel):
 
 
 class PageResponse(pydantic.BaseModel):
-    """Recipe pagination and filtering response"""
+    """Recipe pagination,sorting, and filtering response"""
     page_number: int
     page_size: int
     previous_page: str | None
