@@ -118,7 +118,7 @@ class PaginateRecipiesInputModel(pydantic.BaseModel):
 
     @pydantic.field_validator('page_size', mode='after')
     @classmethod
-    def validate_page(cls, field: str):
+    def validate_page_size(cls, field: str):
         if int(field) < 1:
             raise fastapi.HTTPException(status_code=422, detail=f"Page size must be greater than 0.")
         return field
