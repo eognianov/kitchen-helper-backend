@@ -10,7 +10,7 @@ from .exceptions import (
     IngredientCategoryIntegrityViolation,
     IngredientCategoryNameViolation,
 )
-from features.ingredients_api.models import Ingredient
+from features.recipes.ingredients.models import Ingredient
 from .models import IngredientCategory
 from sqlalchemy.exc import IntegrityError
 

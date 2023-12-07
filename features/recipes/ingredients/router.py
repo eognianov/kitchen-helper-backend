@@ -2,9 +2,9 @@
 from typing import List
 
 import fastapi
-from features.ingredients_api.operations import *
-from features.ingredients_api.responses import IngredientCategory
-import features.ingredients_api.exceptions
+from features.recipes.ingredients.operations import *
+from features.recipes.ingredients.responses import IngredientCategory
+import features.recipes.ingredients.exceptions
 from .input_models import (
     PatchIngredientInputModel,
     CreateIngredientInputModel,

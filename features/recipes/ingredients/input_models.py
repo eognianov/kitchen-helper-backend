@@ -11,20 +11,6 @@ class PatchIngredientCategoryInputModel(BaseModel):
     field: str
     value: str
 
-    # @pydantic.validator('field')
-    # @validator('field')
-    # def validate_field(cls, field: str):
-    #
-    #     allowed_fields_to_edit = [
-    #         'NAME'
-    #     ]
-    #
-    #     if field.upper() not in allowed_fields_to_edit:
-    #         raise ValueError(f"You are not allowed to edit {field} column")
-    #
-    #     raise field
-
-
 class CreateIngredientCategoryInputModel(BaseModel):
     """Create ingredient category"""
 

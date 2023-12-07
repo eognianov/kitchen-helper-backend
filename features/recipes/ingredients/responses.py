@@ -1,5 +1,5 @@
 import pydantic
-from features.ingredients_api.models import Ingredient
+from features.recipes.ingredients.models import Ingredient
 
 
 class IngredientCategory(pydantic.BaseModel):

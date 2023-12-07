@@ -1,9 +1,8 @@
 import pytest
 import db.connection
-from tests.fixtures import use_test_db
-from features.ingredients_api import operations
-from features.ingredients_api.models import Ingredient, IngredientCategory
-from features.ingredients_api.exceptions import (
+from features.recipes.ingredients import operations
+from features.recipes.ingredients.models import Ingredient, IngredientCategory
+from features.recipes.ingredients.exceptions import (
     IngredientNameViolationException,
     IngredientNotFoundException,
     IngredientCategoryNameViolation,
