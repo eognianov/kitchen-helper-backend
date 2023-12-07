@@ -76,7 +76,7 @@ def sort_recipes(sorting: str) -> list:
 
 def paginate_recipes(filtered_recipes: Query, paginated_input_model: PaginateRecipiesInputModel) -> PageResponse:
     current_page = paginated_input_model.page
-    page_size = paginated_input_model.size
+    page_size = paginated_input_model.page_size
 
     total_items = filtered_recipes.count()
     total_pages = math.ceil(total_items / page_size)
