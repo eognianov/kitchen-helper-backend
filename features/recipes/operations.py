@@ -1,6 +1,6 @@
 """Recipes feature business logic"""
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Type
 
 import sqlalchemy.exc
@@ -173,13 +173,17 @@ def fiter_recipes(filters: str) -> list:
             elif filter_name == 'created_by':
                 creator_id = int(conditions)
                 filter_expression.append(Recipe.created_by == creator_id)
+            elif filter_name == 'period':
+                number, condition = conditions.split('-')
+                period = datetime.now() - timedelta(days=int(number))
+                filter_expression.append(Recipe.created_on >= period)
 
     return filter_expression
 
 
 def get_all_recipes(paginated_input_model) -> PageResponse:
     """
-    Get all recipes paginated, sortd, and filtered
+    Get all recipes paginated, sorted, and filtered
     :param paginated_input_model:
     :return:
     """
@@ -260,7 +264,6 @@ def update_recipe(recipe_id: int) -> None:
 def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe: Recipe) -> None:
     """
     Create instructions
-
     :param instructions_request:
     :param recipe:
     :return:
