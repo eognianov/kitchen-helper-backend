@@ -105,7 +105,7 @@ class PatchInstructionInputModel(pydantic.BaseModel):
 class PaginateRecipiesInputModel(pydantic.BaseModel):
     """Paginate Recipes"""
     page: int = pydantic.Field(default=1)
-    size: int = pydantic.Field(default=10)
+    page_size: int = pydantic.Field(default=10)
     sorting: Optional[str] = None
     filters: Optional[str] = None
 
@@ -116,9 +116,9 @@ class PaginateRecipiesInputModel(pydantic.BaseModel):
             raise fastapi.HTTPException(status_code=422, detail=f"Page must be greater than 0.")
         return field
 
-    @pydantic.field_validator('size', mode='after')
+    @pydantic.field_validator('page_size', mode='after')
     @classmethod
-    def validate_seze(cls, field: str):
+    def validate_page_size(cls, field: str):
         if int(field) < 1:
             raise fastapi.HTTPException(status_code=422, detail=f"Page size must be greater than 0.")
         return field
@@ -184,7 +184,6 @@ class PaginateRecipiesInputModel(pydantic.BaseModel):
                     if type != 'days' or number < 1:
                         raise ValueError
                 except (ValueError, IndexError):
-                    raise fastapi.HTTPException(status_code=422,
-                                                detail=f"Invalid period, must be {{number}}-days")
+                    raise fastapi.HTTPException(status_code=422, detail=f"Invalid range period")
 
         return field
