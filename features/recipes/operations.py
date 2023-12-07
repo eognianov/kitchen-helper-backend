@@ -1,18 +1,17 @@
 """Recipes feature business logic"""
-import math
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Type
 
 import sqlalchemy.exc
-from sqlalchemy import update, and_, desc, asc, or_
+from sqlalchemy import update, and_
 
 import db.connection
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
     InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException
-from .helpers import sort_recipes, fiter_recipes, paginate_recipes
+from .helpers import sort_recipes, paginate_recipes, filter_recipes
 from .input_models import CreateInstructionInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
-from .responses import InstructionResponse, PageResponse, RecipeResponse
+from .responses import InstructionResponse, PageResponse
 
 
 def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
@@ -52,7 +51,7 @@ def update_category(category_id: int, field: str, value: str, updated_by: str = 
         raise CategoryNameViolationException(ex)
 
 
-def create_category(category_name: str, created_by: str = 'me') -> RecipeCategory:
+def create_category(category_name: str, created_by: int = 1) -> RecipeCategory:
     """Create category"""
 
     try:
@@ -124,14 +123,15 @@ def get_all_recipes(paginated_input_model) -> PageResponse:
     :return:
     """
 
-    order_expression = sort_recipes(paginated_input_model.sorting)
-    filter_expression = fiter_recipes(paginated_input_model.filters)
+    order_expression = sort_recipes(paginated_input_model.sort)
+    filter_expression = filter_recipes(paginated_input_model.filter)
 
     with db.connection.get_session() as session:
         filtered_recipes = session.query(Recipe) \
             .join(RecipeCategory) \
             .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)), *filter_expression) \
-            .order_by(*order_expression)
+            .order_by(*paginated_input_model.order_expression)
+
 
         response = paginate_recipes(filtered_recipes, paginated_input_model)
         return response

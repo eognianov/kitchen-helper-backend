@@ -1,8 +1,11 @@
 """Recipe feature input model"""
-from typing import Optional, Union
+from typing import Optional, Union, Any
 
 import fastapi
 import pydantic
+from sqlalchemy import desc, asc
+
+from features.recipes.models import Recipe, RecipeCategory
 
 INSTRUCTION_CATEGORIES = ('BREAKFAST', 'LUNCH', 'DINNER')
 
@@ -108,6 +111,9 @@ class PaginateRecipiesInputModel(pydantic.BaseModel):
     page_size: int = pydantic.Field(default=10)
     sorting: Optional[str] = None
     filters: Optional[str] = None
+    sort: Optional[list] = []
+    filter: Optional[dict] = {}
+    order_expression: Optional[list] = []
 
     @pydantic.field_validator('page', mode='after')
     @classmethod
@@ -123,67 +129,77 @@ class PaginateRecipiesInputModel(pydantic.BaseModel):
             raise fastapi.HTTPException(status_code=422, detail=f"Page size must be greater than 0.")
         return field
 
-    @pydantic.field_validator('sorting', mode='after')
-    @classmethod
-    def validate_sorting(cls, field: str):
+    def model_post_init(self, __context: Any) -> None:
 
-        if not field:
-            return
+        SORTING_FIELDS = ('id', 'name', 'created_by', 'time_to_prepare', 'created_on', 'updated_on',
+                          'complexity', 'category.name', 'category.id')
 
-        ALLOWED_FIELD_NAMES = ('id', 'name', 'created_by', 'time_to_prepare', 'created_on', 'updated_on',
-                               'complexity', 'category.name', 'category.id')
+        FILTERING_FIELDS = ('category', 'complexity', 'time_to_prepare', 'created_by', 'period')
 
-        check_sorting = field.split(',')
-        for data in check_sorting:
-            data = data.split(':')
-            column = data[0]
-            direction = data[1] if len(data) > 1 else None
+        if self.sorting:
+            check_sorting = self.sorting.split(',')
+            for data in check_sorting:
+                data = data.split(':')
+                column = data[0]
+                direction = data[1] if len(data) > 1 else None
 
-            if column not in ALLOWED_FIELD_NAMES:
-                raise fastapi.HTTPException(status_code=422, detail=f"Invalid sorting column: {column}")
-            elif direction and direction not in ['asc', 'desc']:
-                raise fastapi.HTTPException(status_code=422, detail=f"Invalid sorting direction: {direction}")
+                if column not in SORTING_FIELDS:
+                    raise fastapi.HTTPException(status_code=422, detail=f"Invalid sorting column: {column}")
 
-        return field
+                if direction and direction not in ['asc', 'desc']:
+                    raise fastapi.HTTPException(status_code=422, detail=f"Invalid sorting direction: {direction}")
 
-    @pydantic.field_validator('filters', mode='after')
-    @classmethod
-    def validate_filters(cls, field: str):
+                self.sort.append((column, direction))
 
-        if not field:
-            return
+                sort_column = getattr(Recipe, column, None)
+                if sort_column is None:
+                    sort_column = getattr(RecipeCategory, column.split('.')[1], None)
 
-        ALLOWED_FIELD_NAMES = ('category', 'complexity', 'time_to_prepare', 'created_by', 'period')
+                ordering = desc(sort_column) if direction == 'desc' else asc(sort_column)
+                self.order_expression.append(ordering)
+        else:
+            self.order_expression.append(desc(Recipe.created_on))
 
-        for data in field.split(','):
-            filter_name = data.split(':')[0]
-            conditions = data.split(':')[1] if len(data.split(':')) > 1 else None
+        if self.filters:
+            for data in self.filters.split(','):
+                filter_name = data.split(':')[0]
+                conditions = data.split(':')[1] if len(data.split(':')) > 1 else None
 
-            if filter_name not in ALLOWED_FIELD_NAMES:
-                raise fastapi.HTTPException(status_code=422, detail=f"Invalid filter: {filter_name}")
-            elif not conditions:
-                raise fastapi.HTTPException(status_code=422, detail=f"Invalid conditions for {filter_name}")
-            elif filter_name == 'complexity' or filter_name == 'time_to_prepare':
-                conditions = conditions.split('-')
-                try:
-                    int(conditions[0])
-                    int(conditions[1])
-                except (ValueError, IndexError):
-                    raise fastapi.HTTPException(status_code=422, detail=f"Invalid range for {filter_name}")
-            elif filter_name == 'created_by':
-                try:
-                    int(conditions)
-                except ValueError:
-                    raise fastapi.HTTPException(status_code=422,
-                                                detail=f"Invalid input for {filter_name}, must be integer")
-            elif filter_name == 'period':
-                conditions = conditions.split('-')
-                try:
-                    number = int(conditions[0])
-                    type = conditions[1]
-                    if type != 'days' or number < 1:
-                        raise ValueError
-                except (ValueError, IndexError):
-                    raise fastapi.HTTPException(status_code=422, detail=f"Invalid range period")
+                if filter_name not in FILTERING_FIELDS:
+                    raise fastapi.HTTPException(status_code=422, detail=f"Invalid filter: {filter_name}")
 
-        return field
+                if not conditions:
+                    raise fastapi.HTTPException(status_code=422, detail=f"Invalid conditions for {filter_name}")
+
+                if filter_name == 'complexity' or filter_name == 'time_to_prepare':
+                    conditions = conditions.split('-')
+                    try:
+                        self.filter[filter_name] = [int(conditions[0]), int(conditions[1])]
+                    except (ValueError, IndexError):
+                        raise fastapi.HTTPException(status_code=422, detail=f"Invalid range for {filter_name}")
+
+                if filter_name == 'created_by':
+                    try:
+                        self.filter[filter_name] = int(conditions)
+                    except ValueError:
+                        raise fastapi.HTTPException(status_code=422,
+                                                    detail=f"Invalid input for {filter_name}, must be integer")
+
+                if filter_name == 'period':
+                    try:
+                        days = int(conditions)
+                        if days < 1:
+                            raise ValueError
+                        self.filter[filter_name] = days
+                    except ValueError:
+                        raise fastapi.HTTPException(status_code=422, detail=f"Invalid range period")
+
+                if filter_name == 'category':
+                    conditions = conditions.split('-')
+                    ids = []
+                    for category_id in conditions:
+                        try:
+                            ids.append(int(category_id))
+                        except ValueError:
+                            raise fastapi.HTTPException(status_code=422, detail=f"Category id must be an integer")
+                    self.filter[filter_name] = ids
