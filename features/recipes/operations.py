@@ -12,6 +12,11 @@ from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse
 from datetime import datetime
 
+import khLogging
+
+logging = khLogging.Logger.get_child_logger(__file__)
+
+
 def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
     """
     Get all recipe categories
@@ -44,12 +49,13 @@ def update_category(category_id: int, field: str, value: str, updated_by: str = 
             session.execute(update(RecipeCategory), [{"id": category.id, f"{field}": value, "updated_by": updated_by}])
             session.commit()
             RecipeCategory.__setattr__(category, field, value)
+            logging.info(f"User {updated_by} updated Category (#{category_id}). Set {field} to {value}")
             return category
     except sqlalchemy.exc.IntegrityError as ex:
         raise CategoryNameViolationException(ex)
 
 
-def create_category(category_name: str, created_by: str = 'me') -> RecipeCategory:
+def create_category(category_name: str, created_by: int = 1) -> RecipeCategory:
     """Create category"""
 
     try:
@@ -58,6 +64,7 @@ def create_category(category_name: str, created_by: str = 'me') -> RecipeCategor
             session.add(category)
             session.commit()
             session.refresh(category)
+            logging.info(f"User {created_by} created Category (#{category.id}).")
             return category
     except sqlalchemy.exc.IntegrityError as ex:
         raise CategoryNameViolationException(ex)
@@ -65,7 +72,7 @@ def create_category(category_name: str, created_by: str = 'me') -> RecipeCategor
 
 def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
                   calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0,
-                  created_by: str = 'me', instructions: list[CreateInstructionInputModel]):
+                  created_by: int = 1, instructions: list[CreateInstructionInputModel]):
     """
     Create recipe
 
@@ -99,7 +106,8 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
         fats=fats,
         proteins=proteins,
         cholesterol=cholesterol,
-        created_by=created_by
+        created_by=created_by,
+        is_published=True
     )
 
     with db.connection.get_session() as session:
@@ -108,8 +116,9 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
         session.refresh(recipe)
 
         if instructions:
-            create_instructions(instructions, recipe)
+            create_instructions(instructions, recipe.id)
             session.refresh(recipe)
+    logging.info(f"User {created_by} create Recipe (#{recipe.id}).")
     return recipe
 
 
@@ -153,31 +162,36 @@ def update_recipe(recipe_id: int) -> None:
         complexity_len = (len([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
         time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in recipe.instructions]))
 
-        recipe.complexity = round(total_complexity / complexity_len, 1)
+        if complexity_len == 0:
+            recipe.complexity = 0
+        else:
+            recipe.complexity = round(total_complexity / complexity_len, 1)
+
         recipe.time_to_prepare = time_to_prepare
 
         session.add(recipe)
         session.commit()
         session.refresh(recipe)
+    logging.info(f"Recipe #{recipe_id} was updated")
 
 
-def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe: Recipe) -> None:
+def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe_id: int) -> None:
     """
     Create instructions
 
     :param instructions_request:
-    :param recipe:
+    :param recipe_id:
     :return:
     """
 
     with db.connection.get_session() as session:
         for instruction in instructions_request:
             new_instruction = RecipeInstruction(**instruction.model_dump())
-            new_instruction.recipe_id = recipe.id
+            new_instruction.recipe_id = recipe_id
             session.add(new_instruction)
             session.commit()
-
-    update_recipe(recipe_id=recipe.id)
+    logging.info(f"Recipe #{recipe_id} was updated with {len(instructions_request)} instructions")
+    update_recipe(recipe_id=recipe_id)
 
 
 def get_instruction_by_id(instruction_id: int):
@@ -190,7 +204,7 @@ def get_instruction_by_id(instruction_id: int):
         return instruction
 
 
-def update_instruction(recipe_id: int, instruction_id, field: str, value: str):
+def update_instruction(recipe_id: int, instruction_id: int, field: str, value: str):
     """
     Update instruction
     :param recipe_id:
@@ -211,8 +225,8 @@ def update_instruction(recipe_id: int, instruction_id, field: str, value: str):
             session.commit()
             RecipeInstruction.__setattr__(instruction, field, value)
 
-            update_recipe(recipe_id=recipe_id)
-
+            update_recipe(recipe_id=recipe.id)
+            logging.info(f"Instruction #({instruction_id}) was updated. Set {field} = {value}")
             return instruction
 
     except sqlalchemy.exc.IntegrityError as ex:
@@ -240,11 +254,11 @@ def create_instruction(recipe_id: int, instruction_request):
         session.commit()
         session.refresh(instruction)
 
-        update_recipe(recipe_id=recipe_id)
+        update_recipe(recipe_id=recipe.id)
     return instruction
 
 
-def delete_instruction(recipe_id: int, instruction_id):
+def delete_instruction(recipe_id: int, instruction_id: int):
     recipe = get_recipe_by_id(recipe_id)
     instruction = get_instruction_by_id(instruction_id)
 
@@ -254,9 +268,8 @@ def delete_instruction(recipe_id: int, instruction_id):
     with db.connection.get_session() as session:
         session.delete(instruction)
         session.commit()
-
-        update_recipe(recipe_id=recipe_id)
-
+        logging.info(f"Instruction #{instruction_id} was deleted from Recipe #{recipe_id}")
+        update_recipe(recipe_id=recipe.id)
 
 
 def delete_recipe(*, recipe_id: int, deleted_by: int):
@@ -273,13 +286,11 @@ def delete_recipe(*, recipe_id: int, deleted_by: int):
     with db.connection.get_session() as session:
         session.execute(
             update(Recipe), [{
-                    "id": recipe.id,
-                    "is_deleted": True,
-                    "deleted_on": datetime.utcnow(),
-                    "deleted_by": deleted_by
-                }]
+                "id": recipe.id,
+                "is_deleted": True,
+                "deleted_on": datetime.utcnow(),
+                "deleted_by": deleted_by
+            }]
         )
         session.commit()
         return recipe
-
-

@@ -12,10 +12,9 @@ from typing import Union, Any, Type
 import bcrypt
 from jose import jwt
 from pydantic import ValidationError
-from sqlalchemy import update, delete, insert
+from sqlalchemy import update
 from fastapi.templating import Jinja2Templates
 from httpx import AsyncClient
-from fastapi import HTTPException
 
 import configuration
 import db.connection
@@ -24,15 +23,20 @@ from db.connection import get_session
 from .input_models import RegisterUserInputModel
 from .models import User, Role, UserRole, ConfirmationToken
 from .constants import TokenTypes
+import khLogging
+
+logging = khLogging.Logger.get_child_logger(__file__)
+
+config = configuration.Config()
 
 
-def hash_password(password: str) -> bytes:
+def _hash_password(password: str) -> bytes:
     """
-    Hash the password
+    Hash password
+
     :param password:
     :return:
     """
-
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
     return hashed_password
@@ -63,7 +67,7 @@ def create_new_user(user: RegisterUserInputModel) -> User:
             if get_user_from_db(username=user.username, email=user.email):
                 raise features.users.exceptions.UserAlreadyExists()
         except features.users.exceptions.UserDoesNotExistException:
-            user.password = hash_password(password=user.password)
+            user.password = _hash_password(password=user.password)
             db_user = User(username=user.username, email=user.email, password=user.password)
             session.add(db_user)
             session.commit()
@@ -83,6 +87,7 @@ def signin_user(username: str, password: str) -> User:
 
     current_user = get_user_from_db(username=username)
     if not current_user or not check_password(current_user, password):
+        logging.warning(f"Failed logging attempt for {username}")
         raise features.users.exceptions.AccessDenied()
 
     return current_user
@@ -132,7 +137,7 @@ def get_all_users() -> list:
     return all_users
 
 
-def update_user(user_id: int, field: str, value: str, updated_by: int = 1) -> Type[User]:
+def update_user(user_id: int, field: str, value: str, updated_by: int = 1) -> User:
     """
     Update user
 
@@ -142,12 +147,13 @@ def update_user(user_id: int, field: str, value: str, updated_by: int = 1) -> Ty
     :param updated_by:
     :return:
     """
-
     user = get_user_from_db(pk=user_id)
     with get_session() as session:
         session.execute(update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}])
         session.commit()
-        return session.query(User).where(User.id == user_id).first()
+        user.__setattr__(field, value)
+        logging.info(f"User #{user.id} updated. {updated_by} set {field}={value}")
+        return user
 
 
 def create_token(subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True) -> tuple:
@@ -254,6 +260,7 @@ def create_role(name: str, created_by: str = 'me') -> Role:
             session.add(role)
             session.commit()
             session.refresh(role)
+        logging.info(f"Role {name} with #{role.id} was created by #{created_by}")
         return role
 
 
@@ -273,9 +280,10 @@ def add_user_to_role(user_id: int, role_id: int, added_by: str = 'me') -> None:
         raise features.users.exceptions.UserWithRoleExist
 
     with db.connection.get_session() as session:
-        user_role = UserRole(user_id=user_id, role_id=role_id, added_by=added_by)
+        user_role = UserRole(user_id=user.id, role_id=role.id, added_by=added_by)
         session.add(user_role)
         session.commit()
+    logging.info(f"User #{user.id} was add to role #{role.id} by #{added_by}")
 
 
 def remove_user_from_role(user_id: int, role_id: int) -> None:
@@ -298,6 +306,7 @@ def remove_user_from_role(user_id: int, role_id: int) -> None:
 
         session.add(user)
         session.commit()
+    logging.info(f"User #{user.id} was add to role #{role.id} by #{added_by}")
 
 
 def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
