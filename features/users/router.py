@@ -37,6 +37,11 @@ async def signup(user: RegisterUserInputModel):
             status_code=fastapi.status.HTTP_409_CONFLICT,
             detail="User with this username or email already exists!"
         )
+    except features.users.exceptions.FailedToSendEmailException as e:
+        raise HTTPException(
+                status_code=e.status_code,
+                detail=f"Failed to send email: {e.text}",
+            )
 
 
 @user_router.post("/signin", response_model=JwtTokenResponseModel)
@@ -246,6 +251,11 @@ async def request_password_reset(email: str):
 
     except features.users.exceptions.UserDoesNotExistException:
         raise HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="User not found")
+    except features.users.exceptions.FailedToSendEmailException as e:
+        raise HTTPException(
+                status_code=e.status_code,
+                detail=f"Failed to send email: {e.text}",
+            )
 
 
 @user_router.post("/reset-password/{token}")

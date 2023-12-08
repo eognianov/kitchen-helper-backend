@@ -59,14 +59,15 @@ def create_new_user(user: RegisterUserInputModel) -> User:
     """
 
     with get_session() as session:
-        if get_user_from_db(username=user.username, email=user.email):
-            raise features.users.exceptions.UserAlreadyExists()
-
-        user.password = hash_password(password=user.password)
-        db_user = User(username=user.username, email=user.email, password=user.password)
-        session.add(db_user)
-        session.commit()
-        session.refresh(db_user)
+        try:
+            if get_user_from_db(username=user.username, email=user.email):
+                raise features.users.exceptions.UserAlreadyExists()
+        except features.users.exceptions.UserDoesNotExistException:
+            user.password = hash_password(password=user.password)
+            db_user = User(username=user.username, email=user.email, password=user.password)
+            session.add(db_user)
+            session.commit()
+            session.refresh(db_user)
 
     return db_user
 
@@ -355,9 +356,9 @@ async def _send_mail(*, token_type: str, recipient_email: str, username: str, ht
         response = await client.post(api_url, headers=headers, json=payload)
 
         if response.status_code != 201:
-            raise HTTPException(
+            raise features.users.exceptions.FailedToSendEmailException(
                 status_code=response.status_code,
-                detail=f"Failed to send email: {response.text}",
+                text=response.text
             )
 
         result = response.json()
