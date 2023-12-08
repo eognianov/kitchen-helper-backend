@@ -4,8 +4,9 @@ import fastapi
 from fastapi import APIRouter, HTTPException
 
 import features.users.exceptions
+from .constants import TokenTypes
 from .input_models import RegisterUserInputModel, UpdateUserInputModel, CreateUserRole
-from .operations import create_new_user, signin_user, get_all_users, get_user_from_db
+from .operations import create_new_user, signin_user, get_all_users, get_user_from_db, create_token
 from .responses import UsersResponseModel, JwtTokenResponseModel, RolesResponseModel, RolesWithUsersResponseModel
 
 user_router = APIRouter()
@@ -22,12 +23,25 @@ async def signup(user: RegisterUserInputModel):
     """
     try:
         db_user = create_new_user(user)
+        token = features.users.operations.generate_email_password_token(
+            user=db_user,
+            token_type=TokenTypes.EMAIL_CONFIRMATION
+        )
+        await features.users.operations.send_email(
+            token=token.token_type,
+            recipient=db_user
+        )
         return db_user
     except features.users.exceptions.UserAlreadyExists:
         raise HTTPException(
             status_code=fastapi.status.HTTP_409_CONFLICT,
             detail="User with this username or email already exists!"
         )
+    except features.users.exceptions.FailedToSendEmailException as e:
+        raise HTTPException(
+                status_code=e.status_code,
+                detail=f"Failed to send email: {e.text}",
+            )
 
 
 @user_router.post("/signin", response_model=JwtTokenResponseModel)
@@ -41,7 +55,8 @@ async def signin(username: str, password: str):
     """
     try:
         # Sign in user and create jwt token
-        token, token_type = signin_user(username, password)
+        user = signin_user(username, password)
+        token, token_type = create_token(user.username)
         return JwtTokenResponseModel(token_value=token, token_type=token_type)
     except features.users.exceptions.AccessDenied:
         raise HTTPException(
@@ -195,3 +210,91 @@ def remove_user_from_role(user_id: int, role_id: int):
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"No user with this role"
         )
+
+
+@user_router.get("/confirm-email/{token}")
+async def confirm_email(token: str):
+    """
+    Confirm email
+
+    :param token:
+    :return:
+    """
+
+    confirm_token = features.users.operations.check_if_token_is_valid(token=token)
+    if confirm_token is None:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token"
+        )
+
+    features.users.operations.confirm_email(confirm_token)
+
+    return fastapi.status.HTTP_200_OK
+
+
+@user_router.post("/request-password-reset")
+async def request_password_reset(email: str):
+    """
+    Request password reset
+
+    :param email:
+    :return:
+    """
+    try:
+        db_user = get_user_from_db(email=email)
+        token = features.users.operations.generate_email_password_token(
+            user=db_user, token_type=TokenTypes.PASSWORD_RESET
+        )
+        await features.users.operations.send_email(token=token, recipient=db_user)
+        return fastapi.status.HTTP_200_OK
+
+    except features.users.exceptions.UserDoesNotExistException:
+        raise HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="User not found")
+    except features.users.exceptions.FailedToSendEmailException as e:
+        raise HTTPException(
+                status_code=e.status_code,
+                detail=f"Failed to send email: {e.text}",
+            )
+
+
+@user_router.post("/reset-password/{token}")
+async def reset_password(token: str, new_password: str):
+    """
+    Reset password
+
+    :param token:
+    :param new_password:
+    :return:
+    """
+
+    reset_token = features.users.operations.check_if_token_is_valid(token=token)
+
+    if reset_token is None:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token"
+        )
+    try:
+        user = get_user_from_db(pk=reset_token.user_id)
+        features.users.operations.update_user_password(user, new_password, reset_token)
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=e.args
+        )
+
+    except features.users.exceptions.UserDoesNotExistException:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    except features.users.exceptions.SamePasswordsException:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="The new password can not be the same as the old password"
+        )
+
+    return fastapi.status.HTTP_200_OK
