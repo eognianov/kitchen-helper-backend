@@ -11,6 +11,12 @@ from features.recipes.responses import PageResponse, RecipeResponse
 
 
 def paginate_recipes(filtered_recipes: Query, paginated_input_model: PaginateRecipiesInputModel) -> PageResponse:
+    """
+    Create recipes paginated response
+    :param filtered_recipes:
+    :param paginated_input_model:
+    :return:
+    """
     current_page = paginated_input_model.page
     page_size = paginated_input_model.page_size
 
@@ -61,15 +67,17 @@ def filter_recipes(filters: str, FILTERING_FIELDS: tuple) -> list:
         if not conditions:
             raise fastapi.HTTPException(status_code=422, detail=f"Invalid conditions for {filter_name}")
 
+        # different filters are separated with commas ","
+
+        # complexity:1-5 / from(number)-to(number) separated with "-" / using range to avoid lt, gt ...
         if filter_name == 'complexity':
             conditions = conditions.split('-')
             try:
-                int(conditions[0])
-                int(conditions[1])
-                filter_expression.append(Recipe.complexity.between(int(conditions[0]), int(conditions[1])))
+                filter_expression.append(Recipe.complexity.between(float(conditions[0]), float(conditions[1])))
             except (ValueError, IndexError):
                 raise fastapi.HTTPException(status_code=422, detail=f"Invalid range for {filter_name}")
 
+        # time_to_prepare:0-20 / from(number)-to(number) separated with "-" / using range to avoid lt, gt ...
         if filter_name == 'time_to_prepare':
             conditions = conditions.split('-')
             try:
@@ -78,6 +86,7 @@ def filter_recipes(filters: str, FILTERING_FIELDS: tuple) -> list:
             except (ValueError, IndexError):
                 raise fastapi.HTTPException(status_code=422, detail=f"Invalid range for {filter_name}")
 
+        # created_by:1 /filter by creator id
         if filter_name == 'created_by':
             try:
                 filter_expression.append(Recipe.created_by == conditions)
@@ -85,6 +94,7 @@ def filter_recipes(filters: str, FILTERING_FIELDS: tuple) -> list:
                 raise fastapi.HTTPException(status_code=422,
                                             detail=f"Invalid input for {filter_name}, must be integer")
 
+        # period:3 / filter all recipes from last (number) days
         if filter_name == 'period':
             try:
                 days = int(conditions)
@@ -93,8 +103,9 @@ def filter_recipes(filters: str, FILTERING_FIELDS: tuple) -> list:
                 period = datetime.now() - timedelta(days=days)
                 filter_expression.append(Recipe.created_on >= period)
             except ValueError:
-                raise fastapi.HTTPException(status_code=422, detail=f"Invalid range period")
+                raise fastapi.HTTPException(status_code=422, detail=f"Invalid range period, must be integer")
 
+        # category:1-2 / filter by multiple categories using ids, separated with "-"
         if filter_name == 'category':
             conditions = conditions.split('-')
             ids = []
@@ -109,11 +120,18 @@ def filter_recipes(filters: str, FILTERING_FIELDS: tuple) -> list:
 
 
 def sort_recipes(sorting: str, SORTING_FIELDS: tuple) -> list:
+    """
+    Create order expression
+    :param sorting:
+    :param SORTING_FIELDS:
+    :return:
+    """
     order_expression = []
-
+    # default sorting
     if not sorting:
         return [desc(Recipe.created_on)]
 
+    # different sorters are separated with commas ","
     for data in sorting.split(','):
         data = data.split(':')
         column = data[0]

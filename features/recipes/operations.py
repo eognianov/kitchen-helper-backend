@@ -8,7 +8,7 @@ from sqlalchemy import update, and_
 import db.connection
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
     InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException
-from .helpers import sort_recipes, paginate_recipes, filter_recipes
+from .helpers import paginate_recipes
 from .input_models import CreateInstructionInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse, PageResponse

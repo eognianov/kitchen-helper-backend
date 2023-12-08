@@ -1,11 +1,10 @@
 """Recipe feature input model"""
-from datetime import datetime
 from typing import Optional, Union, Any
 
 import fastapi
 import pydantic
 
-import features
+import features.recipes.helpers
 
 INSTRUCTION_CATEGORIES = ('BREAKFAST', 'LUNCH', 'DINNER')
 
