@@ -123,15 +123,14 @@ def get_all_recipes(paginated_input_model) -> PageResponse:
     :return:
     """
 
-    order_expression = sort_recipes(paginated_input_model.sort)
-    filter_expression = filter_recipes(paginated_input_model.filter)
+    filter_expression = paginated_input_model.filter_expression
+    order_expression = paginated_input_model.order_expression
 
     with db.connection.get_session() as session:
         filtered_recipes = session.query(Recipe) \
             .join(RecipeCategory) \
             .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)), *filter_expression) \
-            .order_by(*paginated_input_model.order_expression)
-
+            .order_by(*order_expression)
 
         response = paginate_recipes(filtered_recipes, paginated_input_model)
         return response
