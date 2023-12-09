@@ -219,7 +219,6 @@ def update_ingredient(
             detail=f"Ingredient with f'{ingredient_id.name}' name not found",
         )
 
-
 @ingredients_router.delete("/{ingredient_id", response_model=PatchIngredientInputModel)
 def delete_ingredient(ingredient_id: int = fastapi.Path()):
     """Soft delete ingredient

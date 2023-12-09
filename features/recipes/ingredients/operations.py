@@ -17,6 +17,7 @@ from .input_models import PatchIngredientInputModel, PatchIngredientCategoryInpu
 
 
 def get_all_ingredients_category() -> List[PatchIngredientCategoryInputModel]:
+
     """Get all ingredients categories
     ...
     :return: list of ingredients categories

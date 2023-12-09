@@ -52,8 +52,7 @@ class PatchIngredientInputModel(BaseModel):
     proteins: float = Field(default=0, ge=0)
     cholesterol: float = Field(default=0, ge=0)
 
-    # MEASUREMENT_UNITS: ClassVar[list[str]] = [unit.value for unit in MeasurementUnits]
-    MEASUREMENT_UNITS: List[str] = [unit.value for unit in MeasurementUnits]
+    MEASUREMENT_UNITS: ClassVar[list[str]] = [unit.value for unit in MeasurementUnits]
 
     measurement: str = Field(default=0, ge=0, enum=MEASUREMENT_UNITS)
 
