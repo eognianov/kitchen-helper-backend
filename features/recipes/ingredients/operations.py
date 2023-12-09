@@ -10,23 +10,28 @@ from .exceptions import (
     IngredientCategoryIntegrityViolation,
     IngredientCategoryNameViolation,
 )
-from features.recipes.ingredients.models import Ingredient
-from .models import IngredientCategory
+from .models import IngredientCategory, Ingredient
 from sqlalchemy.exc import IntegrityError
 
+from .input_models import PatchIngredientInputModel, PatchIngredientCategoryInputModel, CreateIngredientCategoryInputModel, CreateIngredientInputModel
 
-def get_all_ingredients_category() -> List[Ingredient]:
+
+def get_all_ingredients_category() -> List[PatchIngredientCategoryInputModel]:
     """Get all ingredients categories
     ...
     :return: list of ingredients categories
-    :rtype: List[Ingredient]
+    :rtype: List[IngredientCategory]
     """
 
     with db.connection.get_session() as session:
-        return session.query(Ingredient).all()
+        return (
+            session.query(IngredientCategory)
+            .filter(IngredientCategory.is_deleted == False)
+            .all()
+        )
 
 
-def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
+def get_ingredient_category_by_id(category_id: int) -> Type[PatchIngredientCategoryInputModel]:
     """Get ingredient category by id
     ...
     :return: ingredient category
@@ -47,7 +52,7 @@ def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
 
 def update_ingredient_category(
     category_id: int, field: str, value: str, updated_by: str
-) -> Type[IngredientCategory]:
+) -> Type[PatchIngredientCategoryInputModel]:
     """Update ingredient category
     ...
     :return: updated ingredient category
@@ -65,13 +70,13 @@ def update_ingredient_category(
             )
             setattr(category, field, value)
             session.commit()
-            session.refresh(category)
+
             return category
     except IntegrityError as ex:
         raise IngredientCategoryIntegrityViolation(ex)
 
 
-def create_ingredient_category(name: str, created_by: str) -> Type[IngredientCategory]:
+def create_ingredient_category(name: str, created_by: str) -> Type[PatchIngredientCategoryInputModel]:
     """Create ingredient category
     ...
     :return: created ingredient category
@@ -89,7 +94,7 @@ def create_ingredient_category(name: str, created_by: str) -> Type[IngredientCat
         raise IngredientCategoryNameViolation(ex)
 
 
-def create_ingredient(ingredient: Ingredient):
+def create_ingredient(ingredient: CreateIngredientInputModel):
     try:
         db_ingredient = Ingredient(**ingredient.model_dump())
 
@@ -104,7 +109,7 @@ def create_ingredient(ingredient: Ingredient):
         raise IngredientIntegrityViolation(ex)
 
 
-def get_ingredient(ingredient_id: int) -> Ingredient:
+def get_ingredient(ingredient_id: int) -> PatchIngredientInputModel:
     with db.connection.get_session() as session:
         ingredient = (
             session.query(Ingredient)
@@ -139,7 +144,6 @@ def update_ingredient(ingredient_id: int, field: str, value: str):
             raise HTTPException(status_code=404, detail="Ingredient not found")
 
         try:
-            # Build the update statement
             stmt = (
                 update(Ingredient)
                 .where(Ingredient.id == ingredient_id)
@@ -147,12 +151,9 @@ def update_ingredient(ingredient_id: int, field: str, value: str):
             )
             session.execute(stmt)
 
-            # Update the corresponding attribute in the SQLAlchemy model
             setattr(db_ingredient, field, value)
 
-            # Commit the changes and refresh the model
             session.commit()
-            session.refresh(db_ingredient)
 
             return db_ingredient
 
@@ -160,30 +161,26 @@ def update_ingredient(ingredient_id: int, field: str, value: str):
             raise IngredientIntegrityViolation(exc)
 
 
-def delete_ingredient(ingredient_id: int):
-    with db.connection.get_session() as session:
-        db_ingredient = (
-            session.query(Ingredient)
-            .filter(Ingredient.id == ingredient_id, Ingredient.is_deleted == False)
-            .first()
-        )
+def delete_ingredient(ingredient_id: int) -> PatchIngredientInputModel:
 
-        if not db_ingredient:
-            raise HTTPException(status_code=404, detail="Ingredient not found")
+    db_ingredient = get_ingredient(ingredient_id)
 
-        try:
-            with db.connection.get_session() as session:
-                session.execute(
-                    update(Ingredient)
-                    .where(Ingredient.id == ingredient_id)
-                    .values({"is_deleted": True})
-                )
-                db_ingredient.is_deleted = True
+    if db_ingredient.is_deleted:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
 
-                session.commit()
-                session.refresh(db_ingredient)
+    try:
+        with db.connection.get_session() as session:
+            session.execute(
+                update(Ingredient)
+                .where(Ingredient.id == ingredient_id)
+                .values({"is_deleted": True})
+            )
+            db_ingredient.is_deleted = True
 
-                return {"message": "Ingredient soft-deleted"}
+            session.commit()
+            session.refresh(db_ingredient)
 
-        except IntegrityError as ex:
-            raise IngredientIntegrityViolation(ex)
+            return {"message": "Ingredient soft-deleted"}
+
+    except IntegrityError as ex:
+        raise IngredientIntegrityViolation(ex)
