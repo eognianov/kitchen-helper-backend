@@ -2,8 +2,13 @@
 from typing import List
 
 import fastapi
-from features.recipes.ingredients.operations import *
-from features.recipes.ingredients.responses import IngredientCategory
+
+from .operations import get_all_ingredients_category, get_ingredient_category_by_id,\
+    update_ingredient_category, create_ingredient_category,\
+    get_ingredient, get_all_ingredients,\
+    create_ingredient, update_ingredient,\
+    delete_ingredient
+
 import features.recipes.ingredients.exceptions
 from .input_models import (
     PatchIngredientInputModel,
@@ -15,8 +20,8 @@ categories_router = fastapi.APIRouter()
 ingredients_router = fastapi.APIRouter()
 
 
-@categories_router.get("/")
-def get_all_ingredients_categories_endpoint() -> List[Ingredient]:
+@categories_router.get("/", response_model=list[PatchIngredientCategoryInputModel])
+def get_all_ingredients_categories_endpoint() -> List[PatchIngredientCategoryInputModel]:
     """Get all ingredients categories
     ...
     :return: list of ingredients categories
@@ -27,7 +32,7 @@ def get_all_ingredients_categories_endpoint() -> List[Ingredient]:
 
 
 @categories_router.get("/{category_id}")
-def get_ingredient_category_by_id(category_id: int = fastapi.Path()) -> Ingredient:
+def get_ingredient_category_by_id(category_id: int = fastapi.Path()) -> PatchIngredientCategoryInputModel:
     """Get ingredient category by id
     ...
     :return: ingredient category
@@ -45,8 +50,8 @@ def get_ingredient_category_by_id(category_id: int = fastapi.Path()) -> Ingredie
 
 @categories_router.post("/")
 def create_ingredient_category(
-    created_category_input_model: IngredientCategory,
-) -> IngredientCategory:
+    created_category_input_model: CreateIngredientInputModel,
+) -> CreateIngredientInputModel:
     """Create ingredient category
     ...
     :return: created ingredient category
@@ -68,7 +73,7 @@ def create_ingredient_category(
 def update_ingredient_category(
     category_id: int = fastapi.Path(),
     patch_ingredient_category_input_model: PatchIngredientCategoryInputModel = fastapi.Body(),
-) -> IngredientCategory:
+) -> PatchIngredientCategoryInputModel:
     """Update ingredient category
     ...
     :return: updated ingredient category
@@ -83,7 +88,7 @@ def update_ingredient_category(
         raise fastapi.HTTPException(status_code=fastapi.status.HTTP_400_BAD_REQUEST)
 
 
-@categories_router.delete("/{category_id", response_model=IngredientCategory)
+@categories_router.delete("/{category_id", response_model=PatchIngredientInputModel)
 def delete_category(category_id: int = fastapi.Path()):
     """Delete category
 
@@ -107,7 +112,7 @@ def delete_category(category_id: int = fastapi.Path()):
         )
 
 
-@ingredients_router.get("/", response_model=List[Ingredient])
+@ingredients_router.get("/", response_model=List[PatchIngredientInputModel])
 def get_all_ingredients_endpoint():
     """Get all ingredients
     ...
@@ -118,7 +123,7 @@ def get_all_ingredients_endpoint():
     return features.ingredients_api.operations.get_all_ingredients()
 
 
-@ingredients_router.get("/{ingredient_id}", response_model=Ingredient)
+@ingredients_router.get("/{ingredient_id}", response_model=PatchIngredientInputModel)
 def get_ingredient(ingredient_id: int = fastapi.Path()):
     """Get ingredient
 
@@ -140,7 +145,7 @@ def get_ingredient(ingredient_id: int = fastapi.Path()):
         )
 
 
-@ingredients_router.post("/", response_model=Ingredient)
+@ingredients_router.post("/", response_model=PatchIngredientInputModel)
 def create_ingredient(create_ingredient_input_model: CreateIngredientInputModel):
     """Create ingredient
 
@@ -187,7 +192,7 @@ def create_ingredient(create_ingredient_input_model: CreateIngredientInputModel)
         )
 
 
-@ingredients_router.patch("/{ingredient_id", response_model=Ingredient)
+@ingredients_router.patch("/{ingredient_id", response_model=PatchIngredientInputModel)
 def update_ingredient(
     ingredient_id: int = fastapi.Path(),
     patch_ingredient_input_model: PatchIngredientInputModel = fastapi.Body(),
@@ -215,7 +220,7 @@ def update_ingredient(
         )
 
 
-@ingredients_router.delete("/{ingredient_id", response_model=Ingredient)
+@ingredients_router.delete("/{ingredient_id", response_model=PatchIngredientInputModel)
 def delete_ingredient(ingredient_id: int = fastapi.Path()):
     """Soft delete ingredient
 
