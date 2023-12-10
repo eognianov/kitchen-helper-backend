@@ -117,6 +117,11 @@ class ServerConfiguration(BaseModel):
     port: int
 
 
+class RabbitmqConfiguration(BaseModel):
+    user: str
+    password: str
+
+
 class Config(CustomBaseSettings):
     """Base configurations"""
 
@@ -125,15 +130,13 @@ class Config(CustomBaseSettings):
     sqlite: SqliteConfig
     postgres: PostgresConfig
     server: ServerConfiguration
-
-
+    rabbitmq: RabbitmqConfiguration
 
     @property
     def connection_string(self):
         if self.database == DbTypeOptions.POSTGRES:
             return self.postgres.connection_string
         return self.sqlite.connection_string
-
 
     @model_validator(mode='after')
     def validate_db_configuration(self):
