@@ -38,4 +38,4 @@ app.include_router(features.images.router, prefix='/images')
 # app.mount('/media', fastapi.staticfiles.StaticFiles(directory='media'))
 
 if __name__ == '__main__':
-    uvicorn.run(app, log_config=khLogging.UVICORN_LOG_CONFIG)
+    uvicorn.run(app, log_config=khLogging.UVICORN_LOG_CONFIG, port=8000)
