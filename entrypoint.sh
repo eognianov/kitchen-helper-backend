@@ -8,4 +8,7 @@ done
 
 echo "PostgreSQL started"
 
+echo "Applying migrations"
+alembic upgrade head
+
 exec "$@"

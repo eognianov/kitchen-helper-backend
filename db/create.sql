@@ -1,1 +1,1 @@
-CREATE DATABASE 'kitchen-helper';
+CREATE DATABASE "kitchen-helper";
