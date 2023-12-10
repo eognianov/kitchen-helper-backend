@@ -10,6 +10,7 @@ config = configuration.Config()
 
 
 class RegisterUserInputModel(BaseModel):
+    """Create user"""
     username: str = Field(min_length=3, max_length=30)
     email: str = EmailStr
     password: str = Field()

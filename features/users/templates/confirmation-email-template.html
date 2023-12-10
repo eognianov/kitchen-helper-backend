@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p>Hello, {{ recipient_name }}</p>
+    <p>Thank you for registering!</p>
+    <br>
+    <p>Please confirm your email by clicking the link below:</p>
+    <a href="{{ token_confirmation_link }}">{{ token_confirmation_link }}</a>
+</body>
+</html>
