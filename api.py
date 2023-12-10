@@ -14,18 +14,16 @@ from fastapi.middleware.cors import CORSMiddleware
 import configuration
 import khLogging
 
-config = configuration.Config()
 
 logging = khLogging.Logger('api')
 
 app = fastapi.FastAPI()
 
-# Configure CORS middleware
+cors_config = configuration.CorsSettings()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=config.cors.allow_origins,
-    allow_methods=config.cors.allow_methods,
-    allow_headers=config.cors.allow_headers,
+    **cors_config.__dict__,
 )
 
 
@@ -38,4 +36,4 @@ app.include_router(features.images.router, prefix='/images')
 app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 
 if __name__ == '__main__':
-    uvicorn.run(app)
+    uvicorn.run(app, log_config=khLogging.UVICORN_LOG_CONFIG)

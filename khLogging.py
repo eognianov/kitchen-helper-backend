@@ -1,6 +1,7 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
+
 import configuration
 from collections import defaultdict
 
@@ -65,3 +66,50 @@ class Logger:
     @classmethod
     def get_child_logger(cls, log_name: str):
         return cls(log_name, child_logger=True)
+
+
+UVICORN_LOG_CONFIG = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            '()': 'uvicorn.logging.DefaultFormatter',
+            'format': '%(asctime)s - %(process)s - %(thread)s - %(name)s - %(levelname)s - %(message)s'
+        }
+    },
+    'handlers': {
+        "error_default": {
+            "formatter": "default",
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stderr"
+        },
+        'error_file_handler': {
+            'formatter': 'default',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            "filename": "logs/uvicorn_error.log",
+            "when": 'midnight',
+            "utc": True,
+            "encoding": 'utf-8'
+        },
+        'access_handler': {
+            'formatter': 'default',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            "filename": "logs/uvicorn_access.log",
+            "when": 'midnight',
+            "utc": True,
+            "encoding": 'utf-8'
+        },
+    },
+    'loggers': {
+        'uvicorn.error': {
+            'level': 'INFO',
+            'handlers': ['error_file_handler', 'error_default'],
+            'propagate': False
+        },
+        'uvicorn.access': {
+            'level': 'INFO',
+            'handlers': ['access_handler'],
+            'propagate': False
+        },
+    }
+}

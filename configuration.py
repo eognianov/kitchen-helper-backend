@@ -1,9 +1,11 @@
 """Configuation module"""
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
-from pydantic import BaseModel, model_validator, Field
+from pydantic import BaseModel, model_validator
 from typing import Optional, List
 from enum import StrEnum, auto
+
 
 _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
@@ -14,6 +16,11 @@ _ENV_FILES_PATHS = (
     pathlib.Path(f'{ROOT_PATH}/.env.dev'),
     pathlib.Path(f'{ROOT_PATH}/.env.prod'),
 )
+
+
+class CustomBaseSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
+                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
 
 class CaseInsensitiveEnum(StrEnum):
@@ -76,7 +83,8 @@ class PostgresConfig(BaseModel):
         return self.host and self.port and self.user and self.password and self.database
 
 
-class JwtToken(BaseModel):
+class JwtToken(CustomBaseSettings):
+    """JWT Token settings"""
     access_token_expire_minutes: int
     refresh_token_expire_minutes: int
     algorithm: str
@@ -84,21 +92,42 @@ class JwtToken(BaseModel):
     refresh_secret_key: str
 
 
-class CorsSettings(BaseModel):
+class CorsSettings(CustomBaseSettings):
+    """CORSMiddleware settings"""
     allow_origins: List[str]
     allow_methods: List[str]
     allow_headers: List[str]
 
 
-class Config(BaseSettings):
+class BrevoSettings(CustomBaseSettings):
+    """Brevo settings"""
+    email_api_key: str
+    email_api_url: str
+    email_sender: str
+    email_from: str
+
+
+class ConfirmationToken(CustomBaseSettings):
+    """Email confirmation and password reset token"""
+    email_token_expiration_minutes: int
+    password_token_expiration_minutes: int
+
+
+class ServerConfiguration(BaseModel):
+    host: str
+    port: int
+
+
+class Config(CustomBaseSettings):
     """Base configurations"""
 
     context: ContextOptions = ContextOptions.DEV
     database: DbTypeOptions = DbTypeOptions.SQLITE
     sqlite: SqliteConfig
     postgres: PostgresConfig
-    jwt: JwtToken
-    cors: CorsSettings
+    server: ServerConfiguration
+
+
 
     @property
     def connection_string(self):
@@ -106,8 +135,6 @@ class Config(BaseSettings):
             return self.postgres.connection_string
         return self.sqlite.connection_string
 
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
 
     @model_validator(mode='after')
     def validate_db_configuration(self):
@@ -115,12 +142,9 @@ class Config(BaseSettings):
             raise ValueError('You have selected postgres as database but did not provide its configuration')
 
 
-class Cloudinary(BaseSettings):
+class Cloudinary(CustomBaseSettings):
     """Cloudinary settings"""
 
-    cloud_name: str = Field(alias='cloudinary__cloud_name')
-    api_key: str = Field(alias='cloudinary__api_key')
-    api_secret: str = Field(alias='cloudinary__api_secret')
-
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
+    cloud_name: str
+    api_key: str
+    api_secret: str
