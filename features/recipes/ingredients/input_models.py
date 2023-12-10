@@ -1,9 +1,7 @@
-from typing import ClassVar, List
-
 from .models import MeasurementUnits
-import pydantic
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
+MEASUREMENT_UNITS = [unit.value for unit in MeasurementUnits]
 
 class PatchIngredientCategoryInputModel(BaseModel):
 
@@ -12,19 +10,19 @@ class PatchIngredientCategoryInputModel(BaseModel):
     field: str
     value: str
 
-    # @validator('field')
-    # @classmethod
-    # def validate_field(cls, field: str):
-    #     allowed_fields_to_edit = [
-    #         'NAME'
-    #     ]
-    #
-    #     if field.upper() not in allowed_fields_to_edit:
-    #         raise ValueError(f'Field {field} is not allowed to be patched')
-    #
-    #     return field
+    @field_validator('field')
+    @classmethod
+    def validate_field(cls, field: str):
+        allowed_fields_to_edit = [
+            'NAME'
+        ]
 
-    @validator('value')
+        if field.upper() not in allowed_fields_to_edit:
+            raise ValueError(f'Field {field} is not allowed to be patched')
+
+        return field
+
+    @field_validator('value')
     @classmethod
     def validate_value(cls, value: str):
         if not value:
@@ -52,32 +50,31 @@ class PatchIngredientInputModel(BaseModel):
     proteins: float = Field(default=0, ge=0)
     cholesterol: float = Field(default=0, ge=0)
 
-    MEASUREMENT_UNITS: ClassVar[list[str]] = [unit.value for unit in MeasurementUnits]
 
     measurement: str = Field(default=0, ge=0, enum=MEASUREMENT_UNITS)
 
     class Config:
         allow_mutation = False
 
-    # @validator('field')
-    # @classmethod
-    # def validate_field(cls, field: str):
-    #     allowed_fields_to_edit = [
-    #         'NAME',
-    #         'MEASUREMENT',
-    #         'CALORIES',
-    #         'CARBO',
-    #         'FATS',
-    #         'PROTEINS',
-    #         'CHOLESTEROL'
-    #     ]
-    #
-    #     if field.upper() not in allowed_fields_to_edit:
-    #         raise ValueError(f'Field {field} is not allowed to be patched')
-    #
-    #     return field
+    @field_validator('field')
+    @classmethod
+    def validate_field(cls, field: str):
+        allowed_fields_to_edit = [
+            'NAME',
+            'MEASUREMENT',
+            'CALORIES',
+            'CARBO',
+            'FATS',
+            'PROTEINS',
+            'CHOLESTEROL'
+        ]
 
-    @validator('value')
+        if field.upper() not in allowed_fields_to_edit:
+            raise ValueError(f'Field {field} is not allowed to be patched')
+
+        return field
+
+    @field_validator('value')
     @classmethod
     def validate_value(cls, value: str):
         if not value:
@@ -85,13 +82,14 @@ class PatchIngredientInputModel(BaseModel):
 
         return value
 
-    @validator('measurement')
+    @field_validator('measurement')
     @classmethod
     def validate_measurement(cls, measurement: str):
         if measurement not in cls.MEASUREMENT_UNITS:
             raise ValueError(f'Measurement {measurement} is not allowed')
 
         return measurement
+
 
 class CreateIngredientInputModel(BaseModel):
     """Create ingredient"""
@@ -104,22 +102,12 @@ class CreateIngredientInputModel(BaseModel):
     proteins: float = Field(default=0, ge=0)
     cholesterol: float = Field(default=0, ge=0)
 
-    MEASUREMENT_UNITS = [unit.value for unit in MeasurementUnits]
-    measurement: str = Field(default=0, ge=0, enum=MEASUREMENT_UNITS)
+    measurement: str = Field(default=0, ge=0)
 
-
-    @validator('name')
-    @classmethod
-    def validate_name(cls, name: str):
-        if not name:
-            raise ValueError('Name cannot be empty')
-
-        return name
-
-    @validator('measurement')
+    @field_validator('measurement')
     @classmethod
     def validate_measurement(cls, measurement: str):
-        if measurement not in cls.MEASUREMENT_UNITS:
+        if measurement not in MEASUREMENT_UNITS:
             raise ValueError(f'Measurement {measurement} is not allowed')
 
         return measurement
