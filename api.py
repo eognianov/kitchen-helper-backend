@@ -30,9 +30,11 @@ app.add_middleware(
 app.include_router(features.health.router, prefix='/health')
 app.include_router(features.users.user_router, prefix='/users')
 app.include_router(features.users.role_router, prefix='/roles')
-app.include_router(features.recipes.category_router, prefix='/categories')
+app.include_router(features.recipes.recipes_category_router, prefix='/categories')
 app.include_router(features.recipes.recipes_router, prefix='/recipes')
 app.include_router(features.images.router, prefix='/images')
+app.include_router(features.recipes.ingredients_router, prefix='/ingredients')
+app.include_router(features.recipes.ingredients_category_router, prefix='/ingredients/categories')
 # app.mount('/media', fastapi.staticfiles.StaticFiles(directory='media'))
 
 if __name__ == '__main__':
