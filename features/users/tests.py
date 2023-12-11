@@ -20,22 +20,20 @@ class TestUserOperations:
 
     role_data = {'name': 'admin'}
 
-    def test_hashed_password_matches_expected(self, use_test_db, mocker):
+    def test_hashed_password_matches_expected(self, use_test_db):
         """
         Test that hashed password
         :param use_test_db:
-        :param mocker:
         :return:
         """
         password = "secure_password"
         hashed_password = operations._hash_password(password)
         assert bcrypt.checkpw(password.encode("utf-8"), hashed_password) is True
 
-    def test_check_password_expected_true(self, use_test_db, mocker):
+    def test_check_password_expected_true(self, use_test_db):
         """
         Test that password is equal to user's hashed password
         :param use_test_db:
-        :param mocker:
         :return:
         """
         assert operations.check_password(
@@ -43,11 +41,10 @@ class TestUserOperations:
             self.user_data['password']
         ) is True
 
-    def test_check_password_expected_false(self, use_test_db, mocker):
+    def test_check_password_expected_false(self, use_test_db):
         """
         Test that password is different from user's hashed password
         :param use_test_db:
-        :param mocker:
         :return:
         """
         different_password = 'different password'
@@ -56,11 +53,10 @@ class TestUserOperations:
             different_password
         ) is False
 
-    def test_create_new_user_without_role_success(self, use_test_db, mocker):
+    def test_create_new_user_without_role_success(self, use_test_db):
         """
         Test that creating user without role is successful
         :param use_test_db:
-        :param mocker:
         :return:
         """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -71,11 +67,10 @@ class TestUserOperations:
         assert users[0].id == 1
         assert users[0].roles == []
 
-    def test_create_new_user_with_roles_success(self, use_test_db, mocker):
+    def test_create_new_user_with_roles_success(self, use_test_db):
         """
         Test that creating user with role is successful
         :param use_test_db:
-        :param mocker:
         :return:
         """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -93,11 +88,10 @@ class TestUserOperations:
         assert updated_user.id == 1
         assert len(updated_user.roles) == 1
 
-    def test_signin_user_expected_success(self, use_test_db, mocker):
+    def test_signin_user_expected_success(self, use_test_db):
         """
         Test that signin user is successful
         :param use_test_db:
-        :param mocker:
         :return:
         """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -105,11 +99,10 @@ class TestUserOperations:
             user = session.query(models.User).first()
         assert operations.signin_user(self.user_data['username'], self.user_data['password']) == user
 
-    def test_signin_user_not_existing_username_expected_exception(self, use_test_db, mocker):
+    def test_signin_user_not_existing_username_expected_exception(self, use_test_db):
         """
         Test that signin user with not existing username is not successful
         :param use_test_db:
-        :param mocker:
         :return:
         """
         different_username = 'different_username'
@@ -117,11 +110,10 @@ class TestUserOperations:
         with pytest.raises(exceptions.UserDoesNotExistException):
             operations.signin_user(different_username, self.user_data['password'])
 
-    def test_signin_user_wrong_password_expected_exception(self, use_test_db, mocker):
+    def test_signin_user_wrong_password_expected_exception(self, use_test_db):
         """
         Test that signin user with wrong password is not successful
         :param use_test_db:
-        :param mocker:
         :return:
         """
         wrong_password = 'wrong_password'
@@ -129,11 +121,10 @@ class TestUserOperations:
         with pytest.raises(exceptions.AccessDenied):
             operations.signin_user(self.user_data['username'], wrong_password)
 
-    def test_get_user_from_db_with_pk_expected_success(self, use_test_db, mocker):
+    def test_get_user_from_db_with_pk_expected_success(self, use_test_db):
         """
         Test get user from database with pk
         :param use_test_db:
-        :param mocker:
         :return:
         """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -141,22 +132,20 @@ class TestUserOperations:
             user = session.query(models.User).first()
         assert operations.get_user_from_db(pk=user.id) == user
 
-    def test_get_user_from_db_with_wrong_pk_expected_exception(self, use_test_db, mocker):
+    def test_get_user_from_db_with_wrong_pk_expected_exception(self, use_test_db):
         """
         Test get user from database with wrong pk
         :param use_test_db:
-        :param mocker:
         :return:
         """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
         with pytest.raises(exceptions.UserDoesNotExistException):
             operations.get_user_from_db(pk=2)
 
-    def test_get_user_from_db_with_username_expected_success(self, use_test_db, mocker):
+    def test_get_user_from_db_with_username_expected_success(self, use_test_db):
         """
         Test get user from database with username
         :param use_test_db:
-        :param mocker:
         :return:
         """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -164,22 +153,20 @@ class TestUserOperations:
             user = session.query(models.User).first()
         assert operations.get_user_from_db(username=user.username) == user
 
-    def test_get_user_from_db_with_wrong_username_expected_exception(self, use_test_db, mocker):
+    def test_get_user_from_db_with_wrong_username_expected_exception(self, use_test_db):
         """
         Test get user from database with wrong username
         :param use_test_db:
-        :param mocker:
         :return:
         """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
         with pytest.raises(exceptions.UserDoesNotExistException):
             operations.get_user_from_db(username='wrong_username')
 
-    def test_get_user_from_db_with_email_expected_success(self, use_test_db, mocker):
+    def test_get_user_from_db_with_email_expected_success(self, use_test_db):
         """
         Test get user from database with email
         :param use_test_db:
-        :param mocker:
         :return:
         """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -187,33 +174,30 @@ class TestUserOperations:
             user = session.query(models.User).first()
         assert operations.get_user_from_db(email=user.email) == user
 
-    def test_get_user_from_db_with_wrong_email_expected_exception(self, use_test_db, mocker):
+    def test_get_user_from_db_with_wrong_email_expected_exception(self, use_test_db):
         """
         Test get user from database with wrong email
         :param use_test_db:
-        :param mocker:
         :return:
         """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
         with pytest.raises(exceptions.UserDoesNotExistException):
             operations.get_user_from_db(email='wrong_email@test.com')
 
-    def test_get_all_users_no_users_in_database_expected_empty_list(self, use_test_db, mocker):
+    def test_get_all_users_no_users_in_database_expected_empty_list(self, use_test_db):
         """
         Test get all users from database without users in the database
         :param use_test_db:
-        :param mocker:
         :return:
         """
         all_users = operations.get_all_users()
         assert all_users == []
         assert len(all_users) == 0
 
-    def test_get_all_users_one_user_in_database_expected_list_with_one_user(self, use_test_db, mocker):
+    def test_get_all_users_one_user_in_database_expected_list_with_one_user(self, use_test_db):
         """
         Test get all users from database with one user in the database
         :param use_test_db:
-        :param mocker:
         :return:
         """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -223,11 +207,10 @@ class TestUserOperations:
         assert all_users[0] == user
         assert len(all_users) == 1
 
-    def test_get_all_users_more_users_in_database_expected_list_with_same_users(self, use_test_db, mocker):
+    def test_get_all_users_more_users_in_database_expected_list_with_same_users(self, use_test_db):
         """
         Test get all users from database with more users in the database
         :param use_test_db:
-        :param mocker:
         :return:
         """
         total_users = 5
@@ -244,11 +227,10 @@ class TestUserOperations:
         assert all_users[len(all_users) - 1] == users[len(users) - 1]
         assert len(all_users) == total_users
 
-    def test_update_user_expected_user_to_be_updated(self, use_test_db, mocker):
+    def test_update_user_expected_user_to_be_updated(self, use_test_db):
         """
         Test update user with expected user data
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -258,42 +240,38 @@ class TestUserOperations:
             updated_user = session.query(models.User).first()
         assert updated_user.email == new_email
 
-    def test_create_token_expected_access_token_type(self, use_test_db, mocker):
+    def test_create_token_expected_access_token_type(self, use_test_db):
         """
         Test create token with expected token type (access token) to be created
         :param use_test_db:
-        :param mocker:
         :return:
         """
         token, token_type = operations.create_token(subject=self.user_data['username'])
         assert token_type == 'jwt access token'
 
-    def test_create_token_expected_refresh_token_type(self, use_test_db, mocker):
+    def test_create_token_expected_refresh_token_type(self, use_test_db):
         """
         Test create token with expected token type (refresh token) to be created
         :param use_test_db:
-        :param mocker:
         :return:
         """
         token, token_type = operations.create_token(subject=self.user_data['username'], access=False)
         assert token_type == 'jwt refresh token'
 
-    def test_get_all_roles_no_roles_in_database_expected_empty_list(self, use_test_db, mocker):
+    def test_get_all_roles_no_roles_in_database_expected_empty_list(self, use_test_db):
         """
         Test get all roles from database without roles in the database
         :param use_test_db:
-        :param mocker:
         :return:
         """
         all_roles = operations.get_all_roles()
         assert all_roles == []
         assert len(all_roles) == 0
 
-    def test_get_all_roles_one_role_in_database_expected_list_with_one_role(self, use_test_db, mocker):
+    def test_get_all_roles_one_role_in_database_expected_list_with_one_role(self, use_test_db):
         """
         Test get all roles from database with one role in the database
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -306,11 +284,10 @@ class TestUserOperations:
         assert all_roles[0].name == self.role_data['name']
         assert all_roles[0].created_by == 'me'  # TODO: Change 'me' with user.id
 
-    def test_get_all_roles_more_roles_in_database_expected_list_with_same_len(self, use_test_db, mocker):
+    def test_get_all_roles_more_roles_in_database_expected_list_with_same_len(self, use_test_db):
         """
         Test get all roles from database with three role in the database
         :param use_test_db:
-        :param mocker:
         :return:
         """
         number_of_roles = 3
@@ -327,11 +304,10 @@ class TestUserOperations:
         for role in all_roles:
             assert role.created_by == 'me'  # TODO: Change 'me' with user.id
 
-    def test_get_role_with_pk_expected_success(self, use_test_db, mocker):
+    def test_get_role_with_pk_expected_success(self, use_test_db):
         """
         Test get role from database with pk
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -340,11 +316,10 @@ class TestUserOperations:
             db_role = session.query(models.Role).first()
         assert operations.get_role(pk=role.id) == db_role
 
-    def test_get_role_with_wrong_pk_expected_exception(self, use_test_db, mocker):
+    def test_get_role_with_wrong_pk_expected_exception(self, use_test_db):
         """
         Test get role from database with wrong pk
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -352,11 +327,10 @@ class TestUserOperations:
         with pytest.raises(exceptions.RoleDoesNotExistException):
             operations.get_role(pk=2)
 
-    def test_get_role_with_name_expected_success(self, use_test_db, mocker):
+    def test_get_role_with_name_expected_success(self, use_test_db):
         """
         Test get role from database with role name
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -365,11 +339,10 @@ class TestUserOperations:
             db_role = session.query(models.Role).first()
         assert operations.get_role(role_name=role.name) == db_role
 
-    def test_get_role_with_wrong_name_expected_exception(self, use_test_db, mocker):
+    def test_get_role_with_wrong_name_expected_exception(self, use_test_db):
         """
         Test get role from database with wrong name
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -377,11 +350,10 @@ class TestUserOperations:
         with pytest.raises(exceptions.RoleDoesNotExistException):
             operations.get_role(role_name='wrong_name')
 
-    def test_check_user_role_expected_true(self, use_test_db, mocker):
+    def test_check_user_role_expected_true(self, use_test_db):
         """
         Test check user role expected role to be in user's roles
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -389,22 +361,20 @@ class TestUserOperations:
         operations.add_user_to_role(user_id=user.id, role_id=role.id)
         assert operations.check_user_role(user_id=user.id, role_id=role.id) is True
 
-    def test_check_user_role_expected_false(self, use_test_db, mocker):
+    def test_check_user_role_expected_false(self, use_test_db):
         """
         Test check user role expected role not to be in user's roles
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
         role = operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
         assert operations.check_user_role(user_id=user.id, role_id=role.id) is False
 
-    def test_create_role_expected_success(self, use_test_db, mocker):
+    def test_create_role_expected_success(self, use_test_db):
         """
         Test that creating role is successful
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -413,11 +383,10 @@ class TestUserOperations:
         assert role.created_by == 'me'  # TODO: Change to user.id
         assert role.id == 1
 
-    def test_create_same_role_expected_exception(self, use_test_db, mocker):
+    def test_create_same_role_expected_exception(self, use_test_db):
         """
         Test that creating same role will raise exception
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -425,11 +394,10 @@ class TestUserOperations:
         with pytest.raises(exceptions.RoleAlreadyExists):
             operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
 
-    def test_add_user_to_role_expected_success(self, use_test_db, mocker):
+    def test_add_user_to_role_expected_success(self, use_test_db):
         """
         Test adding user to role is successful
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -441,11 +409,10 @@ class TestUserOperations:
         assert len(user_roles) + 1 == len(users[0].roles)
         assert users[0].roles[0] == role
 
-    def test_add_user_to_role_user_already_added_expected_exception(self, use_test_db, mocker):
+    def test_add_user_to_role_user_already_added_expected_exception(self, use_test_db):
         """
         Test adding user to role when already added raise exception
         :param use_test_db:
-        :param mocker:
         :return:
         """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
@@ -465,7 +432,7 @@ class TestUserInputModelEmailValidation:
         'password': 'secure_password!2'
     }
 
-    def test_validate_user_valid_email_success_expected(self, use_test_db, mocker):
+    def test_validate_user_valid_email_success_expected(self, use_test_db):
         """
         Test for email validation with valid email address.
         Expected success
@@ -483,7 +450,7 @@ class TestUserInputModelPasswordValidation:
     """
     client = TestClient(app)
 
-    def test_validate_user_password_success_expected(self, use_test_db, mocker):
+    def test_validate_user_password_success_expected(self, use_test_db):
         """
         Test for password validation in prod context.
         Expected success
@@ -494,7 +461,7 @@ class TestUserInputModelPasswordValidation:
         validated_password = input_models.RegisterUserInputModel.validate_password(valid_password)
         assert validated_password == valid_password
 
-    def test_validate_user_short_password_value_error_expected(self, use_test_db, mocker):
+    def test_validate_user_short_password_value_error_expected(self, use_test_db):
         """
         Test for password validation in prod context with short password
         Expected ValueError
@@ -506,7 +473,7 @@ class TestUserInputModelPasswordValidation:
         except ValueError as e:
             assert 'Password must be at least 8 characters long' in str(e)
 
-    def test_validate_user_password_without_uppercase_letter_value_error_expected(self, use_test_db, mocker):
+    def test_validate_user_password_without_uppercase_letter_value_error_expected(self, use_test_db):
         """
         Test for password validation in prod context with password without uppercase letter
         Expected ValueError
@@ -518,7 +485,7 @@ class TestUserInputModelPasswordValidation:
         except ValueError as e:
             assert 'Password must contain at least one uppercase letter' in str(e)
 
-    def test_validate_user_password_without_lowercase_letter_value_error_expected(self, use_test_db, mocker):
+    def test_validate_user_password_without_lowercase_letter_value_error_expected(self, use_test_db):
         """
         Test for password validation in prod context with password without lowercase letter
         Expected ValueError
@@ -530,7 +497,7 @@ class TestUserInputModelPasswordValidation:
         except ValueError as e:
             assert 'Password must contain at least one lowercase letter' in str(e)
 
-    def test_validate_user_password_without_digit_value_error_expected(self, use_test_db, mocker):
+    def test_validate_user_password_without_digit_value_error_expected(self, use_test_db):
         """
         Test for password validation in prod context with password without digit
         Expected ValueError
@@ -542,7 +509,7 @@ class TestUserInputModelPasswordValidation:
         except ValueError as e:
             assert 'Password must contain at least one digit' in str(e)
 
-    def test_validate_user_password_special_symbol_value_error_expected(self, use_test_db, mocker):
+    def test_validate_user_password_special_symbol_value_error_expected(self, use_test_db):
         """
         Test for password validation in prod context with password without special symbol
         Expected ValueError
@@ -561,7 +528,7 @@ class TestUpdateUserInputModel:
     """
     client = TestClient(app)
 
-    def test_validate_update_user_valid_filed_success_expected(self, use_test_db, mocker):
+    def test_validate_update_user_valid_filed_success_expected(self, use_test_db):
         """
         Test for field validation with valid field.
         Expected success
@@ -570,7 +537,7 @@ class TestUpdateUserInputModel:
         validated_email = input_models.UpdateUserInputModel.validate_field('email')
         assert validated_email == 'email'
 
-    def test_validate_update_user_invalid_filed_value_error_expected(self, use_test_db, mocker):
+    def test_validate_update_user_invalid_filed_value_error_expected(self, use_test_db):
         """
         Test for field validation with invalid field.
         Expected ValueError
@@ -582,7 +549,7 @@ class TestUpdateUserInputModel:
         except ValueError as e:
             assert f"You are not allowed to edit {invalid_field} column" in str(e)
 
-    def test_validate_value_valid_email_success_expected(self, use_test_db, mocker):
+    def test_validate_value_valid_email_success_expected(self, use_test_db):
         """
         Test for email validation with valid email address.
         Expected success
