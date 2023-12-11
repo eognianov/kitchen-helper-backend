@@ -425,6 +425,12 @@ class TestUserOperations:
             operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
 
     def test_add_user_to_role_expected_success(self, use_test_db, mocker):
+        """
+        Test adding user to role is successful
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
         user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
         role = operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
         user_roles = user.roles
@@ -433,6 +439,20 @@ class TestUserOperations:
             users = session.query(models.User).all()
         assert len(user_roles) + 1 == len(users[0].roles)
         assert users[0].roles[0] == role
+
+    def test_add_user_to_role_user_already_added_expected_exception(self, use_test_db, mocker):
+        """
+        Test adding user to role when already added raise exception
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        role = operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+        operations.add_user_to_role(role_id=role.id, user_id=user.id, added_by='me')  # TODO: Change to user.id
+        with pytest.raises(exceptions.UserWithRoleExist):
+            operations.add_user_to_role(role_id=role.id, user_id=user.id, added_by='me')  # TODO: Change to user.id
+
 
 
 class TestUserInputModelEmailValidation:
