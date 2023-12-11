@@ -241,6 +241,40 @@ class TestUserOperations:
         assert all_users[len(all_users) - 1] == users[len(users) - 1]
         assert len(all_users) == 5
 
+    def test_update_user_expected_user_to_be_updated(self, use_test_db, mocker):
+        """
+        Test update user with expected user data
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        new_email = 'updated@tets.com'
+        operations.update_user(user.id, 'email', new_email, user.id)
+        with db.connection.get_session() as session:
+            updated_user = session.query(models.User).first()
+        assert updated_user.email == new_email
+
+    def test_create_token_expected_access_token_type(self, use_test_db, mocker):
+        """
+        Test create token with expected token type (access token) to be created
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        token, token_type = operations.create_token(subject=self.user_data['username'])
+        assert token_type == 'jwt access token'
+
+    def test_create_token_expected_refresh_token_type(self, use_test_db, mocker):
+        """
+        Test create token with expected token type (refresh token) to be created
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        token, token_type = operations.create_token(subject=self.user_data['username'], access=False)
+        assert token_type == 'jwt refresh token'
+
 
 class TestUserInputModelEmailValidation:
     """
