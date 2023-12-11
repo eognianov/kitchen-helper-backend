@@ -9,6 +9,7 @@ from enum import StrEnum, auto
 
 _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
+MEDIA_PATH = ROOT_PATH.joinpath('media')
 
 _ENV_FILES_PATHS = (
     pathlib.Path(f'{ROOT_PATH}/.env.template'),
