@@ -15,7 +15,7 @@ class User(DbBaseModel):
     username: Mapped[str] = mapped_column(String(30), unique=True)
     email: Mapped[str] = mapped_column(String(50), unique=True)
     password: Mapped[bytes] = mapped_column(LargeBinary())
-    is_email_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_email_confirmed: Mapped[bool] = mapped_column(Boolean, default=False, server_default='false')
     # TODO add updated by and update on
 
     roles = relationship('Role', secondary='user_roles', back_populates='users', lazy='selectin')
