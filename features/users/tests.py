@@ -2,7 +2,7 @@ import bcrypt
 import pytest
 import db.connection
 from tests.fixtures import use_test_db
-from features.users import operations, models, input_models
+from features.users import operations, models, input_models, exceptions
 from fastapi.testclient import TestClient
 from api import app
 
@@ -90,6 +90,42 @@ class TestUserOperations:
         assert updated_user.email == self.user_data['email']
         assert updated_user.id == 1
         assert len(updated_user.roles) == 1
+
+    def test_signin_user_expected_success(self, use_test_db, mocker):
+        """
+        Test that signin user is successful
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        with db.connection.get_session() as session:
+            user = session.query(models.User).first()
+        assert operations.signin_user(self.user_data['username'], self.user_data['password']) == user
+
+    def test_signin_user_not_existing_username_expected_exception(self, use_test_db, mocker):
+        """
+        Test that signin user with not existing username is not successful
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        different_username = 'different_username'
+        operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        with pytest.raises(exceptions.UserDoesNotExistException):
+            operations.signin_user(different_username, self.user_data['password'])
+
+    def test_signin_user_wrong_password_expected_exception(self, use_test_db, mocker):
+        """
+        Test that signin user with wrong password is not successful
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        wrong_password = 'wrong_password'
+        operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        with pytest.raises(exceptions.AccessDenied):
+            operations.signin_user(self.user_data['username'], wrong_password)
 
 
 class TestUserInputModelEmailValidation:
