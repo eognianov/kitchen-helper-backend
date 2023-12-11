@@ -399,6 +399,31 @@ class TestUserOperations:
         role = operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
         assert operations.check_user_role(user_id=user.id, role_id=role.id) is False
 
+    def test_create_role_expected_success(self, use_test_db, mocker):
+        """
+        Test that creating role is successful
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        role = operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+        assert role.name == self.role_data['name']
+        assert role.created_by == 'me'  # TODO: Change to user.id
+        assert role.id == 1
+
+    def test_create_same_role_expected_exception(self, use_test_db, mocker):
+        """
+        Test that creating same role will raise exception
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+        with pytest.raises(exceptions.RoleAlreadyExists):
+            operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+
 
 class TestUserInputModelEmailValidation:
     """
