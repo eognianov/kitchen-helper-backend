@@ -424,6 +424,16 @@ class TestUserOperations:
         with pytest.raises(exceptions.RoleAlreadyExists):
             operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
 
+    def test_add_user_to_role_expected_success(self, use_test_db, mocker):
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        role = operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+        user_roles = user.roles
+        operations.add_user_to_role(role_id=role.id, user_id=user.id, added_by='me')  # TODO: Change to user.id
+        with db.connection.get_session() as session:
+            users = session.query(models.User).all()
+        assert len(user_roles) + 1 == len(users[0].roles)
+        assert users[0].roles[0] == role
+
 
 class TestUserInputModelEmailValidation:
     """
