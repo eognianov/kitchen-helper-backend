@@ -70,9 +70,8 @@ def create_category(category_name: str, created_by: int = 1) -> RecipeCategory:
         raise CategoryNameViolationException(ex)
 
 
-def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
-                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0,
-                  created_by: int = 1, instructions: list[CreateInstructionInputModel]):
+def create_recipe(*, name: str, time_to_prepare: int, created_by: int, category_id: int = None, picture: str = None, summary: str = None,
+                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0, instructions: list[CreateInstructionInputModel]):
     """
     Create recipe
 

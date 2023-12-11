@@ -7,7 +7,7 @@ from db.connection import get_session
 import datetime
 
 from datetime import datetime, timedelta
-from typing import Union, Any, Type
+from typing import Union, Any, Type, Optional
 
 import bcrypt
 from jose import jwt
@@ -137,7 +137,7 @@ def get_all_users() -> list:
     return all_users
 
 
-def update_user(user_id: int, field: str, value: str, updated_by: int = 1) -> User:
+def update_user(user_id: int, field: str, value: str, updated_by) -> User:
     """
     Update user
 
@@ -156,28 +156,29 @@ def update_user(user_id: int, field: str, value: str, updated_by: int = 1) -> Us
         return user
 
 
-def create_token(subject: Union[str, Any], expires_delta: timedelta = None, access: bool = True) -> tuple:
+def create_token(user_id: int, user_role_ids: list[int] = None, expires_delta: timedelta = None, access: bool = True) -> tuple:
     """
-    Create JWT Token
+    Create jwt token
 
-    :param subject:
+    :param user_id:
+    :param user_role_ids:
     :param expires_delta:
     :param access:
     :return:
     """
-
     jwt_config = configuration.JwtToken()
-
     minutes = jwt_config.access_token_expire_minutes if access else jwt_config.refresh_token_expire_minutes
     secret_key = jwt_config.secret_key if access else jwt_config.refresh_secret_key
     algorithm = jwt_config.algorithm
-    token_type = "jwt access token" if access else "jwt refresh token"
+    token_type = "Bearer" if access else "Refresh"
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
     else:
         expires_delta = datetime.utcnow() + timedelta(minutes=minutes)
 
-    to_encode = {"exp": expires_delta, "sub": str(subject)}
+    to_encode = {"exp": expires_delta, "sub": str(user_id)}
+    if user_role_ids:
+        to_encode["roles"] = user_role_ids
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm)
 
     return encoded_jwt, token_type
@@ -242,7 +243,7 @@ def check_user_role(user_id: int, role_id: int) -> bool:
     return True
 
 
-def create_role(name: str, created_by: str = 'me') -> Role:
+def create_role(name: str, created_by: int) -> Role:
     """
         Create role
 
@@ -264,7 +265,7 @@ def create_role(name: str, created_by: str = 'me') -> Role:
         return role
 
 
-def add_user_to_role(user_id: int, role_id: int, added_by: str = 'me') -> None:
+def add_user_to_role(user_id: int, role_id: int, added_by: int) -> None:
     """
         Assign role to user
 
