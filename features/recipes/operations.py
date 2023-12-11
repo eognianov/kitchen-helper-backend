@@ -175,6 +175,21 @@ def update_recipe(recipe_id: int) -> None:
     logging.info(f"Recipe #{recipe_id} was updated")
 
 
+def patch_recipe(recipe_id: int, field: str, value: str, updated_by: str = 'me') -> Type[Recipe]:
+    """Patch recipe"""
+    recipe = get_recipe_by_id(recipe_id)
+
+    try:
+        with db.connection.get_session() as session:
+            session.execute(update(Recipe), [{"id": recipe.id, f"{field}": value, "updated_by": updated_by}])
+            session.commit()
+            Recipe.__setattr__(recipe, field, value)
+            logging.info(f"User {updated_by} updated Recipe (#{recipe_id}). Set {field} to {value}")
+            return recipe
+    except sqlalchemy.exc.IntegrityError as ex:
+        raise CategoryNameViolationException(ex)
+
+
 def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe_id: int) -> None:
     """
     Create instructions

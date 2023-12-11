@@ -91,6 +91,36 @@ class UpgradeRecipeInputModel(pydantic.BaseModel):
 
         return time_to_prepare
 
+class PatchRecipeInputModel(pydantic.BaseModel):
+    """Patch recipe"""
+
+    field: str
+    value: Union[str, int]
+
+    @pydantic.model_validator(mode='after')
+    def check_fields(self) -> 'PatchRecipeInputModel':
+        allowed_fields_to_edit = [
+            'NAME', 'TIME_TO_PREPARE', 'CATEGORY_ID'
+        ]
+
+        field = self.field
+        value = self.value
+
+        if field.upper() not in allowed_fields_to_edit:
+            raise ValueError(f"You are not allowed to edit {field} column")
+
+        if field.upper() == 'TIME_TO_PREPARE':
+            try:
+                value = int(value)
+            except ValueError:
+                raise ValueError(f"{field} must be an integer")
+            if value < 1:
+                raise ValueError(f"{field} must be greater then 1")
+            if field.upper() == 'TIME_TO_PREPARE' and value > 99:
+                raise ValueError(f"Time must be less then 100")
+
+        return self
+
 class PatchInstructionInputModel(pydantic.BaseModel):
     """Update instruction"""
 

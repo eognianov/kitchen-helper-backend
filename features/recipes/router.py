@@ -8,7 +8,8 @@ import features.recipes.operations
 import features.recipes.responses
 from features.recipes.responses import Category
 from features.recipes.responses import InstructionResponse
-from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
+from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, \
+    PatchRecipeInputModel
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel
 from .responses import Recipe
 
@@ -224,4 +225,35 @@ def delete_recipe(recipe_id: int, user_id: int = 1):
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Recipe with {recipe_id=} does not exist"
+        )
+
+@recipes_router.patch('/{recipe_id}', response_model=Recipe)
+def update_recipe(recipe_id: int = fastapi.Path(),
+                 patch_recipe_input_model: PatchRecipeInputModel = fastapi.Body()):
+    """
+    Update recipe
+
+    :param recipe_id:
+    :param patch_recipe_input_model:
+    :return:
+    """
+    try:
+        return features.recipes.operations.update_recipe(recipe_id=recipe_id,
+                                                         **patch_recipe_input_model.model_dump())
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with id {recipe_id} does not exist"
+        )
+
+    except features.recipes.exceptions.InstructionNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Instruction with id {patch_recipe_input_model.instruction_id} does not exist"
+        )
+
+    except features.recipes.exceptions.CategoryNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Category with id {patch_recipe_input_model.category_id} does not exist"
         )
