@@ -223,14 +223,15 @@ class TestUserOperations:
         assert all_users[0] == user
         assert len(all_users) == 1
 
-    def test_get_all_users_five_users_in_database_expected_list_with_five_users(self, use_test_db, mocker):
+    def test_get_all_users_more_users_in_database_expected_list_with_same_users(self, use_test_db, mocker):
         """
-        Test get all users from database with five users in the database
+        Test get all users from database with more users in the database
         :param use_test_db:
         :param mocker:
         :return:
         """
-        for i in range(5):
+        total_users = 5
+        for i in range(total_users):
             operations.create_new_user(input_models.RegisterUserInputModel(
                 username=f"{self.user_data['username']}{i}",
                 email=f"{i}{self.user_data['email']}",
@@ -241,7 +242,7 @@ class TestUserOperations:
             users = session.query(models.User).all()
         assert all_users[0] == users[0]
         assert all_users[len(all_users) - 1] == users[len(users) - 1]
-        assert len(all_users) == 5
+        assert len(all_users) == total_users
 
     def test_update_user_expected_user_to_be_updated(self, use_test_db, mocker):
         """
@@ -452,7 +453,6 @@ class TestUserOperations:
         operations.add_user_to_role(role_id=role.id, user_id=user.id, added_by='me')  # TODO: Change to user.id
         with pytest.raises(exceptions.UserWithRoleExist):
             operations.add_user_to_role(role_id=role.id, user_id=user.id, added_by='me')  # TODO: Change to user.id
-
 
 
 class TestUserInputModelEmailValidation:
