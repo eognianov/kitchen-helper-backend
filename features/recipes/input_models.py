@@ -61,6 +61,65 @@ class CreateRecipeInputModel(pydantic.BaseModel):
     category_id: Optional[int] = None
     instructions: Optional[list[CreateInstructionInputModel]] = None
 
+class PatchRecipeInputModel(pydantic.BaseModel):
+    """Patch recipe"""
+
+    field: str
+    value: Union[str, int]
+
+    @pydantic.model_validator(mode='after')
+    def check_fields(self) -> 'PatchRecipeInputModel':
+        allowed_fields_to_edit = [
+            'NAME', 'TIME_TO_PREPARE', 'CATEGORY_ID'
+        ]
+
+        field = self.field
+        value = self.value
+
+        if field.upper() not in allowed_fields_to_edit:
+            raise ValueError(f"You are not allowed to edit {field} column")
+
+        if field.upper() == 'TIME_TO_PREPARE':
+            try:
+                value = int(value)
+            except ValueError:
+                raise ValueError(f"{field} must be an integer")
+            if value < 1:
+                raise ValueError(f"{field} must be greater then 1")
+            if field.upper() == 'TIME_TO_PREPARE' and value > 99:
+                raise ValueError(f"Time must be less then 100")
+
+        return self
+
+class UpgradeRecipeInputModel(pydantic.BaseModel):
+    """Update recipe"""
+
+    name: Optional[str] = pydantic.Field(max_length=255)
+    picture: Optional[str] = pydantic.Field(max_length=255)
+    summary: Optional[str] = pydantic.Field(max_length=1000)
+    calories: Optional[float] = pydantic.Field(default=0, ge=0)
+    carbo: Optional[float] = pydantic.Field(default=0, ge=0)
+    fats: Optional[float] = pydantic.Field(default=0, ge=0)
+    proteins: Optional[float] = pydantic.Field(default=0, ge=0)
+    cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
+    time_to_prepare: Optional[int] = pydantic.Field(gt=0)
+    category_id: Optional[int] = None
+
+    @pydantic.validator("name")
+    @classmethod
+    def validate_name(cls, name: str):
+        if not name:
+            raise ValueError("Name is required")
+
+        return name
+
+    @pydantic.validator("time_to_prepare")
+    @classmethod
+    def validate_time_to_prepare(cls, time_to_prepare: int):
+        if not time_to_prepare:
+            raise ValueError("Time to prepare is required")
+
+        return time_to_prepare
 
 class PatchInstructionInputModel(pydantic.BaseModel):
     """Update instruction"""
