@@ -8,6 +8,9 @@ from api import app
 
 
 class TestUserOperations:
+    """
+    Tests for user operations
+    """
     client = TestClient(app)
     user_data = {
         'username': 'test_user',
@@ -16,11 +19,48 @@ class TestUserOperations:
     }
 
     def test_hashed_password_matches_expected(self, use_test_db, mocker):
+        """
+        Test that hashed password
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
         password = "secure_password"
         hashed_password = operations._hash_password(password)
         assert bcrypt.checkpw(password.encode("utf-8"), hashed_password) is True
 
+    def test_check_password_expected_true(self, use_test_db, mocker):
+        """
+        Test that password is equal to user's hashed password
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        assert operations.check_password(
+            operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data)),
+            self.user_data['password']
+        ) is True
+
+    def test_check_password_expected_false(self, use_test_db, mocker):
+        """
+        Test that password is different from user's hashed password
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        different_password = 'different password'
+        assert operations.check_password(
+            operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data)),
+            different_password
+        ) is False
+
     def test_create_new_user_without_role_success(self, use_test_db, mocker):
+        """
+        Test that creating user without role is successful
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
         with db.connection.get_session() as session:
             users = session.query(models.User).all()
@@ -30,6 +70,12 @@ class TestUserOperations:
         assert users[0].roles == []
 
     def test_create_new_user_with_roles_success(self, use_test_db, mocker):
+        """
+        Test that creating user with role is successful
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
         operations.create_role('admin', 'me')
 
