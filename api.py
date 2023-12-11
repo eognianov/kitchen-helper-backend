@@ -7,6 +7,9 @@ import features.images
 import features.users
 import features.recipes
 
+import multiprocessing
+cpus = multiprocessing.cpu_count()
+
 import uvicorn
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,4 +39,4 @@ app.include_router(features.images.router, prefix='/images')
 app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 
 if __name__ == '__main__':
-    uvicorn.run(app, log_config=khLogging.UVICORN_LOG_CONFIG)
+    uvicorn.run("api:app", workers=cpus, log_config=khLogging.UVICORN_LOG_CONFIG, port=8000, host='0.0.0.0')

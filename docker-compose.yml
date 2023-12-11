@@ -1,0 +1,57 @@
+#To work properly you have to create .env file with credentials
+version: '3.8'
+
+services:
+
+  web:
+    container_name: kitchen-helper-dev
+    build: ./
+    command: python3 api.py
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - 8000:8000
+    environment:
+      - postgres__host=db
+      - postgres__port=5432
+      - postgres__user=${POSTGRES_USER}
+      - postgres__password=${POSTGRES_PASSWORD}
+      - postgres__database=kitchen-helper
+      - rabbitmq__user=${RABBITMQ_USER}
+      - rabbitmq__password=${RABBITMQ_PASSWORD}
+    depends_on:
+      - db
+      - rabbitmq
+
+  db:
+    container_name: kitchen-helper-db
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    volumes:
+      - kitchen-helper-db-volume:/var/lib/postgreslq/data
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: kitchen-helper-rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    volumes:
+      - kitchen-helper-rabbitmq-volume:/var/lib/rabbitmq
+volumes:
+  kitchen-helper-db-volume:
+    driver: local
+  kitchen-helper-rabbitmq-volume:
+    driver: local
