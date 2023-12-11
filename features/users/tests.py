@@ -14,7 +14,7 @@ class TestUserOperations:
     client = TestClient(app)
     user_data = {
         'username': 'test_user',
-        'email': '_test_example@abv.bg',
+        'email': 'test@test.com',
         'password': 'Password1@'
     }
 
@@ -126,6 +126,75 @@ class TestUserOperations:
         operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
         with pytest.raises(exceptions.AccessDenied):
             operations.signin_user(self.user_data['username'], wrong_password)
+
+    def test_get_user_from_db_with_pk_expected_success(self, use_test_db, mocker):
+        """
+        Test get user from database with pk
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        with db.connection.get_session() as session:
+            user = session.query(models.User).first()
+        assert operations.get_user_from_db(pk=user.id) == user
+
+    def test_get_user_from_db_with_wrong_pk_expected_exception(self, use_test_db, mocker):
+        """
+        Test get user from database with wrong pk
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        with pytest.raises(exceptions.UserDoesNotExistException):
+            operations.get_user_from_db(pk=2)
+
+    def test_get_user_from_db_with_username_expected_success(self, use_test_db, mocker):
+        """
+        Test get user from database with username
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        with db.connection.get_session() as session:
+            user = session.query(models.User).first()
+        assert operations.get_user_from_db(username=user.username) == user
+
+    def test_get_user_from_db_with_wrong_username_expected_exception(self, use_test_db, mocker):
+        """
+        Test get user from database with wrong username
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        with pytest.raises(exceptions.UserDoesNotExistException):
+            operations.get_user_from_db(username='wrong_username')
+
+    def test_get_user_from_db_with_email_expected_success(self, use_test_db, mocker):
+        """
+        Test get user from database with email
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        with db.connection.get_session() as session:
+            user = session.query(models.User).first()
+        assert operations.get_user_from_db(email=user.email) == user
+
+    def test_get_user_from_db_with_wrong_email_expected_exception(self, use_test_db, mocker):
+        """
+        Test get user from database with wrong email
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        with pytest.raises(exceptions.UserDoesNotExistException):
+            operations.get_user_from_db(email='wrong_email@test.com')
 
 
 class TestUserInputModelEmailValidation:
