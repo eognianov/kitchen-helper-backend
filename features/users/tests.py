@@ -376,6 +376,29 @@ class TestUserOperations:
         with pytest.raises(exceptions.RoleDoesNotExistException):
             operations.get_role(role_name='wrong_name')
 
+    def test_check_user_role_expected_true(self, use_test_db, mocker):
+        """
+        Test check user role expected role to be in user's roles
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        role = operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+        operations.add_user_to_role(user_id=user.id, role_id=role.id)
+        assert operations.check_user_role(user_id=user.id, role_id=role.id) is True
+
+    def test_check_user_role_expected_false(self, use_test_db, mocker):
+        """
+        Test check user role expected role not to be in user's roles
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        role = operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+        assert operations.check_user_role(user_id=user.id, role_id=role.id) is False
+
 
 class TestUserInputModelEmailValidation:
     """
