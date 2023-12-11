@@ -196,6 +196,51 @@ class TestUserOperations:
         with pytest.raises(exceptions.UserDoesNotExistException):
             operations.get_user_from_db(email='wrong_email@test.com')
 
+    def test_get_all_users_no_users_in_database_expected_empty_list(self, use_test_db, mocker):
+        """
+        Test get all users from database without users in the database
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        all_users = operations.get_all_users()
+        assert all_users == []
+        assert len(all_users) == 0
+
+    def test_get_all_users_one_user_in_database_expected_list_with_one_user(self, use_test_db, mocker):
+        """
+        Test get all users from database with one user in the database
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        all_users = operations.get_all_users()
+        with db.connection.get_session() as session:
+            user = session.query(models.User).first()
+        assert all_users[0] == user
+        assert len(all_users) == 1
+
+    def test_get_all_users_five_users_in_database_expected_list_with_five_users(self, use_test_db, mocker):
+        """
+        Test get all users from database with five users in the database
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        for i in range(5):
+            operations.create_new_user(input_models.RegisterUserInputModel(
+                username=f"{self.user_data['username']}{i}",
+                email=f"{i}{self.user_data['email']}",
+                password=self.user_data['password']
+            ))
+        all_users = operations.get_all_users()
+        with db.connection.get_session() as session:
+            users = session.query(models.User).all()
+        assert all_users[0] == users[0]
+        assert all_users[len(all_users) - 1] == users[len(users) - 1]
+        assert len(all_users) == 5
+
 
 class TestUserInputModelEmailValidation:
     """
