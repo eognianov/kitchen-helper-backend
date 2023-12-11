@@ -18,6 +18,8 @@ class TestUserOperations:
         'password': 'Password1@'
     }
 
+    role_data = {'name': 'admin'}
+
     def test_hashed_password_matches_expected(self, use_test_db, mocker):
         """
         Test that hashed password
@@ -274,6 +276,55 @@ class TestUserOperations:
         """
         token, token_type = operations.create_token(subject=self.user_data['username'], access=False)
         assert token_type == 'jwt refresh token'
+
+    def test_get_all_roles_no_roles_in_database_expected_empty_list(self, use_test_db, mocker):
+        """
+        Test get all roles from database without roles in the database
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        all_roles = operations.get_all_roles()
+        assert all_roles == []
+        assert len(all_roles) == 0
+
+    def test_get_all_roles_one_role_in_database_expected_list_with_one_role(self, use_test_db, mocker):
+        """
+        Test get all roles from database with one role in the database
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        operations.create_role(self.role_data['name'], 'me')  # TODO: Change created_by to user.id
+        all_roles = operations.get_all_roles()
+        with db.connection.get_session() as session:
+            role_from_db = session.query(models.Role).first()
+        assert all_roles[0] == role_from_db
+        assert len(all_roles) == 1
+        assert all_roles[0].name == self.role_data['name']
+        assert all_roles[0].created_by == 'me'  # TODO: Change 'me' with user.id
+
+    def test_get_all_roles_more_roles_in_database_expected_list_with_same_len(self, use_test_db, mocker):
+        """
+        Test get all roles from database with three role in the database
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        number_of_roles = 3
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        for i in range(number_of_roles):
+            operations.create_role(f"{self.role_data['name']}{i}", 'me')  # TODO: Change created_by to user.id
+        all_roles = operations.get_all_roles()
+        with db.connection.get_session() as session:
+            roles_from_db = session.query(models.Role).all()
+        assert all_roles[0] == roles_from_db[0]
+        assert all_roles[len(all_roles) - 1] == roles_from_db[len(roles_from_db) - 1]
+        assert len(all_roles) == number_of_roles
+        assert all_roles[0].name == roles_from_db[0].name
+        for role in all_roles:
+            assert role.created_by == 'me'  # TODO: Change 'me' with user.id
 
 
 class TestUserInputModelEmailValidation:
