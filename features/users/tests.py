@@ -326,6 +326,56 @@ class TestUserOperations:
         for role in all_roles:
             assert role.created_by == 'me'  # TODO: Change 'me' with user.id
 
+    def test_get_role_with_pk_expected_success(self, use_test_db, mocker):
+        """
+        Test get role from database with pk
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        role = operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+        with db.connection.get_session() as session:
+            db_role = session.query(models.Role).first()
+        assert operations.get_role(pk=role.id) == db_role
+
+    def test_get_role_with_wrong_pk_expected_exception(self, use_test_db, mocker):
+        """
+        Test get role from database with wrong pk
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+        with pytest.raises(exceptions.RoleDoesNotExistException):
+            operations.get_role(pk=2)
+
+    def test_get_role_with_name_expected_success(self, use_test_db, mocker):
+        """
+        Test get role from database with role name
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        role = operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+        with db.connection.get_session() as session:
+            db_role = session.query(models.Role).first()
+        assert operations.get_role(role_name=role.name) == db_role
+
+    def test_get_role_with_wrong_name_expected_exception(self, use_test_db, mocker):
+        """
+        Test get role from database with wrong name
+        :param use_test_db:
+        :param mocker:
+        :return:
+        """
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**self.user_data))
+        operations.create_role(self.role_data['name'], 'me')  # TODO: Change to user.id
+        with pytest.raises(exceptions.RoleDoesNotExistException):
+            operations.get_role(role_name='wrong_name')
+
 
 class TestUserInputModelEmailValidation:
     """
