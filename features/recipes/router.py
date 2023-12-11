@@ -74,7 +74,7 @@ def update_category(category_id: int = fastapi.Path(),
     """
     try:
         return features.recipes.operations.update_category(category_id=category_id,
-                                                                       **patch_category_input_model.model_dump())
+                                                           **patch_category_input_model.model_dump())
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -181,7 +181,7 @@ def create_instruction(recipe_id: int = fastapi.Path(),
 
 
 @recipes_router.delete('/{recipe_id}/instructions/{instruction_id}', status_code=fastapi.status.HTTP_204_NO_CONTENT)
-def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id=fastapi.Path()):
+def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id: int = fastapi.Path()):
     """
     Delete instruction
 
@@ -196,7 +196,6 @@ def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id=fastapi.P
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Instruction with id {instruction_id} does not exist"
         )
-
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -207,7 +206,6 @@ def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id=fastapi.P
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Combination of {recipe_id=} and {instruction_id=} does not exist"
         )
-
 
 
 @recipes_router.delete('/{recipe_id}', response_model=Recipe)
