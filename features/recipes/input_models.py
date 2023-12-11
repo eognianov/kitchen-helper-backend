@@ -91,7 +91,7 @@ class PatchRecipeInputModel(pydantic.BaseModel):
 
         return self
 
-class UpgradeRecipeInputModel(pydantic.BaseModel):
+class UpdateRecipeInputModel(pydantic.BaseModel):
     """Update recipe"""
 
     name: Optional[str] = pydantic.Field(max_length=255)
