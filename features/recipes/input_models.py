@@ -104,23 +104,25 @@ class PatchInstructionInputModel(pydantic.BaseModel):
         return self
 
 
-class PaginateRecipiesInputModel(pydantic.BaseModel):
-    """Paginate Recipes"""
-    page: int = pydantic.Field(default=1)
-    page_size: int = pydantic.Field(default=10)
-    sorting: Optional[str] = None
+class PSFRecipesInputModel(pydantic.BaseModel):
+    """Paginate, sort, filter Recipes"""
+    page: int = pydantic.Field(default=1, gt=0)
+    page_size: int = pydantic.Field(default=10, gt=0)
+    sort: Optional[str] = None
     filters: Optional[str] = None
     order_expression: Optional[list] = []
     filter_expression: Optional[list] = []
 
-    @pydantic.field_validator('page', mode='after')
+    # otherwise gives an internal server error
+    @pydantic.field_validator('page', mode='before')
     @classmethod
     def validate_page(cls, field: str):
         if int(field) < 1:
             raise fastapi.HTTPException(status_code=422, detail=f"Page must be greater than 0.")
         return field
 
-    @pydantic.field_validator('page_size', mode='after')
+    # otherwise gives an internal server error
+    @pydantic.field_validator('page_size', mode='before')
     @classmethod
     def validate_page_size(cls, field: str):
         if int(field) < 1:
@@ -129,12 +131,13 @@ class PaginateRecipiesInputModel(pydantic.BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
 
-        SORTING_FIELDS = ('id', 'name', 'created_by', 'time_to_prepare', 'created_on', 'updated_on',
-                          'complexity', 'category.name', 'category.id')
-
-        FILTERING_FIELDS = ('category', 'complexity', 'time_to_prepare', 'created_by', 'period')
-
-        self.order_expression = features.recipes.helpers.sort_recipes(self.sorting, SORTING_FIELDS)
+        try:
+            self.order_expression = features.recipes.helpers.sort_recipes(self.sort)
+        except ValueError as ve:
+            raise fastapi.HTTPException(status_code=422, detail=str(ve))
 
         if self.filters:
-            self.filter_expression = features.recipes.helpers.filter_recipes(self.filters, FILTERING_FIELDS)
+            try:
+                self.filter_expression = features.recipes.helpers.filter_recipes(self.filters)
+            except ValueError as ve:
+                raise fastapi.HTTPException(status_code=422, detail=str(ve))

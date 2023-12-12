@@ -62,8 +62,8 @@ class RecipeResponse(pydantic.BaseModel):
             self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]
 
 
-class PageResponse(pydantic.BaseModel):
-    """Recipe pagination,sorting, and filtering response"""
+class PSFRecipesResponseModel(pydantic.BaseModel):
+    """Recipe pagination, sorting, and filtering response"""
     page_number: int
     page_size: int
     previous_page: str | None

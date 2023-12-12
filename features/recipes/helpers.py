@@ -1,16 +1,15 @@
 import math
 from datetime import datetime, timedelta
 
-import fastapi
 from fastapi import Query
 from sqlalchemy import desc, asc
 
-from features.recipes.input_models import PaginateRecipiesInputModel
+from features.recipes.input_models import PSFRecipesInputModel
 from features.recipes.models import RecipeCategory, Recipe
-from features.recipes.responses import PageResponse, RecipeResponse
+from features.recipes.responses import RecipeResponse, PSFRecipesResponseModel
 
 
-def paginate_recipes(filtered_recipes: Query, paginated_input_model: PaginateRecipiesInputModel) -> PageResponse:
+def paginate_recipes(filtered_recipes: Query, paginated_input_model: PSFRecipesInputModel) -> PSFRecipesResponseModel:
     """
     Create recipes paginated response
     :param filtered_recipes:
@@ -30,12 +29,14 @@ def paginate_recipes(filtered_recipes: Query, paginated_input_model: PaginateRec
 
         filtered_recipes = filtered_recipes.offset(offset).limit(page_size)
 
-    sorting = f'&sorting={paginated_input_model.sorting}' if paginated_input_model.sorting else ''
+    sort = f'&sort={paginated_input_model.sort}' if paginated_input_model.sort else ''
     filters = f'&filters={paginated_input_model.filters}' if paginated_input_model.filters else ''
-    previous_page = f"recipes/?page={current_page - 1}&size={page_size}{sorting}{filters}" if current_page - 1 > 0 else None
-    next_page = f"recipes/?page={current_page + 1}&page_size={page_size}{sorting}{filters}" if current_page < total_pages else None
+    previous_page = f"recipes/?page={current_page - 1}&size={page_size}{sort}{filters}" \
+        if current_page - 1 > 0 else None
+    next_page = f"recipes/?page={current_page + 1}&page_size={page_size}{sort}{filters}" \
+        if current_page < total_pages else None
 
-    response = PageResponse(
+    response = PSFRecipesResponseModel(
         page_number=current_page,
         page_size=page_size,
         previous_page=previous_page,
@@ -47,54 +48,57 @@ def paginate_recipes(filtered_recipes: Query, paginated_input_model: PaginateRec
     return response
 
 
-def filter_recipes(filters: str, FILTERING_FIELDS: tuple) -> list:
+def filter_recipes(filters: str) -> list:
     """
     Create filter expression
     :param filters:
-    :param FILTERING_FIELDS:
     :return:
     """
     filter_expression = []
 
+    filter_fields = ('category', 'complexity', 'time_to_prepare', 'created_by', 'period')
+
+    # different filters are separated with commas ","
+    # example: &filters=complexity:0-3,time_to_prepare:0-20,created_by:1,period:3,category:1-2
+    # filters recipes with complexity less than or equal to 3, time to prepare less than or equal to 20, created by
+    # user with id = 1 in the last 3 days and belonging to categories with ids 1 or 2.
+
     for data in filters.split(','):
+        data = data.split(':')
+        filter_name = data[0]
+        conditions = data[1] if len(data) > 1 else None
 
-        filter_name = data.split(':')[0]
-        conditions = data.split(':')[1] if len(data.split(':')) > 1 else None
-
-        if filter_name not in FILTERING_FIELDS:
-            raise fastapi.HTTPException(status_code=422, detail=f"Invalid filter: {filter_name}")
+        if filter_name not in filter_fields:
+            raise ValueError(f"Invalid filter: {filter_name}")
 
         if not conditions:
-            raise fastapi.HTTPException(status_code=422, detail=f"Invalid conditions for {filter_name}")
+            raise ValueError(f"Invalid conditions for {filter_name}")
 
-        # different filters are separated with commas ","
-
-        # complexity:1-5 / from(number)-to(number) separated with "-" / using range to avoid lt, gt ...
+        # &filters=complexity:1-5 / from(number)-to(number) separated with "-" / using range to avoid lt, gt ...
         if filter_name == 'complexity':
             conditions = conditions.split('-')
             try:
                 filter_expression.append(Recipe.complexity.between(float(conditions[0]), float(conditions[1])))
             except (ValueError, IndexError):
-                raise fastapi.HTTPException(status_code=422, detail=f"Invalid range for {filter_name}")
+                raise ValueError(f"Invalid range for {filter_name}.")
 
-        # time_to_prepare:0-20 / from(number)-to(number) separated with "-" / using range to avoid lt, gt ...
+        # &filters=time_to_prepare:0-20 / from(number)-to(number) separated with "-" / using range to avoid lt, gt ...
         if filter_name == 'time_to_prepare':
             conditions = conditions.split('-')
             try:
                 filter_expression.append(
                     Recipe.time_to_prepare.between(int(conditions[0]), int(conditions[1])))
             except (ValueError, IndexError):
-                raise fastapi.HTTPException(status_code=422, detail=f"Invalid range for {filter_name}")
+                raise ValueError(f"Invalid range for {filter_name}.")
 
-        # created_by:1 /filter by creator id
+        # &filters=created_by:1 /filter by creator id
         if filter_name == 'created_by':
             try:
-                filter_expression.append(Recipe.created_by == conditions)
+                filter_expression.append(Recipe.created_by == int(conditions))
             except ValueError:
-                raise fastapi.HTTPException(status_code=422,
-                                            detail=f"Invalid input for {filter_name}, must be integer")
+                raise ValueError(f"Invalid input for {filter_name}, must be integer.")
 
-        # period:3 / filter all recipes from last (number) days
+        # &filters=period:3 / filter all recipes from last (number) days
         if filter_name == 'period':
             try:
                 days = int(conditions)
@@ -103,9 +107,9 @@ def filter_recipes(filters: str, FILTERING_FIELDS: tuple) -> list:
                 period = datetime.now() - timedelta(days=days)
                 filter_expression.append(Recipe.created_on >= period)
             except ValueError:
-                raise fastapi.HTTPException(status_code=422, detail=f"Invalid range period, must be integer")
+                raise ValueError(f"Invalid range period. Must be integer, greater then 0.")
 
-        # category:1-2 / filter by multiple categories using ids, separated with "-"
+        # &filters=category:1-2 / filter by multiple categories using ids, separated with "-"
         if filter_name == 'category':
             conditions = conditions.split('-')
             ids = []
@@ -113,37 +117,42 @@ def filter_recipes(filters: str, FILTERING_FIELDS: tuple) -> list:
                 try:
                     ids.append(int(category_id))
                 except ValueError:
-                    raise fastapi.HTTPException(status_code=422, detail=f"Category id must be an integer")
+                    raise ValueError(f"Category id must be an integer")
             filter_expression.append(RecipeCategory.id.in_(ids))
 
     return filter_expression
 
 
-def sort_recipes(sorting: str, SORTING_FIELDS: tuple) -> list:
+def sort_recipes(sort: str) -> list:
     """
     Create order expression
-    :param sorting:
-    :param SORTING_FIELDS:
+    :param sort:
     :return:
     """
     order_expression = []
+
+    sort_fields = ('id', 'name', 'created_by', 'time_to_prepare', 'created_on', 'updated_on',
+                   'complexity', 'category.name', 'category.id')
+
     # default sorting
-    if not sorting:
+    if not sort:
         return [desc(Recipe.created_on)]
 
-    # different sorters are separated with commas ","
-    for data in sorting.split(','):
+    # different sorters are separated with commas ",", directions are separated with ":"
+    # example &sort=complexity:asc,created_on:desc,category.name:desc
+    for data in sort.split(','):
         data = data.split(':')
         column = data[0]
         direction = data[1] if len(data) > 1 else None
 
-        if column not in SORTING_FIELDS:
-            raise fastapi.HTTPException(status_code=422, detail=f"Invalid sorting column: {column}")
+        if column not in sort_fields:
+            raise ValueError(f"Invalid sorting column: {column}.")
 
         if direction and direction not in ['asc', 'desc']:
-            raise fastapi.HTTPException(status_code=422, detail=f"Invalid sorting direction: {direction}")
+            raise ValueError(f"Invalid sorting direction: {direction}.")
 
         sort_column = getattr(Recipe, column, None)
+
         if not sort_column:
             sort_column = getattr(RecipeCategory, column.split('.')[1], None)
 

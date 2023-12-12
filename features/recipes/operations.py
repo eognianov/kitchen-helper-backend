@@ -9,9 +9,9 @@ import db.connection
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
     InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException
 from .helpers import paginate_recipes
-from .input_models import CreateInstructionInputModel
+from .input_models import CreateInstructionInputModel, PSFRecipesInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
-from .responses import InstructionResponse, PageResponse
+from .responses import InstructionResponse, PSFRecipesResponseModel
 
 
 def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
@@ -116,7 +116,7 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     return recipe
 
 
-def get_all_recipes(paginated_input_model) -> PageResponse:
+def get_all_recipes(paginated_input_model: PSFRecipesInputModel) -> PSFRecipesResponseModel:
     """
     Get all recipes paginated, sorted, and filtered
     :param paginated_input_model:
