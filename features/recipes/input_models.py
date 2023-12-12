@@ -44,12 +44,10 @@ class CreateIngredientCategoryInputModel(BaseModel):
     name: str = Field(min_length=3, max_length=255)
 
 
-class PatchIngredientInputModel(BaseModel):
+class UpdateIngredientInputModel(BaseModel):
 
     """Update ingredient"""
 
-    field: str = Field(max_length=255)
-    value: str = Field(max_length=255)
     name: str = Field(min_length=3, max_length=255)
     category: str = Field(max_length=255)
     calories: float = Field(default=0, ge=0)
@@ -97,6 +95,48 @@ class PatchIngredientInputModel(BaseModel):
         return measurement
 
 
+class PatchIngredientInputModel(BaseModel):
+
+    """Patch ingredient"""
+
+    field: str
+    value: Union[str, float, int]
+
+    @field_validator('field')
+    @classmethod
+    def validate_field(cls, field: str):
+        allowed_fields_to_edit = [
+            'NAME',
+            'MEASUREMENT',
+            'CALORIES',
+            'CARBO',
+            'FATS',
+            'PROTEINS',
+            'CHOLESTEROL'
+        ]
+
+        if field.upper() not in allowed_fields_to_edit:
+            raise ValueError(f'Field {field} is not allowed to be patched')
+
+        return field
+
+    @field_validator('value')
+    @classmethod
+    def validate_value(cls, value: Union[str, float, int]):
+        if not value:
+            raise ValueError('Value cannot be empty')
+
+        return value
+
+    @field_validator('measurement')
+    @classmethod
+    def validate_measurement(cls, measurement: str):
+        if measurement not in cls.MEASUREMENT_UNITS:
+            raise ValueError(f'Measurement {measurement} is not allowed')
+
+        return measurement
+
+
 class CreateIngredientInputModel(BaseModel):
     """Create ingredient"""
 
@@ -108,7 +148,7 @@ class CreateIngredientInputModel(BaseModel):
     proteins: float = Field(default=0, ge=0)
     cholesterol: float = Field(default=0, ge=0)
 
-    measurement: str = Field(default=0, ge=0)
+    measurement: str = Field(required=True, enum=MEASUREMENT_UNITS)
 
     @field_validator('measurement')
     @classmethod

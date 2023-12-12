@@ -4,7 +4,7 @@ from typing import Optional, Any
 import pydantic
 
 
-class Category(pydantic.BaseModel):
+class RecipeCategory(pydantic.BaseModel):
     """Category response"""
     id: int
     name: str
@@ -42,12 +42,32 @@ class Recipe(pydantic.BaseModel):
     created_on: datetime.datetime
     updated_by: Optional[str]
     updated_on: datetime.datetime
-    category: Category | Any = None
+    category: RecipeCategory | Any = None
     instructions: list[InstructionResponse] | Any = None
 
     def model_post_init(self, __context: Any):
         if self.category:
-            self.category = Category(**self.category.__dict__)
+            self.category = RecipeCategory(**self.category.__dict__)
 
         if self.instructions:
             self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]
+
+class Ingredient(pydantic.BaseModel):
+    """Ingredient response"""
+    id: int
+    name: str
+    category_id: int
+    created_by: int
+    created_on: datetime.datetime
+    updated_by: Optional[int] = None
+    updated_on: Optional[datetime.datetime] = None
+
+class IngredientCategory(pydantic.BaseModel):
+    """Ingredient category response"""
+    id: int
+    name: str
+    created_by: int
+    created_on: datetime.datetime
+    updated_by: Optional[int] = None
+    updated_on: Optional[datetime.datetime] = None
+    ingredients: list[Ingredient] | Any = None

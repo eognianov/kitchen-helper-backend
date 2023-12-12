@@ -16,20 +16,23 @@ class IngredientCategory(DbBaseModel):
     id: Mapped[int] = mapped_column(
         Integer, autoincrement=True, primary_key=True, init=False
     )
-    name: Mapped[str] = mapped_column(String(50), unique=True)
-    created_by: Mapped[str] = mapped_column(String(30))
+    name: Mapped[str] = mapped_column(String(255), unique=True)
+    created_by: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     created_on: Mapped[datetime.datetime] = mapped_column(
         DateTime, server_default=func.current_timestamp(), init=False
     )
-    updated_by: Mapped[Optional[str]] = mapped_column(
-        String(30), nullable=True, init=False
+
+    updated_by: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("Users.id"), nullable=True, init=False
     )
+
     updated_on: Mapped[datetime.datetime] = mapped_column(
         DateTime,
         server_default=func.current_timestamp(),
         onupdate=func.current_timestamp(),
         init=False,
     )
+
     ingredients: Mapped[list["Ingredient"]] = relationship(
         "Ingredient", back_populates="ingredient", init=False, lazy="selectin"
     )
@@ -60,8 +63,7 @@ class Ingredient(DbBaseModel):
     deleted_on: Mapped[Optional[datetime.datetime]] = mapped_column(
         DateTime, nullable=True, init=False
     )
-    deleted_by: Mapped[Optional[str]] = mapped_column(String, nullable=True, init=False)
-
+    deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
 
 class RecipeCategory(DbBaseModel):
     """Recipe category"""
@@ -122,3 +124,4 @@ class RecipeInstruction(DbBaseModel):
 
     recipe_id: Mapped[int] = mapped_column(ForeignKey('RECIPES.id'), nullable=False, init=False)
     recipe: Mapped[Recipe] = relationship('Recipe', back_populates='instructions', init=False, lazy='selectin')
+

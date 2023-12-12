@@ -1,13 +1,14 @@
 """Recipes feature business logic"""
 from typing import Type, List
 import sqlalchemy.exc
-from sqlalchemy import and_
+from sqlalchemy import update, and_
+
 import db.connection
 from fastapi import HTTPException
 from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 
-
+import features
 from .exceptions import RecipesCategoryNotFoundException, RecipesCategoryNameViolationException,\
     RecipeNotFoundException, InstructionNotFoundException, InstructionNameViolationException,\
     RecipeWithInstructionNotFoundException, IngredientIntegrityViolation,\
@@ -29,7 +30,7 @@ import khLogging
 logging = khLogging.Logger.get_child_logger(__file__)
 
 
-def get_all_ingredients_category() -> List[PatchIngredientCategoryInputModel]:
+def get_all_ingredients_category() -> List[features.recipes.responses.IngredientCategory]:
 
     """Get all ingredients categories
     ...
@@ -39,13 +40,13 @@ def get_all_ingredients_category() -> List[PatchIngredientCategoryInputModel]:
 
     with db.connection.get_session() as session:
         return (
-            session.query(PatchIngredientCategoryInputModel)
-            .filter(PatchIngredientCategoryInputModel.is_deleted is False)
+            session.query(features.recipes.models.IngredientCategory)
+            .filter(IngredientCategory.is_deleted is False)
             .all()
         )
 
 
-def get_ingredient_category_by_id(category_id: int) -> Type[PatchIngredientCategoryInputModel]:
+def get_ingredient_category_by_id(category_id: int) -> Type[features.recipes.models.IngredientCategory]:
     """Get ingredient category by id
     ...
     :return: ingredient category
@@ -64,10 +65,10 @@ def get_ingredient_category_by_id(category_id: int) -> Type[PatchIngredientCateg
         return category
 
 
-def update_ingredient_category(
+def patch_ingredient_category(
     category_id: int, field: str, value: str, updated_by: str
 ) -> Type[PatchIngredientCategoryInputModel]:
-    """Update ingredient category
+    """Patch ingredient category
     ...
     :return: updated ingredient category
     :rtype: IngredientCategory
@@ -174,6 +175,28 @@ def update_ingredient(ingredient_id: int, field: str, value: str):
         except IntegrityError as exc:
             raise IngredientIntegrityViolation(exc)
 
+def patch_ingredient(ingredient_id: int, field: str, value: str) -> PatchIngredientInputModel:
+
+    db_ingredient = get_ingredient(ingredient_id)
+
+    if db_ingredient.is_deleted:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
+
+    try:
+        with db.connection.get_session() as session:
+            session.execute(
+                update(Ingredient)
+                .where(Ingredient.id == ingredient_id)
+                .values({field: value})
+            )
+            setattr(db_ingredient, field, value)
+            session.commit()
+
+            return db_ingredient
+
+    except IntegrityError as ex:
+        raise IngredientIntegrityViolation(ex)
+
 
 def delete_ingredient(ingredient_id: int) -> PatchIngredientInputModel:
 
@@ -253,9 +276,8 @@ def create_category(category_name: str, created_by: int = 1) -> RecipeCategory:
         raise RecipesCategoryNameViolationException(ex)
 
 
-def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
-                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0,
-                  created_by: int = 1, instructions: list[CreateInstructionInputModel]):
+def create_recipe(*, name: str, time_to_prepare: int, created_by: int, category_id: int = None, picture: str = None, summary: str = None,
+                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0, instructions: list[CreateInstructionInputModel]):
     """
     Create recipe
 
