@@ -2,6 +2,7 @@
 
 import fastapi
 
+import common.authentication
 import features.recipes.exceptions
 import features.recipes.exceptions
 import features.recipes.operations
@@ -11,7 +12,10 @@ from features.recipes.responses import InstructionResponse
 from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel
 from .responses import Recipe
+from typing import Annotated
 
+
+from common.authentication import Authenticate, AuthenticatedUser
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
 
@@ -107,15 +111,16 @@ def get_recipe(recipe_id: int = fastapi.Path()):
 
 
 @recipes_router.post('/', response_model=Recipe)
-def create_recipe(create_recipe_input_model: CreateRecipeInputModel):
+def create_recipe(create_recipe_input_model: CreateRecipeInputModel, created_by: common.authentication.authenticated_user):
     """
     Create recipe
 
     :param create_recipe_input_model:
+    :param created_by:
     :return:
     """
     try:
-        return features.recipes.operations.create_recipe(**create_recipe_input_model.__dict__)
+        return features.recipes.operations.create_recipe(**create_recipe_input_model.__dict__, created_by=created_by.id)
 
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(

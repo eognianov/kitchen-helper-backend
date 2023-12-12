@@ -22,8 +22,7 @@ class UsersResponseModel(BaseModel):
 
 
 class JwtTokenResponseModel(BaseModel):
-    """JWT Token response"""
-    token_value: str
+    access_token: str
     token_type: str
 
 
