@@ -22,7 +22,12 @@ class User(DbBaseModel):
     # TODO add updated by and update on
 
     roles = relationship(
-        "Role", secondary="user_roles", back_populates="users", lazy="selectin"
+        "Role",
+        secondary="user_roles",
+        back_populates="users",
+        lazy="selectin",
+        primaryjoin="User.id == user_roles.c.user_id",
+        secondaryjoin="User.id == user_roles.c.user_id",
     )
 
     @property
@@ -59,7 +64,12 @@ class Role(DbBaseModel):
     created_by: Mapped[int] = mapped_column(ForeignKey("Users.id"), nullable=True)
 
     users = relationship(
-        "User", secondary="user_roles", back_populates="roles", lazy="selectin"
+        "User",
+        secondary="user_roles",
+        back_populates="roles",
+        lazy="selectin",
+        primaryjoin="Role.id == user_roles.c.role_id",
+        secondaryjoin="User.id == user_roles.c.user_id",
     )
 
 
