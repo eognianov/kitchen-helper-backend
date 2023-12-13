@@ -32,7 +32,7 @@ async def extract_user_data_from_jwt(
         return None
     try:
         payload = jwt.decode(
-            token, jwt_config.jwt.secret_key, algorithms=[jwt_config.jwt.algorithm]
+            token, jwt_config.secret_key, algorithms=[jwt_config.algorithm]
         )
         user_id = int(payload.get("sub"))
         roles = payload.get("roles")
