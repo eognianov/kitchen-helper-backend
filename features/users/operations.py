@@ -7,11 +7,9 @@ from db.connection import get_session
 import datetime
 
 from datetime import datetime, timedelta
-from typing import Union, Any, Type, Optional
 
 import bcrypt
 from jose import jwt
-from pydantic import ValidationError
 from sqlalchemy import update
 from fastapi.templating import Jinja2Templates
 from httpx import AsyncClient
@@ -51,7 +49,7 @@ def check_password(user: User, password: str) -> bool:
     :return:
     """
 
-    return bcrypt.checkpw(password.encode('utf-8'), user.password)
+    return bcrypt.checkpw(password.encode("utf-8"), user.password)
 
 
 def create_new_user(user: RegisterUserInputModel) -> User:
@@ -68,7 +66,9 @@ def create_new_user(user: RegisterUserInputModel) -> User:
                 raise features.users.exceptions.UserAlreadyExists()
         except features.users.exceptions.UserDoesNotExistException:
             user.password = _hash_password(password=user.password)
-            db_user = User(username=user.username, email=user.email, password=user.password)
+            db_user = User(
+                username=user.username, email=user.email, password=user.password
+            )
             session.add(db_user)
             session.commit()
             session.refresh(db_user)
@@ -93,7 +93,9 @@ def signin_user(username: str, password: str) -> User:
     return current_user
 
 
-def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
+def get_user_from_db(
+    *, pk: int = None, username: str = None, email: str = None
+) -> User | None:
     """
     Get user from DB by pk, username or email
 
@@ -149,14 +151,21 @@ def update_user(user_id: int, field: str, value: str, updated_by) -> User:
     """
     user = get_user_from_db(pk=user_id)
     with get_session() as session:
-        session.execute(update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}])
+        session.execute(
+            update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}]
+        )
         session.commit()
         user.__setattr__(field, value)
         logging.info(f"User #{user.id} updated. {updated_by} set {field}={value}")
         return user
 
 
-def create_token(user_id: int, user_role_ids: list[int] = None, expires_delta: timedelta = None, access: bool = True) -> tuple:
+def create_token(
+    user_id: int,
+    user_role_ids: list[int] = None,
+    expires_delta: timedelta = None,
+    access: bool = True,
+) -> tuple:
     """
     Create jwt token
 
@@ -167,7 +176,11 @@ def create_token(user_id: int, user_role_ids: list[int] = None, expires_delta: t
     :return:
     """
     jwt_config = configuration.JwtToken()
-    minutes = jwt_config.access_token_expire_minutes if access else jwt_config.refresh_token_expire_minutes
+    minutes = (
+        jwt_config.access_token_expire_minutes
+        if access
+        else jwt_config.refresh_token_expire_minutes
+    )
     secret_key = jwt_config.secret_key if access else jwt_config.refresh_secret_key
     algorithm = jwt_config.algorithm
     token_type = "Bearer" if access else "Refresh"
@@ -186,9 +199,9 @@ def create_token(user_id: int, user_role_ids: list[int] = None, expires_delta: t
 
 def get_all_roles() -> list:
     """
-        Get all roles
+    Get all roles
 
-        :return:
+    :return:
     """
     with db.connection.get_session() as session:
         roles = session.query(Role).all()
@@ -197,14 +210,14 @@ def get_all_roles() -> list:
 
 def get_role(pk: int = None, role_name: str = None) -> Role | None:
     """
-        Get role by id or name
+    Get role by id or name
 
-        :param pk:
-        :param role_name:
-        :return:
+    :param pk:
+    :param role_name:
+    :return:
     """
     if not pk and not role_name:
-        raise ValidationError("Neither pk nor role_name is provided")
+        raise ValueError("Neither pk nor role_name is provided")
 
     with db.connection.get_session() as session:
         query = session.query(Role)
@@ -228,11 +241,11 @@ def get_role(pk: int = None, role_name: str = None) -> Role | None:
 
 def check_user_role(user_id: int, role_id: int) -> bool:
     """
-        Create role
+    Create role
 
-        :param user_id:
-        :param role_id:
-        :return:
+    :param user_id:
+    :param role_id:
+    :return:
     """
 
     user = get_user_from_db(pk=user_id)
@@ -245,11 +258,11 @@ def check_user_role(user_id: int, role_id: int) -> bool:
 
 def create_role(name: str, created_by: int) -> Role:
     """
-        Create role
+    Create role
 
-        :param name:
-        :param created_by:
-        :return:
+    :param name:
+    :param created_by:
+    :return:
     """
     try:
         role = get_role(role_name=name)
@@ -267,12 +280,12 @@ def create_role(name: str, created_by: int) -> Role:
 
 def add_user_to_role(user_id: int, role_id: int, added_by: int) -> None:
     """
-        Assign role to user
+    Assign role to user
 
-        :param user_id:
-        :param role_id:
-        :param added_by:
-        :return:
+    :param user_id:
+    :param role_id:
+    :param added_by:
+    :return:
     """
     user = get_user_from_db(pk=user_id)
     role = get_role(pk=role_id)
@@ -287,13 +300,14 @@ def add_user_to_role(user_id: int, role_id: int, added_by: int) -> None:
     logging.info(f"User #{user.id} was add to role #{role.id} by #{added_by}")
 
 
-def remove_user_from_role(user_id: int, role_id: int) -> None:
+def remove_user_from_role(user_id: int, role_id: int, removed_by: int) -> None:
     """
-        Remove user from role
+    Remove user from role
 
-        :param user_id:
-        :param role_id:
-        :return:
+    :param user_id:
+    :param role_id:
+    :param removed_by:
+    :return:
     """
     user = get_user_from_db(pk=user_id)
     role = get_role(pk=role_id)
@@ -307,7 +321,8 @@ def remove_user_from_role(user_id: int, role_id: int) -> None:
 
         session.add(user)
         session.commit()
-    logging.info(f"User #{user.id} was add to role #{role.id} by #{added_by}")
+        session.refresh(user)
+    logging.info(f"User #{user.id} was removed from role #{role.id} by #{removed_by}")
 
 
 def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
@@ -322,12 +337,17 @@ def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
 
     config = configuration.Config()
 
-    templates = Jinja2Templates('features/users/templates')
-    template_path = 'confirmation-email-template.html' if token_type == TokenTypes.EMAIL_CONFIRMATION \
-        else 'password-reset-email.html'
+    templates = Jinja2Templates("features/users/templates")
+    template_path = (
+        "confirmation-email-template.html"
+        if token_type == TokenTypes.EMAIL_CONFIRMATION
+        else "password-reset-email.html"
+    )
     template = templates.get_template(template_path)
 
-    confirmation_link = f'{config.server.host}:{config.server.port}/users/confirm-email/{token}'
+    confirmation_link = (
+        f"{config.server.host}:{config.server.port}/users/confirm-email/{token}"
+    )
 
     html_content = template.render(
         recipient_name=recipient,
@@ -337,7 +357,9 @@ def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
     return html_content
 
 
-async def _send_mail(*, token_type: str, recipient_email: str, username: str, html_content):
+async def _send_mail(
+    *, token_type: str, recipient_email: str, username: str, html_content
+):
     """
     Create headers, payload and send email
 
@@ -367,8 +389,7 @@ async def _send_mail(*, token_type: str, recipient_email: str, username: str, ht
 
         if response.status_code != 201:
             raise features.users.exceptions.FailedToSendEmailException(
-                status_code=response.status_code,
-                text=response.text
+                status_code=response.status_code, text=response.text
             )
 
         result = response.json()
@@ -391,7 +412,7 @@ async def send_email(*, token: ConfirmationToken, recipient: User):
         token_type=token.token_type,
         recipient_email=recipient.email,
         username=recipient.username,
-        html_content=html_content
+        html_content=html_content,
     )
     return response
 
@@ -409,10 +430,11 @@ def expire_all_existing_tokens_for_user(*, user: User, token_type) -> None:
         current_datetime = datetime.utcnow()
         tokens = (
             session.query(ConfirmationToken)
-            .filter(ConfirmationToken.user_id == user.id,
-                    ConfirmationToken.token_type == token_type,
-                    ConfirmationToken.expired_on > current_datetime
-                    )
+            .filter(
+                ConfirmationToken.user_id == user.id,
+                ConfirmationToken.token_type == token_type,
+                ConfirmationToken.expired_on > current_datetime,
+            )
             .all()
         )
         if tokens:
@@ -448,12 +470,11 @@ def generate_email_password_token(*, user: User, token_type: str) -> Confirmatio
     expiration_time = datetime.utcnow() + timedelta(minutes=int(expiration_minutes))
 
     with get_session() as session:
-
         token_obj = ConfirmationToken(
             token=token,
             user_id=user.id,
             expired_on=expiration_time,
-            token_type=token_type
+            token_type=token_type,
         )
 
         session.add(token_obj)
@@ -476,7 +497,10 @@ def check_if_token_is_valid(token: str) -> ConfirmationToken | None:
     with get_session() as session:
         token = (
             session.query(ConfirmationToken)
-            .filter(ConfirmationToken.token == token, ConfirmationToken.expired_on > current_datetime)
+            .filter(
+                ConfirmationToken.token == token,
+                ConfirmationToken.expired_on > current_datetime,
+            )
             .first()
         )
 
@@ -501,7 +525,9 @@ def confirm_email(token: ConfirmationToken) -> User:
     return user
 
 
-def update_user_password(user: User, new_password: str, token: ConfirmationToken) -> User:
+def update_user_password(
+    user: User, new_password: str, token: ConfirmationToken
+) -> User:
     """
     Validate the new password
     Check if the new password does not match the old password
@@ -519,7 +545,7 @@ def update_user_password(user: User, new_password: str, token: ConfirmationToken
     if check_password(user, new_password):
         raise features.users.exceptions.SamePasswordsException()
 
-    hashed_password = hash_password(new_password)
+    hashed_password = _hash_password(new_password)
     user.password = hashed_password
 
     with get_session() as session:
