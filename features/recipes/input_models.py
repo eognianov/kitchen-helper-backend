@@ -60,31 +60,6 @@ class UpdateIngredientInputModel(BaseModel):
     class Config:
         allow_mutation = False
 
-    @field_validator('field')
-    @classmethod
-    def validate_field(cls, field: str):
-        allowed_fields_to_edit = [
-            'NAME',
-            'MEASUREMENT',
-            'CALORIES',
-            'CARBO',
-            'FATS',
-            'PROTEINS',
-            'CHOLESTEROL'
-        ]
-
-        if field.upper() not in allowed_fields_to_edit:
-            raise ValueError(f'Field {field} is not allowed to be patched')
-
-        return field
-
-    @field_validator('value')
-    @classmethod
-    def validate_value(cls, value: str):
-        if not value:
-            raise ValueError('Value cannot be empty')
-
-        return value
 
     @field_validator('measurement')
     @classmethod
@@ -127,14 +102,6 @@ class PatchIngredientInputModel(BaseModel):
             raise ValueError('Value cannot be empty')
 
         return value
-
-    @field_validator('measurement')
-    @classmethod
-    def validate_measurement(cls, measurement: str):
-        if measurement not in cls.MEASUREMENT_UNITS:
-            raise ValueError(f'Measurement {measurement} is not allowed')
-
-        return measurement
 
 
 class CreateIngredientInputModel(BaseModel):

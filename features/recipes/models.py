@@ -1,3 +1,5 @@
+import enum
+
 from features import DbBaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, Float, func, ForeignKey, DateTime, Boolean
@@ -38,27 +40,27 @@ class IngredientCategory(DbBaseModel):
     )
 
 
-class MeasurementUnits(Enum):
-    KG = 'kg'
-    ML = 'ml'
-    G = 'g'
-    L = 'L'
-    OZ = 'oz'
-    LB = 'lb'
-    CUP = 'cup'
+class MeasurementUnits(enum.Enum):
+    kg = enum.auto()
+    ml = enum.auto()
+    g = enum.auto()
+    l = enum.auto()
+    oz = enum.auto()
+    lb = enum.auto()
+    cup = enum.auto()
 
 
 class Ingredient(DbBaseModel):
     __tablename__ = "INGREDIENTS"
 
-    id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
-    name: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, init=False, autoincrement=True, primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
     calories: Mapped[float] = mapped_column(Float, nullable=False)
     carbo: Mapped[float] = mapped_column(Float, nullable=False)
     fats: Mapped[float] = mapped_column(Float, nullable=False)
     protein: Mapped[float] = mapped_column(Float, nullable=False)
     cholesterol: Mapped[float] = mapped_column(Float, nullable=False)
-    measurement: Mapped[str] = mapped_column(SQLAlchemyEnum(MeasurementUnits), nullable=False)
+    measurement: Mapped[MeasurementUnits] = mapped_column(SQLAlchemyEnum(MeasurementUnits), nullable=False)
     is_deleted: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
     deleted_on: Mapped[Optional[datetime.datetime]] = mapped_column(
         DateTime, nullable=True, init=False
