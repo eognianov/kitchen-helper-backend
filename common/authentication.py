@@ -11,7 +11,7 @@ import configuration
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/signin", auto_error=False)
 
-config = configuration.Config()
+jwt_config = configuration.JwtToken()
 
 
 class AuthenticatedUser(pydantic.BaseModel):
@@ -19,7 +19,9 @@ class AuthenticatedUser(pydantic.BaseModel):
     roles: list[int]
 
 
-async def extract_user_data_from_jwt(token: Annotated[str, fastapi.Depends(oauth2_scheme)]) -> Optional[AuthenticatedUser]:
+async def extract_user_data_from_jwt(
+    token: Annotated[str, fastapi.Depends(oauth2_scheme)]
+) -> Optional[AuthenticatedUser]:
     """
     Get the current user
     :param token:
@@ -29,9 +31,11 @@ async def extract_user_data_from_jwt(token: Annotated[str, fastapi.Depends(oauth
     if not token:
         return None
     try:
-        payload = jwt.decode(token, config.jwt.secret_key, algorithms=[config.jwt.algorithm])
+        payload = jwt.decode(
+            token, jwt_config.secret_key, algorithms=[jwt_config.algorithm]
+        )
         user_id = int(payload.get("sub"))
-        roles = payload.get('roles')
+        roles = payload.get("roles")
         if user_id is None:
             return None
     except JWTError as e:
@@ -46,11 +50,20 @@ class Authenticate:
     def __init__(self, optional: bool = False):
         self.optional = optional
 
-    def __call__(self, user: Annotated[AuthenticatedUser, fastapi.Depends(extract_user_data_from_jwt)]):
+    def __call__(
+        self,
+        user: Annotated[AuthenticatedUser, fastapi.Depends(extract_user_data_from_jwt)],
+    ):
         if not self.optional and not user:
-            raise fastapi.HTTPException(status_code=fastapi.status.HTTP_401_UNAUTHORIZED)
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_401_UNAUTHORIZED
+            )
         return user
 
 
-authenticated_user = Annotated[AuthenticatedUser, fastapi.Depends(Authenticate(optional=False))]
-optional_user = Annotated[AuthenticatedUser, fastapi.Depends(Authenticate(optional=True))]
+authenticated_user = Annotated[
+    AuthenticatedUser, fastapi.Depends(Authenticate(optional=False))
+]
+optional_user = Annotated[
+    AuthenticatedUser, fastapi.Depends(Authenticate(optional=True))
+]
