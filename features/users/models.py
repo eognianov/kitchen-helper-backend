@@ -27,7 +27,7 @@ class User(DbBaseModel):
         back_populates="users",
         lazy="selectin",
         primaryjoin="User.id == user_roles.c.user_id",
-        secondaryjoin="User.id == user_roles.c.user_id",
+        secondaryjoin="Role.id == user_roles.c.role_id",
     )
 
     @property
