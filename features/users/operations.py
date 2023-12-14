@@ -511,7 +511,7 @@ def check_if_token_is_valid(token: str) -> ConfirmationToken | None:
 
 def confirm_email(token: ConfirmationToken) -> User:
     """
-    Mark the user email as confirmed and delete the token
+    Mark the user email as confirmed and expire the token
 
     :param token:
     :return:
@@ -523,6 +523,8 @@ def confirm_email(token: ConfirmationToken) -> User:
         session.add(user)
         session.add(token)
         session.commit()
+        session.refresh(token)
+        session.refresh(user)
 
     return user
 
