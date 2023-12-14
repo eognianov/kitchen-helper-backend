@@ -9,22 +9,28 @@ from enum import StrEnum, auto
 
 _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
-MEDIA_PATH = ROOT_PATH.joinpath('media')
+MEDIA_PATH = ROOT_PATH.joinpath("media")
 
 _ENV_FILES_PATHS = (
-    pathlib.Path(f'{ROOT_PATH}/.env.template'),
-    pathlib.Path(f'{ROOT_PATH}/.env.dev'),
-    pathlib.Path(f'{ROOT_PATH}/.env.prod'),
+    pathlib.Path(f"{ROOT_PATH}/.env.template"),
+    pathlib.Path(f"{ROOT_PATH}/.env.dev"),
+    pathlib.Path(f"{ROOT_PATH}/.env.prod"),
 )
 
 
 class CustomBaseSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
+    model_config = SettingsConfigDict(
+        env_file=_ENV_FILES_PATHS,
+        validate_default=True,
+        case_sensitive=False,
+        env_nested_delimiter="__",
+        extra="ignore",
+    )
 
 
 class CaseInsensitiveEnum(StrEnum):
     """Case insensitive enum"""
+
     @classmethod
     def _missing_(cls, value: str):
         value = value.lower()
@@ -36,6 +42,7 @@ class CaseInsensitiveEnum(StrEnum):
 
 class ContextOptions(CaseInsensitiveEnum):
     """Context options"""
+
     PROD = auto()
     DEV = auto()
     TEST = auto()
@@ -43,6 +50,7 @@ class ContextOptions(CaseInsensitiveEnum):
 
 class DbTypeOptions(CaseInsensitiveEnum):
     """DB type options"""
+
     SQLITE = auto()
     POSTGRES = auto()
 
@@ -85,6 +93,7 @@ class PostgresConfig(BaseModel):
 
 class JwtToken(CustomBaseSettings):
     """JWT Token settings"""
+
     access_token_expire_minutes: int
     refresh_token_expire_minutes: int
     algorithm: str
@@ -94,6 +103,7 @@ class JwtToken(CustomBaseSettings):
 
 class CorsSettings(CustomBaseSettings):
     """CORSMiddleware settings"""
+
     allow_origins: List[str]
     allow_methods: List[str]
     allow_headers: List[str]
@@ -101,6 +111,7 @@ class CorsSettings(CustomBaseSettings):
 
 class BrevoSettings(CustomBaseSettings):
     """Brevo settings"""
+
     email_api_key: str
     email_api_url: str
     email_sender: str
@@ -109,6 +120,7 @@ class BrevoSettings(CustomBaseSettings):
 
 class ConfirmationToken(CustomBaseSettings):
     """Email confirmation and password reset token"""
+
     email_token_expiration_minutes: int
     password_token_expiration_minutes: int
 
@@ -123,6 +135,15 @@ class RabbitmqConfiguration(BaseModel):
     password: str
 
 
+class CelerySettings(CustomBaseSettings):
+    """Cloudinary settings"""
+
+    broker: str
+    backend: str
+    host: str
+    port: int
+
+
 class Config(CustomBaseSettings):
     """Base configurations"""
 
@@ -132,6 +153,7 @@ class Config(CustomBaseSettings):
     postgres: PostgresConfig
     server: ServerConfiguration
     rabbitmq: RabbitmqConfiguration
+    celery: CelerySettings
 
     @property
     def connection_string(self):
@@ -139,10 +161,15 @@ class Config(CustomBaseSettings):
             return self.postgres.connection_string
         return self.sqlite.connection_string
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_db_configuration(self):
-        if self.database == DbTypeOptions.POSTGRES and not self.postgres.are_all_fields_populated:
-            raise ValueError('You have selected postgres as database but did not provide its configuration')
+        if (
+            self.database == DbTypeOptions.POSTGRES
+            and not self.postgres.are_all_fields_populated
+        ):
+            raise ValueError(
+                "You have selected postgres as database but did not provide its configuration"
+            )
 
 
 class Cloudinary(CustomBaseSettings):
