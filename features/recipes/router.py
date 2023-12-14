@@ -107,7 +107,7 @@ def get_recipe(recipe_id: int = fastapi.Path()):
 
 
 @recipes_router.post('/', response_model=recipes.responses.Recipe)
-def create_recipe(create_recipe_input_model: recipes.input_models.CreateRecipeInputModel, created_by: common.authentication.authenticated_user):
+def create_recipe(create_recipe_input_model: recipes.input_models.RecipeInputModel, created_by: common.authentication.authenticated_user):
     """
     Create recipe
 
@@ -230,7 +230,7 @@ def delete_recipe(recipe_id: int, user_id: int = 1):
 
 @recipes_router.put('/{recipe_id}', response_model=recipes.responses.Recipe)
 def update_recipe(recipe_id: int = fastapi.Path(),
-                 update_recipe_input_model:  recipes.input_models.UpdateRecipeInputModel = fastapi.Body()):
+                 update_recipe_input_model:  recipes.input_models.RecipeInputModel = fastapi.Body()):
 
     """
     Update recipe
