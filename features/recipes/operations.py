@@ -8,27 +8,12 @@ from fastapi import HTTPException
 from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 
-import features
-import features.recipes
-# from .exceptions import RecipesCategoryNotFoundException, RecipesCategoryNameViolationException,\
-#     RecipeNotFoundException, InstructionNotFoundException, InstructionNameViolationException,\
-#     RecipeWithInstructionNotFoundException, IngredientIntegrityViolation,\
-#     IngredientCategoryNotFoundException, IngredientCategoryIntegrityViolation, \
-#     IngredientCategoryNameViolation
 
 import features.recipes.exceptions
 import features.recipes.models
-import features.recipes.input_models
 import features.recipes.responses
+import features.recipes.input_models
 
-# from .input_models import CreateInstructionInputModel, PatchIngredientInputModel, \
-#     PatchIngredientCategoryInputModel,\
-#     CreateIngredientInputModel
-
-# from .models import RecipeCategory, Recipe,\
-#     RecipeInstruction, IngredientCategory, Ingredient
-
-# from .responses import InstructionResponse
 from datetime import datetime
 
 import khLogging
@@ -116,7 +101,7 @@ def create_ingredient_category(name: str, created_by: str) -> Type[recipes.input
         raise recipes.exceptions.IngredientCategoryNameViolation(ex)
 
 
-def create_ingredient(ingredient: recipes.input_models.CreateIngredientInputModel):
+def create_ingredient(ingredient: recipes.input_models.IngredientInputModel):
     try:
         db_ingredient = recipes.models.Ingredient(**ingredient.model_dump())
 

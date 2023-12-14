@@ -5,8 +5,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, Float, func, ForeignKey, DateTime, Boolean
 import datetime
 from typing import Optional
-from enum import Enum
-from sqlalchemy import Enum as SQLAlchemyEnum
 
 
 class IngredientCategory(DbBaseModel):
@@ -60,7 +58,7 @@ class Ingredient(DbBaseModel):
     fats: Mapped[float] = mapped_column(Float, nullable=False)
     protein: Mapped[float] = mapped_column(Float, nullable=False)
     cholesterol: Mapped[float] = mapped_column(Float, nullable=False)
-    measurement: Mapped[MeasurementUnits] = mapped_column(SQLAlchemyEnum(MeasurementUnits), nullable=False)
+    measurement: Mapped[str] = mapped_column(String(100), nullable=False)
     is_deleted: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
     deleted_on: Mapped[Optional[datetime.datetime]] = mapped_column(
         DateTime, nullable=True, init=False

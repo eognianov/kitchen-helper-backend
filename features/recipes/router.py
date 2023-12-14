@@ -49,7 +49,7 @@ def get_ingredient_category_by_id(category_id: int = fastapi.Path()) -> recipes.
 
 @ingredients_categories_router.post("/")
 def create_ingredient_category(
-    created_category_input_model: recipes.input_models.CreateIngredientInputModel,
+    created_category_input_model: recipes.input_models.IngredientInputModel,
 ) -> recipes.responses.IngredientCategory:
     """Create ingredient category
     ...
@@ -143,7 +143,7 @@ def get_ingredient(ingredient_id: int = fastapi.Path()):
 
 
 @ingredients_router.post("/", response_model=recipes.responses.Ingredient)
-def create_ingredient(create_ingredient_input_model: recipes.input_models.CreateIngredientInputModel):
+def create_ingredient(create_ingredient_input_model: recipes.input_models.IngredientInputModel):
     """Create ingredient
 
     :param : name of ingredient
@@ -175,8 +175,8 @@ def create_ingredient(create_ingredient_input_model: recipes.input_models.Create
 
     try:
         return create_ingredient(
-            recipes.input_models.CreateIngredientInputModel.name
-        )
+            recipes.input_models.IngredientInputModel.name,
+            )
 
     except recipes.exceptions.IngredientNameViolationException:
         raise fastapi.HTTPException(
@@ -188,7 +188,7 @@ def create_ingredient(create_ingredient_input_model: recipes.input_models.Create
 @ingredients_router.put("/{ingredient_id}", response_model=recipes.responses.Ingredient)
 def update_ingredient(
     ingredient_id: int = fastapi.Path(),
-    update_ingredient_input_model: recipes.input_models.UpdateIngredientInputModel = fastapi.Body(),
+    update_ingredient_input_model: recipes.input_models.IngredientInputModel = fastapi.Body(),
 ):
     """Update ingredient
 

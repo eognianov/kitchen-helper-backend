@@ -44,32 +44,6 @@ class CreateIngredientCategoryInputModel(BaseModel):
     name: str = Field(min_length=3, max_length=255)
 
 
-class UpdateIngredientInputModel(BaseModel):
-
-    """Update ingredient"""
-
-    name: str = Field(min_length=3, max_length=255)
-    category: str = Field(max_length=255)
-    calories: float = Field(default=0, ge=0)
-    carbo: float = Field(default=0, ge=0)
-    fats: float = Field(default=0, ge=0)
-    proteins: float = Field(default=0, ge=0)
-    cholesterol: float = Field(default=0, ge=0)
-    measurement: str = Field(default=0, ge=0, enum=MEASUREMENT_UNITS)
-
-    class Config:
-        allow_mutation = False
-
-
-    @field_validator('measurement')
-    @classmethod
-    def validate_measurement(cls, measurement: str):
-        if measurement not in cls.MEASUREMENT_UNITS:
-            raise ValueError(f'Measurement {measurement} is not allowed')
-
-        return measurement
-
-
 class PatchIngredientInputModel(BaseModel):
 
     """Patch ingredient"""
@@ -104,8 +78,8 @@ class PatchIngredientInputModel(BaseModel):
         return value
 
 
-class CreateIngredientInputModel(BaseModel):
-    """Create ingredient"""
+class IngredientInputModel(BaseModel):
+    """Ingredient input model"""
 
     name: str = Field(min_length=3, max_length=100)
     category: str = Field(max_length=255)
@@ -115,7 +89,7 @@ class CreateIngredientInputModel(BaseModel):
     proteins: float = Field(default=0, ge=0)
     cholesterol: float = Field(default=0, ge=0)
 
-    measurement: str = Field(required=True, enum=MEASUREMENT_UNITS)
+    measurement: str = Field(max_length=100)
 
     @field_validator('measurement')
     @classmethod
