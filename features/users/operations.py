@@ -27,6 +27,8 @@ logging = khLogging.Logger.get_child_logger(__file__)
 
 config = configuration.Config()
 
+brevo = configuration.BrevoSettings()
+
 
 def _hash_password(password: str) -> bytes:
     """
@@ -335,9 +337,7 @@ def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
     :return:
     """
 
-    config = configuration.Config()
-
-    templates = Jinja2Templates("features/users/templates")
+    templates = Jinja2Templates("templates")
     template_path = (
         "confirmation-email-template.html"
         if token_type == TokenTypes.EMAIL_CONFIRMATION
@@ -369,7 +369,7 @@ async def _send_mail(
     :param html_content:
     :return:
     """
-    brevo = configuration.BrevoSettings()
+
     api_url = brevo.email_api_url
     headers = {
         "Content-Type": "application/json",
