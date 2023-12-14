@@ -347,6 +347,8 @@ def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
 
     confirmation_link = (
         f"{config.server.host}:{config.server.port}/users/confirm-email/{token}"
+        if token_type == TokenTypes.EMAIL_CONFIRMATION
+        else f"{config.server.host}:{config.server.port}/users/reset-password/{token}"
     )
 
     html_content = template.render(

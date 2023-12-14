@@ -575,6 +575,11 @@ class TestUserOperations:
     async def test__prepare_mail_template_email_confirmation_expected_success(
         cls, use_test_db
     ):
+        """
+        Test that the email template include the correct url
+        :param use_test_db:
+        :return:
+        """
         user = operations.create_new_user(
             user=input_models.RegisterUserInputModel(**cls.USER_DATA)
         )
@@ -594,13 +599,18 @@ class TestUserOperations:
     async def test__prepare_mail_template_password_reset_expected_success(
         cls, use_test_db
     ):
+        """
+        Test that the email template include the correct url
+        :param use_test_db:
+        :return:
+        """
         user = operations.create_new_user(
             user=input_models.RegisterUserInputModel(**cls.USER_DATA)
         )
         token = operations.generate_email_password_token(
             user=user, token_type=constants.TokenTypes.PASSWORD_RESET
         )
-        confirmation_link = f"{cls.config.server.host}:{cls.config.server.port}/users/confirm-email/{token.token}"
+        confirmation_link = f"{cls.config.server.host}:{cls.config.server.port}/users/reset-password/{token.token}"
         html_content = operations._prepare_mail_template(
             token_type=token.token_type, token=token.token, recipient=user.email
         )
