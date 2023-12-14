@@ -1,9 +1,12 @@
+import datetime
+
 import bcrypt
 import pytest
 
 import configuration
+import db.connection
 from tests.fixtures import use_test_db
-from features.users import operations, input_models, exceptions, constants
+from features.users import operations, input_models, exceptions, constants, models
 from fastapi.testclient import TestClient
 from api import app
 
@@ -617,6 +620,37 @@ class TestUserOperations:
 
         assert confirmation_link in html_content
         assert user.email in html_content
+
+    @classmethod
+    def test_expire_all_existing_tokens_for_user_expected_to_be_expired(
+        cls, use_test_db
+    ):
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        number_of_tokens = 3
+        tokens = []
+        for _ in range(number_of_tokens):
+            token = operations.generate_email_password_token(
+                user=user, token_type=constants.TokenTypes.PASSWORD_RESET
+            )
+            tokens.append(token)
+        operations.expire_all_existing_tokens_for_user(
+            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+        with db.connection.get_session() as session:
+            all_tokens = (
+                session.query(models.ConfirmationToken)
+                .filter(
+                    models.ConfirmationToken.token_type
+                    == constants.TokenTypes.PASSWORD_RESET
+                )
+                .all()
+            )
+        for idx in range(len(all_tokens) - 1):
+            assert all_tokens[idx].created_on == tokens[idx].created_on
+            assert tokens[idx].expired_on > datetime.datetime.utcnow()
+            assert all_tokens[idx].expired_on < datetime.datetime.utcnow()
 
 
 class TestUserInputModelEmailValidation:
