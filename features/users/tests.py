@@ -625,6 +625,11 @@ class TestUserOperations:
     def test_expire_all_existing_tokens_for_user_expected_to_be_expired(
         cls, use_test_db
     ):
+        """
+        Test that the existing tokens are expired
+        :param use_test_db:
+        :return:
+        """
         user = operations.create_new_user(
             user=input_models.RegisterUserInputModel(**cls.USER_DATA)
         )
@@ -651,6 +656,56 @@ class TestUserOperations:
             assert all_tokens[idx].created_on == tokens[idx].created_on
             assert tokens[idx].expired_on > datetime.datetime.utcnow()
             assert all_tokens[idx].expired_on < datetime.datetime.utcnow()
+
+    @classmethod
+    def test_check_if_token_is_valid_expected_to_be_valid(cls, use_test_db):
+        """
+        Check if token is not expired expected to be valid
+        :param use_test_db:
+        :return:
+        """
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        password_token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+        email_token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
+        )
+        assert (
+            operations.check_if_token_is_valid(token=password_token.token)
+            == password_token
+        )
+        assert (
+            operations.check_if_token_is_valid(token=email_token.token) == email_token
+        )
+
+    @classmethod
+    def test_check_if_token_is_valid_expected_to_be_expired(cls, use_test_db):
+        """
+        Check if token is not expired expected to be expired
+        :param use_test_db:
+        :return:
+        """
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        password_token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+        email_token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
+        )
+        operations.expire_all_existing_tokens_for_user(
+            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+        operations.expire_all_existing_tokens_for_user(
+            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
+        )
+
+        assert operations.check_if_token_is_valid(token=password_token.token) is None
+        assert operations.check_if_token_is_valid(token=email_token.token) is None
 
 
 class TestUserInputModelEmailValidation:
