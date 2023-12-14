@@ -107,7 +107,7 @@ class PatchIngredientInputModel(BaseModel):
 class CreateIngredientInputModel(BaseModel):
     """Create ingredient"""
 
-    name: str = Field(min_length=3, max_length=255)
+    name: str = Field(min_length=3, max_length=100)
     category: str = Field(max_length=255)
     calories: float = Field(default=0, ge=0)
     carbo: float = Field(default=0, ge=0)
