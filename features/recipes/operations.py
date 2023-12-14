@@ -1,4 +1,5 @@
 """Recipes feature business logic"""
+from datetime import datetime
 from typing import Type
 
 import sqlalchemy.exc
@@ -7,10 +8,11 @@ from sqlalchemy import update, and_
 import db.connection
 from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
     InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException
-from .input_models import CreateInstructionInputModel
+from .helpers import paginate_recipes
+from .input_models import CreateInstructionInputModel, PSFRecipesInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
-from .responses import InstructionResponse
-from datetime import datetime
+from .responses import InstructionResponse, PSFRecipesResponseModel
+
 
 import khLogging
 
@@ -70,8 +72,9 @@ def create_category(category_name: str, created_by: int = 1) -> RecipeCategory:
         raise CategoryNameViolationException(ex)
 
 
-def create_recipe(*, name: str, time_to_prepare: int, created_by: int, category_id: int = None, picture: str = None, summary: str = None,
-                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0, instructions: list[CreateInstructionInputModel]):
+def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
+                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0,
+                  created_by: int = 1, instructions: list[CreateInstructionInputModel]):
     """
     Create recipe
 
@@ -121,15 +124,24 @@ def create_recipe(*, name: str, time_to_prepare: int, created_by: int, category_
     return recipe
 
 
-def get_all_recipes():
-    """Get all recipes"""
+def get_all_recipes(paginated_input_model: PSFRecipesInputModel) -> PSFRecipesResponseModel:
+    """
+    Get all recipes paginated, sorted, and filtered
+    :param paginated_input_model:
+    :return:
+    """
+
+    filter_expression = paginated_input_model.filter_expression
+    order_expression = paginated_input_model.order_expression
 
     with db.connection.get_session() as session:
-        return (
-            session.query(Recipe)
-            .join(Recipe.category, isouter=True)
-            .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
-        )
+        filtered_recipes = session.query(Recipe) \
+            .join(RecipeCategory) \
+            .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)), *filter_expression) \
+            .order_by(*order_expression)
+
+        response = paginate_recipes(filtered_recipes, paginated_input_model)
+        return response
 
 
 def get_recipe_by_id(recipe_id: int):
@@ -149,7 +161,6 @@ def get_recipe_by_id(recipe_id: int):
 def update_recipe(recipe_id: int) -> None:
     """
     Update recipe after adding or editing instructions
-
     :param recipe_id:
     :return:
     """
@@ -177,7 +188,6 @@ def update_recipe(recipe_id: int) -> None:
 def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe_id: int) -> None:
     """
     Create instructions
-
     :param instructions_request:
     :param recipe_id:
     :return:
@@ -269,7 +279,6 @@ def delete_instruction(recipe_id: int, instruction_id: int):
         session.commit()
         logging.info(f"Instruction #{instruction_id} was deleted from Recipe #{recipe_id}")
         update_recipe(recipe_id=recipe.id)
-
 
 def delete_recipe(*, recipe_id: int, deleted_by: int):
     """

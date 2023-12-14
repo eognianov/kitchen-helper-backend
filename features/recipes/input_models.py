@@ -1,7 +1,10 @@
 """Recipe feature input model"""
-from typing import Optional, Union
+from typing import Optional, Union, Any
 
+import fastapi
 import pydantic
+
+import features.recipes.helpers
 
 INSTRUCTION_CATEGORIES = ('BREAKFAST', 'LUNCH', 'DINNER')
 
@@ -99,3 +102,42 @@ class PatchInstructionInputModel(pydantic.BaseModel):
             self.value = self.value.capitalize()
 
         return self
+
+
+class PSFRecipesInputModel(pydantic.BaseModel):
+    """Paginate, sort, filter Recipes"""
+    page: int = pydantic.Field(default=1, gt=0)
+    page_size: int = pydantic.Field(default=10, gt=0)
+    sort: Optional[str] = None
+    filters: Optional[str] = None
+    order_expression: Optional[list] = []
+    filter_expression: Optional[list] = []
+
+    # otherwise gives an internal server error
+    @pydantic.field_validator('page', mode='before')
+    @classmethod
+    def validate_page(cls, field: str):
+        if int(field) < 1:
+            raise fastapi.HTTPException(status_code=422, detail=f"Page must be greater than 0.")
+        return field
+
+    # otherwise gives an internal server error
+    @pydantic.field_validator('page_size', mode='before')
+    @classmethod
+    def validate_page_size(cls, field: str):
+        if int(field) < 1:
+            raise fastapi.HTTPException(status_code=422, detail=f"Page size must be greater than 0.")
+        return field
+
+    def model_post_init(self, __context: Any) -> None:
+
+        try:
+            self.order_expression = features.recipes.helpers.sort_recipes(self.sort)
+        except ValueError as ve:
+            raise fastapi.HTTPException(status_code=422, detail=str(ve))
+
+        if self.filters:
+            try:
+                self.filter_expression = features.recipes.helpers.filter_recipes(self.filters)
+            except ValueError as ve:
+                raise fastapi.HTTPException(status_code=422, detail=str(ve))
