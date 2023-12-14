@@ -1,7 +1,9 @@
 import bcrypt
 import pytest
+
+import configuration
 from tests.fixtures import use_test_db
-from features.users import operations, input_models, exceptions
+from features.users import operations, input_models, exceptions, constants
 from fastapi.testclient import TestClient
 from api import app
 
@@ -19,6 +21,8 @@ class TestUserOperations:
     }
 
     ROLE_DATA = {"name": "admin"}
+
+    config = configuration.Config()
 
     @staticmethod
     def test_hashed_password_matches_expected(use_test_db):
@@ -565,6 +569,44 @@ class TestUserOperations:
         assert db_user.roles != user_roles
         assert len(db_user.roles) == len(user_roles) - 1
         assert db_user.roles == []
+
+    @classmethod
+    @pytest.mark.asyncio
+    async def test__prepare_mail_template_email_confirmation_expected_success(
+        cls, use_test_db
+    ):
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
+        )
+        confirmation_link = f"{cls.config.server.host}:{cls.config.server.port}/users/confirm-email/{token.token}"
+        html_content = operations._prepare_mail_template(
+            token_type=token.token_type, token=token.token, recipient=user.email
+        )
+
+        assert confirmation_link in html_content
+        assert user.email in html_content
+
+    @classmethod
+    @pytest.mark.asyncio
+    async def test__prepare_mail_template_password_reset_expected_success(
+        cls, use_test_db
+    ):
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+        confirmation_link = f"{cls.config.server.host}:{cls.config.server.port}/users/confirm-email/{token.token}"
+        html_content = operations._prepare_mail_template(
+            token_type=token.token_type, token=token.token, recipient=user.email
+        )
+
+        assert confirmation_link in html_content
+        assert user.email in html_content
 
 
 class TestUserInputModelEmailValidation:
