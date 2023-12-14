@@ -557,5 +557,8 @@ def update_user_password(
         session.add(token)
         session.add(user)
         session.commit()
+        session.refresh(token)
+        session.refresh(user)
+        session.close()
 
     return user
