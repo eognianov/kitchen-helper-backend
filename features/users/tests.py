@@ -707,6 +707,26 @@ class TestUserOperations:
         assert operations.check_if_token_is_valid(token=password_token.token) is None
         assert operations.check_if_token_is_valid(token=email_token.token) is None
 
+    @classmethod
+    def test_confirm_email_expected_success(cls, use_test_db):
+        """
+        Check if email has been confirmed. Expected success
+        :param use_test_db:
+        :return:
+        """
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        email_token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
+        )
+        user_with_confirmed_email = operations.confirm_email(email_token)
+
+        assert user_with_confirmed_email.is_email_confirmed is True
+        assert user_with_confirmed_email.username == user.username
+        assert user_with_confirmed_email.email == user.email
+        assert email_token.expired_on < datetime.datetime.utcnow()
+
 
 class TestUserInputModelEmailValidation:
     """
