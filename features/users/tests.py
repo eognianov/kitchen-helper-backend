@@ -727,6 +727,37 @@ class TestUserOperations:
         assert user_with_confirmed_email.email == user.email
         assert email_token.expired_on < datetime.datetime.utcnow()
 
+    @classmethod
+    def test_update_user_password_expected_success(cls, use_test_db):
+        """
+        Check if password is successfully updated
+        :param use_test_db:
+        :return:
+        """
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        password_token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+        new_password = cls.USER_DATA["password"] + "new"
+        user_with_new_password = operations.update_user_password(
+            user=user, new_password=new_password, token=password_token
+        )
+        assert (
+            operations.check_password(
+                user=user_with_new_password, password=new_password
+            )
+            is True
+        )
+        assert (
+            operations.check_password(
+                user=user_with_new_password, password=cls.USER_DATA["password"]
+            )
+            is False
+        )
+        assert password_token.expired_on < datetime.datetime.utcnow()
+
 
 class TestUserInputModelEmailValidation:
     """
