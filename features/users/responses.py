@@ -1,5 +1,6 @@
 from typing import Any
 
+"""Users feature responses"""
 from pydantic import BaseModel
 
 
@@ -9,6 +10,7 @@ class RolesResponseModel(BaseModel):
 
 
 class UsersResponseModel(BaseModel):
+    """User response"""
     id: int
     username: str
     email: str
@@ -20,7 +22,7 @@ class UsersResponseModel(BaseModel):
 
 
 class JwtTokenResponseModel(BaseModel):
-    token_value: str
+    access_token: str
     token_type: str
 
 

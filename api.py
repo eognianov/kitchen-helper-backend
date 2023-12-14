@@ -7,6 +7,9 @@ import features.images
 import features.users
 import features.recipes
 
+import multiprocessing
+cpus = multiprocessing.cpu_count()
+
 import uvicorn
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,18 +17,16 @@ from fastapi.middleware.cors import CORSMiddleware
 import configuration
 import khLogging
 
-config = configuration.Config()
 
 logging = khLogging.Logger('api')
 
 app = fastapi.FastAPI()
 
-# Configure CORS middleware
+cors_config = configuration.CorsSettings()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=config.cors.allow_origins,
-    allow_methods=config.cors.allow_methods,
-    allow_headers=config.cors.allow_headers,
+    **cors_config.__dict__,
 )
 
 
@@ -35,7 +36,7 @@ app.include_router(features.users.role_router, prefix='/roles')
 app.include_router(features.recipes.category_router, prefix='/categories')
 app.include_router(features.recipes.recipes_router, prefix='/recipes')
 app.include_router(features.images.router, prefix='/images')
-app.mount('/media', fastapi.staticfiles.StaticFiles(directory='media'))
+app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 
 if __name__ == '__main__':
-    uvicorn.run(app)
+    uvicorn.run("api:app", workers=cpus, log_config=khLogging.UVICORN_LOG_CONFIG, port=8000, host='0.0.0.0')

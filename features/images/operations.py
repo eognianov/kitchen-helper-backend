@@ -12,6 +12,10 @@ import aiofiles
 import cloudinary.uploader
 import configuration
 
+import khLogging
+
+logging = khLogging.Logger.get_child_logger(__file__)
+
 
 async def _save_file_to_disk(file_path: str, content: bytes):
     async with aiofiles.open(file_path, "wb") as buffer:
@@ -59,10 +63,11 @@ async def _download_image_from_url(url: str) -> bytes:
             raise ImageUrlIsNotReachable
 
 
-async def add_image(url: str = None, image: bytes = None, added_by: int = '1'):
+async def add_image(added_by, url: str = None, image: bytes = None):
     """
     Add image
 
+    :param added_by:
     :param url:
     :param image:
     :return:
@@ -85,7 +90,7 @@ async def add_image(url: str = None, image: bytes = None, added_by: int = '1'):
         'height': size[0],
         'uploaded_by': added_by
     }
-
+    logging.info(f"User {added_by} added picture to file system from {'url' if url else 'file'}. Image name: {file_name}")
     with db.connection.get_session() as session:
         image_db = Image(**image_metadata)
         session.add(image_db)
