@@ -5,11 +5,11 @@ import sqlalchemy.exc
 from sqlalchemy import update, and_
 
 import db.connection
-from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
-    InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException
-from .input_models import CreateInstructionInputModel
-from .models import RecipeCategory, Recipe, RecipeInstruction
-from .responses import InstructionResponse
+from features import recipes
+import features.recipes.models
+import features.recipes.exceptions
+import features.recipes.responses
+import features.recipes.input_models
 from datetime import datetime
 
 import khLogging
@@ -17,16 +17,16 @@ import khLogging
 logging = khLogging.Logger.get_child_logger(__file__)
 
 
-def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
+def get_all_recipe_categories() -> list[Type[recipes.models.RecipeCategory]]:
     """
     Get all recipe categories
     :return:
     """
     with db.connection.get_session() as session:
-        return session.query(RecipeCategory).all()
+        return session.query(recipes.models.RecipeCategory).all()
 
 
-def get_category_by_id(category_id: int) -> Type[RecipeCategory]:
+def get_category_by_id(category_id: int) -> Type[recipes.models.RecipeCategory]:
     """
     Get category by id
 
@@ -35,31 +35,31 @@ def get_category_by_id(category_id: int) -> Type[RecipeCategory]:
     """
 
     with db.connection.get_session() as session:
-        category = session.query(RecipeCategory).where(RecipeCategory.id == category_id).first()
+        category = session.query(recipes.models.RecipeCategory).where(recipes.models.RecipeCategory.id == category_id).first()
         if not category:
-            raise CategoryNotFoundException()
+            raise recipes.exceptions.CategoryNotFoundException()
         return category
 
 
-def update_category(category_id: int, field: str, value: str, updated_by: str = 'me') -> Type[RecipeCategory]:
+def update_category(category_id: int, field: str, value: str, updated_by: str = 'me') -> Type[recipes.models.RecipeCategory]:
     """Update category"""
     category = get_category_by_id(category_id)
     try:
         with db.connection.get_session() as session:
-            session.execute(update(RecipeCategory), [{"id": category.id, f"{field}": value, "updated_by": updated_by}])
+            session.execute(update(recipes.models.RecipeCategory), [{"id": category.id, f"{field}": value, "updated_by": updated_by}])
             session.commit()
-            RecipeCategory.__setattr__(category, field, value)
+            recipes.models.RecipeCategory.__setattr__(category, field, value)
             logging.info(f"User {updated_by} updated Category (#{category_id}). Set {field} to {value}")
             return category
     except sqlalchemy.exc.IntegrityError as ex:
-        raise CategoryNameViolationException(ex)
+        raise recipes.exceptions.CategoryNameViolationException(ex)
 
 
-def create_category(category_name: str, created_by: int = 1) -> RecipeCategory:
+def create_category(category_name: str, created_by: int = 1) -> recipes.models.RecipeCategory:
     """Create category"""
 
     try:
-        category = RecipeCategory(name=category_name, created_by=created_by)
+        category = recipes.models.RecipeCategory(name=category_name, created_by=created_by)
         with db.connection.get_session() as session:
             session.add(category)
             session.commit()
@@ -67,11 +67,11 @@ def create_category(category_name: str, created_by: int = 1) -> RecipeCategory:
             logging.info(f"User {created_by} created Category (#{category.id}).")
             return category
     except sqlalchemy.exc.IntegrityError as ex:
-        raise CategoryNameViolationException(ex)
+        raise recipes.exceptions.CategoryNameViolationException(ex)
 
 
 def create_recipe(*, name: str, time_to_prepare: int, created_by: int, category_id: int = None, picture: str = None, summary: str = None,
-                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0, instructions: list[CreateInstructionInputModel]):
+                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0, instructions: list[recipes.input_models.CreateInstructionInputModel]):
     """
     Create recipe
 
@@ -94,7 +94,7 @@ def create_recipe(*, name: str, time_to_prepare: int, created_by: int, category_
     if category_id:
         category = get_category_by_id(category_id)
 
-    recipe = Recipe(
+    recipe = recipes.models.Recipe(
         name=name,
         time_to_prepare=time_to_prepare,
         category=category,
@@ -126,9 +126,9 @@ def get_all_recipes():
 
     with db.connection.get_session() as session:
         return (
-            session.query(Recipe)
-            .join(Recipe.category, isouter=True)
-            .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+            session.query(recipes.models.Recipe)
+            .join(recipes.models.Recipe.category, isouter=True)
+            .filter(and_(recipes.models.Recipe.is_deleted.is_(False), recipes.models.Recipe.is_published.is_(True)))
         )
 
 
@@ -136,13 +136,13 @@ def get_recipe_by_id(recipe_id: int):
     """Get recipe by id"""
 
     with db.connection.get_session() as session:
-        recipe = (session.query(Recipe)
-                  .join(Recipe.category, isouter=True)
-                  .where(Recipe.id == recipe_id)
-                  .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+        recipe = (session.query(recipes.models.Recipe)
+                  .join(recipes.models.Recipe.category, isouter=True)
+                  .where(recipes.models.Recipe.id == recipe_id)
+                  .filter(and_(recipes.models.Recipe.is_deleted.is_(False), recipes.models.Recipe.is_published.is_(True)))
                   .first())
         if not recipe:
-            raise RecipeNotFoundException
+            raise recipes.exceptions.RecipeNotFoundException
         return recipe
 
 def update_recipe(recipe_id: int) -> None:
@@ -156,9 +156,9 @@ def update_recipe(recipe_id: int) -> None:
     with db.connection.get_session() as session:
         recipe = get_recipe_by_id(recipe_id=recipe_id)
 
-        total_complexity = (sum([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
-        complexity_len = (len([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
-        time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in recipe.instructions]))
+        total_complexity = (sum([recipes.responses.InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
+        complexity_len = (len([recipes.responses.InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
+        time_to_prepare = (sum([recipes.responses.InstructionResponse(**x.__dict__).time for x in recipe.instructions]))
 
         if complexity_len == 0:
             recipe.complexity = 0
@@ -173,23 +173,23 @@ def update_recipe(recipe_id: int) -> None:
     logging.info(f"Recipe #{recipe_id} was updated")
 
 
-def patch_recipe(recipe_id: int, field: str, value: str, updated_by: str = 'me') -> Type[Recipe]:
+def patch_recipe(recipe_id: int, field: str, value: str, updated_by: str = 'me') -> Type[recipes.models.Recipe]:
     """Patch recipe"""
 
     recipe = get_recipe_by_id(recipe_id)
 
     try:
         with db.connection.get_session() as session:
-            session.execute(update(Recipe), [{"id": recipe.id, f"{field}": value, "updated_by": updated_by}])
+            session.execute(update(recipes.models.Recipe), [{"id": recipe.id, f"{field}": value, "updated_by": updated_by}])
             session.commit()
-            Recipe.__setattr__(recipe, field, value)
+            recipes.models.Recipe.__setattr__(recipe, field, value)
             logging.info(f"User {updated_by} updated Recipe (#{recipe_id}). Set {field} to {value}")
             return recipe
     except sqlalchemy.exc.IntegrityError as ex:
-        raise CategoryNameViolationException(ex)
+        raise recipes.exceptions.CategoryNameViolationException(ex)
 
 
-def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe_id: int) -> None:
+def create_instructions(instructions_request: list[recipes.input_models.CreateInstructionInputModel], recipe_id: int) -> None:
     """
     Create instructions
 
@@ -200,7 +200,7 @@ def create_instructions(instructions_request: list[CreateInstructionInputModel],
 
     with db.connection.get_session() as session:
         for instruction in instructions_request:
-            new_instruction = RecipeInstruction(**instruction.model_dump())
+            new_instruction = recipes.models.RecipeInstruction(**instruction.model_dump())
             new_instruction.recipe_id = recipe_id
             session.add(new_instruction)
             session.commit()
@@ -212,9 +212,9 @@ def get_instruction_by_id(instruction_id: int):
     """Get instruction by id"""
 
     with db.connection.get_session() as session:
-        instruction = session.query(RecipeInstruction).filter(RecipeInstruction.id == instruction_id).first()
+        instruction = session.query(recipes.models.RecipeInstruction).filter(recipes.models.RecipeInstruction.id == instruction_id).first()
         if not instruction:
-            raise InstructionNotFoundException
+            raise recipes.exceptions.InstructionNotFoundException
         return instruction
 
 
@@ -231,20 +231,20 @@ def update_instruction(recipe_id: int, instruction_id: int, field: str, value: s
     recipe = get_recipe_by_id(recipe_id)
 
     if instruction.recipe_id != recipe_id:
-        raise RecipeWithInstructionNotFoundException
+        raise recipes.exceptions.RecipeWithInstructionNotFoundException
 
     try:
         with db.connection.get_session() as session:
-            session.execute(update(RecipeInstruction), [{"id": instruction.id, f"{field}": value}])
+            session.execute(update(recipes.models.RecipeInstruction), [{"id": instruction.id, f"{field}": value}])
             session.commit()
-            RecipeInstruction.__setattr__(instruction, field, value)
+            recipes.models.RecipeInstruction.__setattr__(instruction, field, value)
 
             update_recipe(recipe_id=recipe.id)
             logging.info(f"Instruction #({instruction_id}) was updated. Set {field} = {value}")
             return instruction
 
     except sqlalchemy.exc.IntegrityError as ex:
-        raise InstructionNameViolationException(ex)
+        raise recipes.exceptions.InstructionNameViolationException(ex)
 
 
 def create_instruction(recipe_id: int, instruction_request):
@@ -255,7 +255,7 @@ def create_instruction(recipe_id: int, instruction_request):
     """
 
     recipe = get_recipe_by_id(recipe_id)
-    instruction = RecipeInstruction(
+    instruction = recipes.models.RecipeInstruction(
         instruction=instruction_request.instruction,
         time=instruction_request.time,
         complexity=instruction_request.complexity,
@@ -277,7 +277,7 @@ def delete_instruction(recipe_id: int, instruction_id: int):
     instruction = get_instruction_by_id(instruction_id)
 
     if instruction.recipe_id != recipe_id:
-        raise RecipeWithInstructionNotFoundException
+        raise recipes.exceptions.RecipeWithInstructionNotFoundException
 
     with db.connection.get_session() as session:
         session.delete(instruction)
@@ -299,7 +299,7 @@ def delete_recipe(*, recipe_id: int, deleted_by: int):
 
     with db.connection.get_session() as session:
         session.execute(
-            update(Recipe), [{
+            update(recipes.models.Recipe), [{
                 "id": recipe.id,
                 "is_deleted": True,
                 "deleted_on": datetime.utcnow(),

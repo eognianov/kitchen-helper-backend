@@ -3,17 +3,12 @@
 import fastapi
 
 import common.authentication
+from features import recipes
 import features.recipes.exceptions
 import features.recipes.exceptions
 import features.recipes.operations
 import features.recipes.responses
-from features.recipes.responses import Category
-from features.recipes.responses import InstructionResponse
-from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, \
-    PatchRecipeInputModel, UpdateRecipeInputModel
-from .input_models import PatchInstructionInputModel, CreateInstructionInputModel
-from .responses import Recipe
-from typing import Annotated
+import features.recipes.input_models
 
 
 from common.authentication import Authenticate, AuthenticatedUser
@@ -21,7 +16,7 @@ categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
 
 
-@categories_router.get('/', response_model=list[Category])
+@categories_router.get('/', response_model=list[recipes.responses.Category])
 def get_all_categories():
     """
     Get all categories
@@ -31,7 +26,7 @@ def get_all_categories():
     return features.recipes.operations.get_all_recipe_categories()
 
 
-@categories_router.get('/{category_id}', response_model=Category)
+@categories_router.get('/{category_id}', response_model=recipes.responses.Category)
 def get_category(category_id: int = fastapi.Path()):
     """
     Get category
@@ -49,8 +44,8 @@ def get_category(category_id: int = fastapi.Path()):
         )
 
 
-@categories_router.post('/', response_model=Category)
-def create_category(create_category_input_model: CreateCategoryInputModel):
+@categories_router.post('/', response_model=recipes.responses.Category)
+def create_category(create_category_input_model: recipes.input_models.CreateCategoryInputModel):
     """
     Crate category
 
@@ -67,9 +62,9 @@ def create_category(create_category_input_model: CreateCategoryInputModel):
         )
 
 
-@categories_router.patch('/{category_id}', response_model=Category)
+@categories_router.patch('/{category_id}', response_model=recipes.responses.Category)
 def update_category(category_id: int = fastapi.Path(),
-                    patch_category_input_model: PatchCategoryInputModel = fastapi.Body()):
+                    patch_category_input_model: recipes.input_models.PatchCategoryInputModel = fastapi.Body()):
     """
     Update category
 
@@ -92,13 +87,13 @@ def update_category(category_id: int = fastapi.Path(),
         )
 
 
-@recipes_router.get('/', response_model=list[Recipe])
+@recipes_router.get('/', response_model=list[recipes.responses.Recipe])
 def get_all_recipes():
     """Get all recipes"""
     return features.recipes.operations.get_all_recipes()
 
 
-@recipes_router.get('/{recipe_id}', response_model=Recipe)
+@recipes_router.get('/{recipe_id}', response_model=recipes.responses.Recipe)
 def get_recipe(recipe_id: int = fastapi.Path()):
     """Get recipe"""
 
@@ -111,8 +106,8 @@ def get_recipe(recipe_id: int = fastapi.Path()):
         )
 
 
-@recipes_router.post('/', response_model=Recipe)
-def create_recipe(create_recipe_input_model: CreateRecipeInputModel, created_by: common.authentication.authenticated_user):
+@recipes_router.post('/', response_model=recipes.responses.Recipe)
+def create_recipe(create_recipe_input_model: recipes.input_models.CreateRecipeInputModel, created_by: common.authentication.authenticated_user):
     """
     Create recipe
 
@@ -130,10 +125,10 @@ def create_recipe(create_recipe_input_model: CreateRecipeInputModel, created_by:
         )
 
 
-@recipes_router.patch('/{recipe_id}/instructions/{instruction_id}', response_model=InstructionResponse)
+@recipes_router.patch('/{recipe_id}/instructions/{instruction_id}', response_model=recipes.responses.InstructionResponse)
 def update_instructions(recipe_id: int = fastapi.Path(),
                         instruction_id: int = fastapi.Path(),
-                        patch_instruction_input_model: PatchInstructionInputModel = fastapi.Body()):
+                        patch_instruction_input_model: recipes.input_models.PatchInstructionInputModel = fastapi.Body()):
     """
     Update instructions
 
@@ -164,9 +159,9 @@ def update_instructions(recipe_id: int = fastapi.Path(),
         )
 
 
-@recipes_router.post('/{recipe_id}/instructions/', response_model=InstructionResponse)
+@recipes_router.post('/{recipe_id}/instructions/', response_model=recipes.responses.InstructionResponse)
 def create_instruction(recipe_id: int = fastapi.Path(),
-                       create_instruction_input_model: CreateInstructionInputModel = fastapi.Body()):
+                       create_instruction_input_model: recipes.input_models.CreateInstructionInputModel = fastapi.Body()):
     """
     Create instructions
 
@@ -214,7 +209,7 @@ def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id: int = fa
         )
 
 
-@recipes_router.delete('/{recipe_id}', response_model=Recipe)
+@recipes_router.delete('/{recipe_id}', response_model=recipes.responses.Recipe)
 def delete_recipe(recipe_id: int, user_id: int = 1):
     """
     Delete recipe
@@ -232,9 +227,10 @@ def delete_recipe(recipe_id: int, user_id: int = 1):
             detail=f"Recipe with {recipe_id=} does not exist"
         )
 
-@recipes_router.put('/{recipe_id}', response_model=Recipe)
+
+@recipes_router.put('/{recipe_id}', response_model=recipes.responses.Recipe)
 def update_recipe(recipe_id: int = fastapi.Path(),
-                 update_recipe_input_model:  UpdateRecipeInputModel= fastapi.Body()):
+                 update_recipe_input_model:  recipes.input_models.UpdateRecipeInputModel = fastapi.Body()):
 
     """
     Update recipe
@@ -265,10 +261,10 @@ def update_recipe(recipe_id: int = fastapi.Path(),
             detail=f"Category with id {update_recipe_input_model.category_id} does not exist"
         )
 
-@recipes_router.patch('/{recipe_id}', response_model=Recipe)
 
+@recipes_router.patch('/{recipe_id}', response_model=recipes.responses.Recipe)
 def patch_recipe(recipe_id: int = fastapi.Path(),
-                patch_recipe_input_model:  PatchRecipeInputModel= fastapi.Body()):
+                patch_recipe_input_model:  recipes.input_models.PatchRecipeInputModel = fastapi.Body()):
 
     """
     Update recipe
