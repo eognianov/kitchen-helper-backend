@@ -3,6 +3,8 @@ import datetime
 import bcrypt
 import pytest
 
+from unittest.mock import patch, AsyncMock, ANY
+
 import configuration
 import db.connection
 from tests.fixtures import use_test_db
@@ -574,8 +576,7 @@ class TestUserOperations:
         assert db_user.roles == []
 
     @classmethod
-    @pytest.mark.asyncio
-    async def test__prepare_mail_template_email_confirmation_expected_success(
+    def test__prepare_mail_template_email_confirmation_expected_success(
         cls, use_test_db
     ):
         """
@@ -598,10 +599,7 @@ class TestUserOperations:
         assert user.email in html_content
 
     @classmethod
-    @pytest.mark.asyncio
-    async def test__prepare_mail_template_password_reset_expected_success(
-        cls, use_test_db
-    ):
+    def test__prepare_mail_template_password_reset_expected_success(cls, use_test_db):
         """
         Test that the email template include the correct url
         :param use_test_db:
@@ -620,6 +618,106 @@ class TestUserOperations:
 
         assert confirmation_link in html_content
         assert user.email in html_content
+
+    @classmethod
+    @pytest.mark.asyncio
+    async def test_send_email_expected_success(cls, use_test_db):
+        """
+        Test send email expected to be successful
+        :param use_test_db:
+        :return:
+        """
+        with patch(
+            "features.users.operations._send_mail", new_callable=AsyncMock
+        ) as mock_send_mail:
+            mock_send_mail.return_value = {"status": 201}
+
+            user = operations.create_new_user(
+                user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+            )
+            token = operations.generate_email_password_token(
+                user=user, token_type=constants.TokenTypes.PASSWORD_RESET
+            )
+            response = await operations.send_email(token=token, recipient=user)
+
+            assert response == {"status": 201}
+
+            mock_send_mail.assert_called_once_with(
+                html_content=ANY,
+                token_type=token.token_type,
+                recipient_email=user.email,
+                username=user.username,
+            )
+
+    @classmethod
+    @pytest.mark.asyncio
+    async def test_send_email_expected_exception(cls, use_test_db):
+        """
+        Test send email expected to raise exception
+        :param use_test_db:
+        :return:
+        """
+        with patch(
+            "features.users.operations._send_mail", new_callable=AsyncMock
+        ) as mock_send_mail:
+            mock_send_mail.side_effect = exceptions.FailedToSendEmailException(
+                status_code=400, text="Bad Request"
+            )
+
+            user = operations.create_new_user(
+                user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+            )
+            token = operations.generate_email_password_token(
+                user=user, token_type=constants.TokenTypes.PASSWORD_RESET
+            )
+
+            with pytest.raises(exceptions.FailedToSendEmailException) as exception_info:
+                await operations.send_email(token=token, recipient=user)
+
+            assert exception_info.value.status_code == 400
+            assert exception_info.value.text == "Bad Request"
+
+    @classmethod
+    def test_generate_email_password_token_expected_email_confirmation_token(
+        cls, use_test_db
+    ):
+        """
+        Test generate email confirmation token. Expected correct token
+        :param use_test_db:
+        :return:
+        """
+
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
+        )
+
+        assert token.token_type == constants.TokenTypes.EMAIL_CONFIRMATION
+        assert token.expired_on > datetime.datetime.utcnow()
+        assert token.user_id == user.id
+
+    @classmethod
+    def test_generate_email_password_token_expected_password_reset_token(
+        cls, use_test_db
+    ):
+        """
+        Test generate password reset token. Expected correct token
+        :param use_test_db:
+        :return:
+        """
+
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+
+        assert token.token_type == constants.TokenTypes.PASSWORD_RESET
+        assert token.expired_on > datetime.datetime.utcnow()
+        assert token.user_id == user.id
 
     @classmethod
     def test_expire_all_existing_tokens_for_user_expected_to_be_expired(
@@ -920,3 +1018,83 @@ class TestUpdateUserInputModel:
             value=valid_email
         )
         assert validated_email == valid_email
+
+
+class TestUserEndpoints:
+    client = TestClient(app)
+
+    USER_DATA = {
+        "username": "test_user",
+        "email": "test@mail.com",
+        "password": "Password!@",
+    }
+
+    @classmethod
+    def test_signup_endpoint_expected_success(cls, use_test_db):
+        """
+        Test signup user endpoint with valid data. Expected success
+        :param use_test_db:
+        :return:
+        """
+        with patch(
+            "features.users.operations._send_mail", new_callable=AsyncMock
+        ) as mock_send_mail:
+            mock_send_mail.return_value = {"status": 201}
+            response = cls.client.post("/users/signup/", json=cls.USER_DATA)
+
+            with db.connection.get_session() as session:
+                user = session.query(models.User).first()
+
+            assert user.id == 1
+            assert user.username == cls.USER_DATA["username"]
+            assert user.email == cls.USER_DATA["email"]
+            assert user.roles == []
+            assert response.status_code == 201
+            assert response.json() == {
+                "email": "test@mail.com",
+                "id": 1,
+                "roles": [],
+                "username": "test_user",
+            }
+
+    @classmethod
+    def test_signup_endpoint_user_exists_expected_exception(cls, use_test_db):
+        """
+        Test signup user endpoint with same user. Expected exception
+        :param use_test_db:
+        :return:
+        """
+
+        operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        with patch(
+            "features.users.operations._send_mail", new_callable=AsyncMock
+        ) as mock_send_mail:
+            mock_send_mail.return_value = {"status": 201}
+            response = cls.client.post("/users/signup/", json=cls.USER_DATA)
+
+        assert response.status_code == 409
+        assert (
+            response.json()["detail"]
+            == "User with this username or email already exists!"
+        )
+
+    @classmethod
+    def test_signup_endpoint_failed_to_send_email_expected_exception(cls, use_test_db):
+        """
+        Test signup user endpoint when sed email fails. Expected exception
+        :param use_test_db:
+        :return:
+        """
+
+        with patch(
+            "features.users.operations._send_mail",
+            side_effect=exceptions.FailedToSendEmailException(
+                status_code=400, text="Bad Request"
+            ),
+        ):
+            response = cls.client.post("/users/signup/", json=cls.USER_DATA)
+
+        assert response.status_code == 400
+        assert response.json()["detail"] == "Failed to send email: Bad Request"
