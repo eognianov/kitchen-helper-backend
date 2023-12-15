@@ -28,7 +28,11 @@ user_router = APIRouter()
 roles_router = APIRouter()
 
 
-@user_router.post("/signup", response_model=UsersResponseModel)
+@user_router.post(
+    "/signup",
+    response_model=UsersResponseModel,
+    status_code=fastapi.status.HTTP_201_CREATED,
+)
 async def signup(user: RegisterUserInputModel):
     """
     Sing up user
@@ -41,9 +45,7 @@ async def signup(user: RegisterUserInputModel):
         token = features.users.operations.generate_email_password_token(
             user=db_user, token_type=TokenTypes.EMAIL_CONFIRMATION
         )
-        await features.users.operations.send_email(
-            token=token.token_type, recipient=db_user
-        )
+        await features.users.operations.send_email(token=token, recipient=db_user)
         return db_user
     except features.users.exceptions.UserAlreadyExists:
         raise HTTPException(
