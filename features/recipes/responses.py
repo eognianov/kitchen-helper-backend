@@ -1,6 +1,7 @@
 """Recipes feature responses"""
 import datetime
 from typing import Optional, Any
+
 import pydantic
 
 
@@ -14,6 +15,12 @@ class Category(pydantic.BaseModel):
     updated_on: Optional[datetime.datetime] = None
 
 
+class CategoryShortResponse(pydantic.BaseModel):
+    """Category response"""
+    id: int
+    name: str
+
+
 class InstructionResponse(pydantic.BaseModel):
     """Instruction response"""
 
@@ -25,7 +32,7 @@ class InstructionResponse(pydantic.BaseModel):
     recipe_id: int
 
 
-class Recipe(pydantic.BaseModel):
+class RecipeResponse(pydantic.BaseModel):
     """Recipe response"""
 
     id: int
@@ -38,16 +45,29 @@ class Recipe(pydantic.BaseModel):
     proteins: Optional[float] = pydantic.Field(default=0, ge=0)
     cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
     time_to_prepare: int = pydantic.Field(gt=0)
+    complexity: int
     created_by: int
     created_on: datetime.datetime
-    updated_by: Optional[str]
+    updated_by: Optional[int]
     updated_on: datetime.datetime
-    category: Category | Any = None
+
+    category: CategoryShortResponse | Any = None
     instructions: list[InstructionResponse] | Any = None
 
     def model_post_init(self, __context: Any):
         if self.category:
-            self.category = Category(**self.category.__dict__)
+            self.category = CategoryShortResponse(**self.category.__dict__)
 
         if self.instructions:
             self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]
+
+
+class PSFRecipesResponseModel(pydantic.BaseModel):
+    """Recipe pagination, sorting, and filtering response"""
+    page_number: int
+    page_size: int
+    previous_page: str | None
+    next_page: str | None
+    total_pages: int
+    total_items: int
+    recipes: list[RecipeResponse]
