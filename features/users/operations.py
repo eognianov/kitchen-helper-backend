@@ -337,19 +337,25 @@ def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
     :return:
     """
 
-    templates = Jinja2Templates("templates")
-    template_path = (
-        "confirmation-email-template.html"
-        if token_type == TokenTypes.EMAIL_CONFIRMATION
-        else "password-reset-email.html"
+    templates_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "templates"
     )
-    template = templates.get_template(template_path)
+    templates = Jinja2Templates(directory=templates_path)
 
-    confirmation_link = (
-        f"{config.server.host}:{config.server.port}/users/confirm-email/{token}"
-        if token_type == TokenTypes.EMAIL_CONFIRMATION
-        else f"{config.server.host}:{config.server.port}/users/reset-password/{token}"
-    )
+    template_name = None
+    confirmation_link = None
+    if token_type == TokenTypes.EMAIL_CONFIRMATION:
+        template_name = "confirmation-email-template.html"
+        confirmation_link = (
+            f"{config.server.host}:{config.server.port}/users/confirm-email/{token}"
+        )
+    elif token_type == TokenTypes.PASSWORD_RESET:
+        template_name = "password-reset-email.html"
+        confirmation_link = (
+            f"{config.server.host}:{config.server.port}/users/reset-password/{token}"
+        )
+
+    template = templates.get_template(template_name)
 
     html_content = template.render(
         recipient_name=recipient,
