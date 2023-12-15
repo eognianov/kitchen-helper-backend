@@ -68,7 +68,9 @@ async def signin(request: Annotated[OAuth2PasswordRequestForm, fastapi.Depends()
     try:
         # Sign in user and create jwt token
         user = signin_user(request.username, request.password)
-        token, token_type = create_token(user.username)
+        token, token_type = create_token(
+            user_id=user.id, user_role_ids=user.user_role_ids
+        )
         return {"access_token": token, "token_type": token_type}
     except features.users.exceptions.AccessDenied:
         raise HTTPException(

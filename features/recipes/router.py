@@ -8,10 +8,11 @@ import features.recipes.exceptions
 import features.recipes.operations
 import features.recipes.responses
 from features.recipes.responses import Category
-from features.recipes.responses import InstructionResponse
-from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel
+from features.recipes.responses import InstructionResponse, PSFRecipesResponseModel, RecipeResponse
+from .input_models import PatchCategoryInputModel, CreateCategoryInputModel, CreateRecipeInputModel, \
+    PSFRecipesInputModel
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel
-from .responses import Recipe
+from .responses import RecipeResponse
 from typing import Annotated
 
 
@@ -91,13 +92,17 @@ def update_category(category_id: int = fastapi.Path(),
         )
 
 
-@recipes_router.get('/', response_model=list[Recipe])
-def get_all_recipes():
-    """Get all recipes"""
-    return features.recipes.operations.get_all_recipes()
+@recipes_router.get('/', response_model=PSFRecipesResponseModel)
+def get_all_recipes(paginated_input_model: PSFRecipesInputModel = fastapi.Depends()):
+    """
+    Get all recipes
+    :param paginated_input_model:
+    """
+
+    return features.recipes.operations.get_all_recipes(paginated_input_model)
 
 
-@recipes_router.get('/{recipe_id}', response_model=Recipe)
+@recipes_router.get('/{recipe_id}', response_model=RecipeResponse)
 def get_recipe(recipe_id: int = fastapi.Path()):
     """Get recipe"""
 
@@ -110,7 +115,7 @@ def get_recipe(recipe_id: int = fastapi.Path()):
         )
 
 
-@recipes_router.post('/', response_model=Recipe)
+@recipes_router.post('/', response_model=RecipeResponse)
 def create_recipe(create_recipe_input_model: CreateRecipeInputModel, created_by: common.authentication.authenticated_user):
     """
     Create recipe
@@ -135,7 +140,6 @@ def update_instructions(recipe_id: int = fastapi.Path(),
                         patch_instruction_input_model: PatchInstructionInputModel = fastapi.Body()):
     """
     Update instructions
-
     :param recipe_id:
     :param instruction_id:
     :param patch_instruction_input_model:
@@ -189,7 +193,6 @@ def create_instruction(recipe_id: int = fastapi.Path(),
 def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id: int = fastapi.Path()):
     """
     Delete instruction
-
     :param recipe_id:
     :param instruction_id:
     :return:
@@ -213,7 +216,7 @@ def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id: int = fa
         )
 
 
-@recipes_router.delete('/{recipe_id}', response_model=Recipe)
+@recipes_router.delete('/{recipe_id}', response_model=RecipeResponse)
 def delete_recipe(recipe_id: int, user_id: int = 1):
     """
     Delete recipe
