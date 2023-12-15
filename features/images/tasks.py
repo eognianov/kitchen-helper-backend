@@ -1,10 +1,61 @@
 """ Tasks related to image processing"""
+import datetime
+import os
+
+import configuration
+import db.connection
+import features.images.models
 from celery_config import celery
-import time
+from .operations import upload_image_to_cloud
+from .helpers import read_image_as_bytes
 
 
 @celery.task
 def upload_images_to_cloud_storage():
-    time.sleep(5)
-    print("Scheduled task is running!")
-    return "Task is complete!"
+    """
+    Periodical celery task for uploading images to cloud storage
+    After successful upload delete the image from local storage
+    :return:
+    """
+
+    with db.connection.get_session() as session:
+        images_to_upload = (
+            session.query(features.images.models.Image)
+            .filter(features.images.models.Image.in_cloudinary.is_(False))
+            .all()
+        )
+
+        if not images_to_upload:
+            return "No images to be uploaded to cloud!"
+
+        uploaded_images = 0
+        not_uploaded_images = 0
+
+        for image in images_to_upload:
+            try:
+                content, image_path = read_image_as_bytes(image)
+                success = upload_image_to_cloud(
+                    content=content, image_name=image.name, uploader=""
+                )
+                if success:
+                    image.file_path = f"https://res.cloudinary.com/{configuration.Cloudinary().cloud_name}/image/upload/{image.name}"
+                    image.in_cloudinary = True
+                    image.uploaded_on = datetime.datetime.utcnow()
+                    session.add(image)
+                    session.commit()
+                    session.refresh(image)
+                    os.remove(image_path)
+                    uploaded_images += 1
+
+            except Exception as e:
+                print(f"Error uploading image {image.name}: {str(e)}")
+
+        session.close()
+
+    return (
+        f"Total images: {not_uploaded_images + uploaded_images}"
+        + os.linesep
+        + f"Images uploaded to cloud and paths updated: {uploaded_images}"
+        + os.linesep
+        + f"Not uploaded images: {not_uploaded_images}"
+    )
