@@ -322,8 +322,8 @@ def create_instruction(recipe_id: int, instruction_request):
     return instruction
 
 
-def delete_instruction(recipe_id: int, instruction_id: int):
-    recipe = get_recipe_by_id(recipe_id)
+def delete_instruction(recipe_id: int, instruction_id: int, user: Optional[common.authentication.AuthenticatedUser]):
+    recipe = get_recipe_by_id(recipe_id, user=user)
     instruction = get_instruction_by_id(instruction_id)
 
     if instruction.recipe_id != recipe_id:
@@ -336,7 +336,7 @@ def delete_instruction(recipe_id: int, instruction_id: int):
         update_recipe(recipe_id=recipe.id)
 
 
-def delete_recipe(*, recipe_id: int, deleted_by: int):
+def delete_recipe(*, recipe_id: int, deleted_by: common.authentication.authenticated_user):
     """
     Delete recipe
 
@@ -345,7 +345,7 @@ def delete_recipe(*, recipe_id: int, deleted_by: int):
     :return:
     """
 
-    recipe = get_recipe_by_id(recipe_id)
+    recipe = get_recipe_by_id(recipe_id, user=deleted_by)
 
     with db.connection.get_session() as session:
         session.execute(
@@ -355,7 +355,7 @@ def delete_recipe(*, recipe_id: int, deleted_by: int):
                     "id": recipe.id,
                     "is_deleted": True,
                     "deleted_on": datetime.utcnow(),
-                    "deleted_by": deleted_by,
+                    "deleted_by": deleted_by.id,
                 }
             ],
         )

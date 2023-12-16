@@ -230,15 +230,21 @@ def create_instruction(
     "/{recipe_id}/instructions/{instruction_id}",
     status_code=fastapi.status.HTTP_204_NO_CONTENT,
 )
-def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id: int = fastapi.Path()):
+def delete_instruction(
+    user: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    instruction_id: int = fastapi.Path(),
+):
     """
     Delete instruction
+
+    :param user:
     :param recipe_id:
     :param instruction_id:
     :return:
     """
     try:
-        features.recipes.operations.delete_instruction(recipe_id, instruction_id)
+        features.recipes.operations.delete_instruction(recipe_id, instruction_id, user)
     except features.recipes.exceptions.InstructionNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -257,17 +263,17 @@ def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id: int = fa
 
 
 @recipes_router.delete("/{recipe_id}", response_model=RecipeResponse)
-def delete_recipe(recipe_id: int, user_id: int = 1):
+def delete_recipe(recipe_id: int, user: common.authentication.authenticated_user):
     """
     Delete recipe
 
     :param recipe_id
-    :param user_id
+    :param user
     :return:
     """
 
     try:
-        return features.recipes.operations.delete_recipe(recipe_id=recipe_id, deleted_by=user_id)
+        return features.recipes.operations.delete_recipe(recipe_id=recipe_id, deleted_by=user)
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
