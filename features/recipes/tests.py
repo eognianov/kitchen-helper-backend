@@ -1,7 +1,9 @@
 import pytest
+
+import common.authentication
 import db.connection
 from features.recipes.input_models import CreateInstructionInputModel
-from tests.fixtures import use_test_db
+from tests.fixtures import use_test_db, admin
 from features.recipes import operations
 from features.recipes.models import RecipeCategory, RecipeInstruction, Recipe
 from features.recipes.exceptions import (
@@ -10,7 +12,6 @@ from features.recipes.exceptions import (
 )
 from fastapi.testclient import TestClient
 from api import app
-import features
 
 
 class TestCategoryOperations:
@@ -47,7 +48,7 @@ class TestCategoryOperations:
 
     def test_update_category(self, use_test_db):
         created_category = operations.create_category("name", 1)
-        operations.update_category(created_category.id, "name", "new_name")
+        operations.update_category(created_category.id, "name", "new_name", 1)
         updated_category = operations.get_category_by_id(created_category.id)
         assert updated_category.name == "new_name"
 
@@ -80,16 +81,18 @@ class TestCategoriesEndpoints:
         get_category_spy.assert_called_with(created_category.id)
 
     @classmethod
-    def test_patch_category(cls, use_test_db, mocker):
+    def test_patch_category(cls, use_test_db, mocker, admin):
         created_category = operations.create_category("new", 1)
         patch_payload = {"field": "name", "value": "updated"}
         update_category_spy = mocker.spy(operations, "update_category")
         response = cls.client.patch(
-            f"/categories/{created_category.id}", json=patch_payload
+            f"/categories/{created_category.id}",
+            json=patch_payload,
+            headers={"Authorization": "Bearer token"},
         )
         assert response.status_code == 200
         update_category_spy.assert_called_with(
-            category_id=1, field="name", value="updated"
+            category_id=1, field="name", value="updated", updated_by=1
         )
 
 
