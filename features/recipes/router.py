@@ -8,11 +8,7 @@ import features.recipes.exceptions
 import features.recipes.operations
 import features.recipes.responses
 from features.recipes.responses import Category
-from features.recipes.responses import (
-    InstructionResponse,
-    PSFRecipesResponseModel,
-    RecipeResponse,
-)
+from features.recipes.responses import InstructionResponse, PSFRecipesResponseModel
 from .input_models import (
     PatchCategoryInputModel,
     CreateCategoryInputModel,
@@ -81,9 +77,7 @@ def create_category(
     """
 
     try:
-        return features.recipes.operations.create_category(
-            create_category_input_model.name, created_by=user.id
-        )
+        return features.recipes.operations.create_category(create_category_input_model.name, created_by=user.id)
     except features.recipes.exceptions.CategoryNameViolationException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
@@ -128,16 +122,16 @@ def update_category(
 
 @recipes_router.get("/", response_model=PSFRecipesResponseModel)
 def get_all_recipes(
-    paginated_input_model: Annotated[
-        PSFRecipesInputModel, fastapi.Depends(_common_parameters)
-    ]
+    paginated_input_model: Annotated[PSFRecipesInputModel, fastapi.Depends(_common_parameters)],
+    user: common.authentication.optional_user,
 ):
     """
     Get all recipes
     :param paginated_input_model:
+    :param user:
     """
 
-    return features.recipes.operations.get_all_recipes(paginated_input_model)
+    return features.recipes.operations.get_all_recipes(paginated_input_model, user=user)
 
 
 @recipes_router.get("/{recipe_id}", response_model=RecipeResponse)
@@ -166,9 +160,7 @@ def create_recipe(
     :return:
     """
     try:
-        return features.recipes.operations.create_recipe(
-            **create_recipe_input_model.__dict__, created_by=created_by.id
-        )
+        return features.recipes.operations.create_recipe(**create_recipe_input_model.__dict__, created_by=created_by.id)
 
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
@@ -177,9 +169,7 @@ def create_recipe(
         )
 
 
-@recipes_router.patch(
-    "/{recipe_id}/instructions/{instruction_id}", response_model=InstructionResponse
-)
+@recipes_router.patch("/{recipe_id}/instructions/{instruction_id}", response_model=InstructionResponse)
 def update_instructions(
     recipe_id: int = fastapi.Path(),
     instruction_id: int = fastapi.Path(),
@@ -227,9 +217,7 @@ def create_instruction(
     :return:
     """
     try:
-        updated_instruction = features.recipes.operations.create_instruction(
-            recipe_id, create_instruction_input_model
-        )
+        updated_instruction = features.recipes.operations.create_instruction(recipe_id, create_instruction_input_model)
         return updated_instruction
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
@@ -242,9 +230,7 @@ def create_instruction(
     "/{recipe_id}/instructions/{instruction_id}",
     status_code=fastapi.status.HTTP_204_NO_CONTENT,
 )
-def delete_instruction(
-    recipe_id: int = fastapi.Path(), instruction_id: int = fastapi.Path()
-):
+def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id: int = fastapi.Path()):
     """
     Delete instruction
     :param recipe_id:
@@ -281,9 +267,7 @@ def delete_recipe(recipe_id: int, user_id: int = 1):
     """
 
     try:
-        return features.recipes.operations.delete_recipe(
-            recipe_id=recipe_id, deleted_by=user_id
-        )
+        return features.recipes.operations.delete_recipe(recipe_id=recipe_id, deleted_by=user_id)
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
