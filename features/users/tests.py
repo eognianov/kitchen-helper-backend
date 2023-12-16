@@ -1154,3 +1154,68 @@ class TestUserEndpoints:
 
         assert response.status_code == 403
         assert response.json() == {"detail": "Incorrect username or password"}
+
+    @classmethod
+    def test_show_all_users_endpoint_no_users_expected_empty_list(cls, use_test_db):
+        """
+        Test all users endpoint without users. Expected empty list
+        :param use_test_db:
+        :return:
+        """
+
+        response = cls.client.get("/users/all/")
+
+        assert response.status_code == 200
+        assert response.json() == []
+        assert len(response.json()) == 0
+
+    @classmethod
+    def test_show_all_users_endpoint_users_expected_list_with_users(cls, use_test_db):
+        """
+        Test all users endpoint. Expected list with all users
+        :param use_test_db:
+        :return:
+        """
+        users = 3
+        all_users = []
+        for i in range(users):
+            user = operations.create_new_user(
+                user=input_models.RegisterUserInputModel(
+                    username=f'{i}{cls.USER_DATA["username"]}',
+                    email=f'{i}{cls.USER_DATA["email"]}',
+                    password=f'{i}{cls.USER_DATA["password"]}',
+                )
+            )
+            all_users.append(
+                {
+                    "email": user.email,
+                    "id": user.id,
+                    "roles": user.roles,
+                    "username": user.username,
+                }
+            )
+
+        response = cls.client.get("/users/all/")
+
+        assert response.status_code == 200
+        assert response.json() == all_users
+        assert len(response.json()) == users
+
+    @classmethod
+    def test_show_user_endpoint_users_expected_success(cls, use_test_db):
+        """
+        Test show user endpoint. Expected success
+        :param use_test_db:
+        :return:
+        """
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        token = operations.generate_email_password_token(
+            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
+        )
+        headers = {"Authentication": f"Bearer {token.token}"}
+
+        response = cls.client.get(f"/users/{user.id}/", headers=headers)
+
+        assert response.status_code == 200
