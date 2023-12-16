@@ -93,19 +93,26 @@ def create_category(
 
 @categories_router.patch("/{category_id}", response_model=Category)
 def update_category(
+    user: Annotated[
+        common.authentication.AuthenticatedUser,
+        fastapi.Depends(common.authentication.admin),
+    ],
     category_id: int = fastapi.Path(),
     patch_category_input_model: PatchCategoryInputModel = fastapi.Body(),
 ):
     """
     Update category
 
+    :param user:
     :param category_id:
     :param patch_category_input_model:
     :return:
     """
     try:
         return features.recipes.operations.update_category(
-            category_id=category_id, **patch_category_input_model.model_dump()
+            category_id=category_id,
+            **patch_category_input_model.model_dump(),
+            updated_by=user.id,
         )
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(

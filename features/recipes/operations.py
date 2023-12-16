@@ -56,7 +56,7 @@ def get_category_by_id(category_id: int) -> Type[RecipeCategory]:
 
 
 def update_category(
-    category_id: int, field: str, value: str, updated_by: str = "me"
+    category_id: int, field: str, value: str, updated_by: int
 ) -> Type[RecipeCategory]:
     """Update category"""
     category = get_category_by_id(category_id)
