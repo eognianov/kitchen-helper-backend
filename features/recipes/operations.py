@@ -195,7 +195,7 @@ def get_all_recipes(
         return response
 
 
-def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUser):
+def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUser = None):
     """Get recipe by id"""
 
     filters = _get_published_filter_expression(user)
