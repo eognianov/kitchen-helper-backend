@@ -80,3 +80,15 @@ authenticated_user = Annotated[
 optional_user = Annotated[
     AuthenticatedUser, fastapi.Depends(Authenticate(optional=True))
 ]
+
+
+def admin(user: authenticated_user):
+    """
+    Admin authenticator
+
+    :param user:
+    :return:
+    """
+    if common.constants.ADMIN_ROLE_ID in user.roles:
+        return user
+    raise fastapi.HTTPException(status_code=fastapi.status.HTTP_403_FORBIDDEN)
