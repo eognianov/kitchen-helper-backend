@@ -64,7 +64,7 @@ class TestCategoriesEndpoints:
 
     @classmethod
     def test_get_all_categories(cls, use_test_db, mocker):
-        created_category = operations.create_category("new")
+        created_category = operations.create_category("new", 1)
         get_all_categories_spy = mocker.spy(operations, "get_all_recipe_categories")
         response = cls.client.get("/categories/")
         assert response.status_code == 200
@@ -73,7 +73,7 @@ class TestCategoriesEndpoints:
 
     @classmethod
     def test_get_category_by_id(cls, use_test_db, mocker):
-        created_category = operations.create_category("new")
+        created_category = operations.create_category("new", 1)
         get_category_spy = mocker.spy(operations, "get_category_by_id")
         response = cls.client.get(f"/categories/{created_category.id}")
         assert response.status_code == 200
@@ -81,7 +81,7 @@ class TestCategoriesEndpoints:
 
     @classmethod
     def test_patch_category(cls, use_test_db, mocker):
-        created_category = operations.create_category("new")
+        created_category = operations.create_category("new", 1)
         patch_payload = {"field": "name", "value": "updated"}
         update_category_spy = mocker.spy(operations, "update_category")
         response = cls.client.patch(
@@ -111,7 +111,7 @@ class TestInstructionsOperations:
         }
 
     def test_create_recipe_without_instructions_success(self, use_test_db):
-        operations.create_category("Category name")
+        operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
         with db.connection.get_session() as session:
@@ -137,7 +137,7 @@ class TestInstructionsOperations:
         self.recipe["instructions"].append(CreateInstructionInputModel(**instruction))
         self.recipe["instructions"].append(CreateInstructionInputModel(**instruction2))
 
-        operations.create_category("Category name")
+        operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
         with db.connection.get_session() as session:
@@ -150,7 +150,7 @@ class TestInstructionsOperations:
         assert recipes[0].instructions[0].category == "Lunch"
 
     def test_create_instruction_for_recipe_success(self, use_test_db):
-        operations.create_category("Category name")
+        operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
         new_instruction = {
@@ -175,7 +175,7 @@ class TestInstructionsOperations:
             assert instruction.complexity == new_instruction["complexity"]
 
     def test_get_instruction_by_id_success(self, use_test_db):
-        operations.create_category("Category name")
+        operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
         new_instruction = {
@@ -197,7 +197,7 @@ class TestInstructionsOperations:
         assert instruction.complexity == new_instruction["complexity"]
 
     def test_update_instruction_success(self, use_test_db):
-        operations.create_category("Category name")
+        operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
         new_instruction = {
@@ -239,7 +239,7 @@ class TestInstructionsOperations:
         assert updated_instruction.complexity == 1
 
     def test_delete_instruction_success(self, use_test_db):
-        operations.create_category("Category name")
+        operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
         new_instruction = {
@@ -296,7 +296,7 @@ class TestInstructionsEndpoints:
         }
 
     def test_patch_instruction_success(self, use_test_db, mocker):
-        operations.create_category("Category")
+        operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
             recipe_id=1,
@@ -332,7 +332,7 @@ class TestInstructionsEndpoints:
         assert response.status_code == 422
 
     def test_delete_instruction_success(self, use_test_db, mocker):
-        operations.create_category("Category")
+        operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
             recipe_id=1,
@@ -349,7 +349,7 @@ class TestInstructionsEndpoints:
     def test_delete_instruction_with_non_existing_recipe_fail(
         self, use_test_db, mocker
     ):
-        operations.create_category("Category")
+        operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
             recipe_id=1,
@@ -366,7 +366,7 @@ class TestInstructionsEndpoints:
     def test_delete_instruction_with_non_existing_instruction_fail(
         self, use_test_db, mocker
     ):
-        operations.create_category("Category")
+        operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
             recipe_id=1,
@@ -379,7 +379,7 @@ class TestInstructionsEndpoints:
         delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2)
 
     def test_delete_instruction_with_wrong_recipe_fail(self, use_test_db, mocker):
-        operations.create_category("Category")
+        operations.create_category("Category", 1)
         operations.create_recipe(**self.recipe)
         operations.create_recipe(**self.recipe)
         operations.create_instruction(
