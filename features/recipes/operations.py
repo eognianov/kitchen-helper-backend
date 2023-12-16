@@ -76,7 +76,7 @@ def update_category(
         raise CategoryNameViolationException(ex)
 
 
-def create_category(category_name: str, created_by: int = 1) -> RecipeCategory:
+def create_category(category_name: str, created_by: int) -> RecipeCategory:
     """Create category"""
 
     try:

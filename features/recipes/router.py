@@ -65,17 +65,24 @@ def get_category(category_id: int = fastapi.Path()):
 
 
 @categories_router.post("/", response_model=Category)
-def create_category(create_category_input_model: CreateCategoryInputModel):
+def create_category(
+    create_category_input_model: CreateCategoryInputModel,
+    user: Annotated[
+        common.authentication.AuthenticatedUser,
+        fastapi.Depends(common.authentication.admin),
+    ],
+):
     """
     Crate category
 
     :param create_category_input_model:
+    :param user:
     :return:
     """
 
     try:
         return features.recipes.operations.create_category(
-            create_category_input_model.name
+            create_category_input_model.name, created_by=user.id
         )
     except features.recipes.exceptions.CategoryNameViolationException:
         raise fastapi.HTTPException(
