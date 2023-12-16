@@ -5,9 +5,12 @@ import os
 import configuration
 import db.connection
 import features.images.models
+import khLogging
 from celery_config import celery
 from .operations import upload_image_to_cloud
 from .helpers import read_image_as_bytes
+
+logger = khLogging.Logger.get_child_logger(__file__)
 
 
 @celery.task
@@ -35,16 +38,13 @@ def upload_images_to_cloud_storage():
             try:
                 content, image_path = read_image_as_bytes(image)
                 success = upload_image_to_cloud(
-                    content=content, image_name=image.name, uploader=""
+                    content=content, image_name=image.name, uploader="me"
                 )
                 if success:
-                    image.file_path = f"https://res.cloudinary.com/{configuration.Cloudinary().cloud_name}/image/upload/{image.name}"
                     image.in_cloudinary = True
-                    image.uploaded_on = datetime.datetime.utcnow()
                     session.add(image)
                     session.commit()
                     session.refresh(image)
-                    os.remove(image_path)
                     uploaded_images += 1
 
             except Exception as e:
@@ -58,4 +58,4 @@ def upload_images_to_cloud_storage():
         + f"Images uploaded to cloud and paths updated: {uploaded_images}"
         + os.linesep
         + f"Not uploaded images: {not_uploaded_images}"
-    )
+    )  # TODO: Add logging
