@@ -1217,3 +1217,40 @@ class TestUserEndpoints:
         response = cls.client.get(f"/users/{user.id}/", headers=headers)
 
         assert response.status_code == 200
+        assert response.json() == {
+            "email": "test@mail.com",
+            "id": 1,
+            "roles": [],
+            "username": "test_user",
+        }
+
+    @classmethod
+    def test_show_user_endpoint_without_auth_expected_exception(cls, use_test_db):
+        """
+        Test show user endpoint without auth. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        user = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        token, _ = operations.create_token(user_id=user.id)
+
+        response = cls.client.get(f"/users/{user.id}/")
+
+        assert response.status_code == 401
+
+    @classmethod
+    def test_show_user_endpoint_with_not_existing_user_id_expected_exception(
+        cls, use_test_db
+    ):
+        """
+        Test show user endpoint without user. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        not_existing_user_id = 999
+        response = cls.client.get(f"/users/{not_existing_user_id}/")
+
+        assert response.status_code == 401
+        assert response.json() == {"detail": "Unauthorized"}
