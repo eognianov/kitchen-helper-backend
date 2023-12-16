@@ -206,18 +206,22 @@ def update_instructions(
 
 @recipes_router.post("/{recipe_id}/instructions/", response_model=InstructionResponse)
 def create_instruction(
+    user: common.authentication.authenticated_user,
     recipe_id: int = fastapi.Path(),
     create_instruction_input_model: CreateInstructionInputModel = fastapi.Body(),
 ):
     """
     Create instructions
 
+    :param user:
     :param recipe_id:
     :param create_instruction_input_model:
     :return:
     """
     try:
-        updated_instruction = features.recipes.operations.create_instruction(recipe_id, create_instruction_input_model)
+        updated_instruction = features.recipes.operations.create_instruction(
+            recipe_id, create_instruction_input_model, user=user
+        )
         return updated_instruction
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(

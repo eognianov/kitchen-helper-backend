@@ -297,14 +297,16 @@ def update_instruction(recipe_id: int, instruction_id: int, field: str, value: s
         raise InstructionNameViolationException(ex)
 
 
-def create_instruction(recipe_id: int, instruction_request):
+def create_instruction(recipe_id: int, instruction_request, user: common.authentication.AuthenticatedUser):
     """
     Create instructions
+
     :param recipe_id:
     :param instruction_request:
+    :param user:
     """
 
-    recipe = get_recipe_by_id(recipe_id)
+    recipe = get_recipe_by_id(recipe_id, user=user)
     instruction = RecipeInstruction(
         instruction=instruction_request.instruction,
         time=instruction_request.time,
