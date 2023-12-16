@@ -21,7 +21,7 @@ class AuthenticatedUser(pydantic.BaseModel):
     """
 
     id: int
-    roles: list[int]
+    roles: Optional[list[int]] = None
 
     @property
     def is_admin(self) -> bool:
@@ -29,7 +29,7 @@ class AuthenticatedUser(pydantic.BaseModel):
         Check if user is admin
         :return:
         """
-        return common.constants.ADMIN_ROLE_ID in self.roles
+        return self.roles and common.constants.ADMIN_ROLE_ID in self.roles
 
 
 async def extract_user_data_from_jwt(
@@ -44,9 +44,7 @@ async def extract_user_data_from_jwt(
     if not token:
         return None
     try:
-        payload = jwt.decode(
-            token, jwt_config.secret_key, algorithms=[jwt_config.algorithm]
-        )
+        payload = jwt.decode(token, jwt_config.secret_key, algorithms=[jwt_config.algorithm])
         user_id = int(payload.get("sub"))
         roles = payload.get("roles")
         if user_id is None:
@@ -68,18 +66,12 @@ class Authenticate:
         user: Annotated[AuthenticatedUser, fastapi.Depends(extract_user_data_from_jwt)],
     ):
         if not self.optional and not user:
-            raise fastapi.HTTPException(
-                status_code=fastapi.status.HTTP_401_UNAUTHORIZED
-            )
+            raise fastapi.HTTPException(status_code=fastapi.status.HTTP_401_UNAUTHORIZED)
         return user
 
 
-authenticated_user = Annotated[
-    AuthenticatedUser, fastapi.Depends(Authenticate(optional=False))
-]
-optional_user = Annotated[
-    AuthenticatedUser, fastapi.Depends(Authenticate(optional=True))
-]
+authenticated_user = Annotated[AuthenticatedUser, fastapi.Depends(Authenticate(optional=False))]
+optional_user = Annotated[AuthenticatedUser, fastapi.Depends(Authenticate(optional=True))]
 
 
 def admin(user: authenticated_user):

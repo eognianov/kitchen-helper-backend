@@ -270,7 +270,7 @@ class TestInstructionsOperations:
             instruction_request=CreateInstructionInputModel(**new_instruction2),
         )
 
-        operations.delete_instruction(recipe_id=1, instruction_id=2)
+        operations.delete_instruction(recipe_id=1, instruction_id=2, user=common.authentication.AuthenticatedUser(id=1))
 
         with db.connection.get_session() as session:
             instructions = session.query(RecipeInstruction).all()
