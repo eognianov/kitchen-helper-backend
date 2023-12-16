@@ -6,6 +6,7 @@ import fastapi
 import pydantic
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
+import common.constants
 
 import configuration
 
@@ -15,8 +16,20 @@ jwt_config = configuration.JwtToken()
 
 
 class AuthenticatedUser(pydantic.BaseModel):
+    """
+    Authenticated users
+    """
+
     id: int
     roles: list[int]
+
+    @property
+    def is_admin(self) -> bool:
+        """
+        Check if user is admin
+        :return:
+        """
+        return common.constants.ADMIN_ROLE_ID in self.roles
 
 
 async def extract_user_data_from_jwt(
