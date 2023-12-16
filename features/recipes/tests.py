@@ -361,7 +361,7 @@ class TestInstructionsEndpoints:
         assert response.status_code == 404
         delete_instruction_spy.assert_called_with(recipe_id=2, instruction_id=1)
 
-    def test_delete_instruction_with_non_existing_instruction_fail(self, use_test_db, mocker):
+    def test_delete_instruction_with_non_existing_instruction_fail(self, use_test_db, mocker, bypass_published_filter):
         operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
@@ -374,7 +374,7 @@ class TestInstructionsEndpoints:
         assert response.status_code == 404
         delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2)
 
-    def test_delete_instruction_with_wrong_recipe_fail(self, use_test_db, mocker):
+    def test_delete_instruction_with_wrong_recipe_fail(self, use_test_db, mocker, bypass_published_filter):
         operations.create_category("Category", 1)
         operations.create_recipe(**self.recipe)
         operations.create_recipe(**self.recipe)
