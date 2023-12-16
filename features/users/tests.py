@@ -1098,3 +1098,59 @@ class TestUserEndpoints:
 
         assert response.status_code == 400
         assert response.json()["detail"] == "Failed to send email: Bad Request"
+
+    @classmethod
+    def test_signin_endpoint_expected_success(cls, use_test_db):
+        """
+        Test signin user endpoint. Expected success
+        :param use_test_db:
+        :return:
+        """
+
+        operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        payload = {
+            "username": cls.USER_DATA["username"],
+            "password": cls.USER_DATA["password"],
+        }
+        response = cls.client.post("/users/signin/", data=payload)
+
+        assert response.status_code == 200
+        assert "access_token" in response.json()
+        assert "token_type" in response.json()
+        assert response.json()["token_type"] == "Bearer"
+
+    @classmethod
+    def test_signin_endpoint_wrong_username_expected_exception(cls, use_test_db):
+        """
+        Test signin user endpoint with wrong username. Expected exception
+        :param use_test_db:
+        :return:
+        """
+
+        operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        payload = {"username": "wrong username", "password": cls.USER_DATA["password"]}
+        response = cls.client.post("/users/signin/", data=payload)
+
+        assert response.status_code == 404
+        assert response.json() == {"detail": "User does not exist"}
+
+    @classmethod
+    def test_signin_endpoint_wrong_password_expected_exception(cls, use_test_db):
+        """
+        Test signin user endpoint with wrong password. Expected exception
+        :param use_test_db:
+        :return:
+        """
+
+        operations.create_new_user(
+            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
+        )
+        payload = {"username": cls.USER_DATA["username"], "password": "wrong password"}
+        response = cls.client.post("/users/signin/", data=payload)
+
+        assert response.status_code == 403
+        assert response.json() == {"detail": "Incorrect username or password"}

@@ -80,6 +80,12 @@ async def signin(request: Annotated[OAuth2PasswordRequestForm, fastapi.Depends()
             detail="Incorrect username or password",
         )
 
+    except features.users.exceptions.UserDoesNotExistException:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail="User does not exist",
+        )
+
 
 @user_router.get("/all", response_model=list[UsersResponseModel])
 async def show_all_users():
