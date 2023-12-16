@@ -6,8 +6,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment:
-      context=TEST
+    env:
+      context: TEST
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
