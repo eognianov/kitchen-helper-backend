@@ -5,7 +5,7 @@ import configuration
 
 config = configuration.Config()
 
-broker_url = f"{config.celery.broker}{config.rabbitmq.user}:{config.rabbitmq.password}@{config.celery.host}:{config.celery.port}//"
+broker_url = config.get_broker_url()
 result_backend = config.celery.backend
 task_serializer = "json"
 result_serializer = "json"
@@ -17,7 +17,7 @@ broker_connection_retry_on_startup = True
 beat_schedule = {
     "upload_images_to_cloud": {
         "task": "features.images.tasks.upload_images_to_cloud_storage",
-        "schedule": 10,  # Set the interval in seconds
+        "schedule": 600,  # Set the interval in seconds
     },
 }
 celery = Celery(

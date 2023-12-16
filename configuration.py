@@ -135,7 +135,7 @@ class RabbitmqConfiguration(BaseModel):
     password: str
 
 
-class CelerySettings(CustomBaseSettings):
+class CelerySettings(BaseModel):
     """Cloudinary settings"""
 
     broker: str
@@ -170,6 +170,9 @@ class Config(CustomBaseSettings):
             raise ValueError(
                 "You have selected postgres as database but did not provide its configuration"
             )
+
+    def get_broker_url(self) -> str:
+        return f"{self.celery.broker}{self.rabbitmq.user}:{self.rabbitmq.password}@{self.celery.host}:{self.celery.port}//"
 
 
 class Cloudinary(CustomBaseSettings):

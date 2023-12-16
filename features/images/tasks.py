@@ -2,7 +2,6 @@
 import datetime
 import os
 
-import configuration
 import db.connection
 import features.images.models
 import khLogging
@@ -10,7 +9,7 @@ from celery_config import celery
 from .operations import upload_image_to_cloud
 from .helpers import read_image_as_bytes
 
-logger = khLogging.Logger.get_child_logger(__file__)
+logging = khLogging.Logger.get_child_logger(__file__)
 
 
 @celery.task
@@ -48,14 +47,16 @@ def upload_images_to_cloud_storage():
                     uploaded_images += 1
 
             except Exception as e:
-                print(f"Error uploading image {image.name}: {str(e)}")
+                not_uploaded_images += 1
+                logging.error(f"Error uploading image {image.name}: {str(e)}")
 
         session.close()
 
-    return (
+    logging.info(
         f"Total images: {not_uploaded_images + uploaded_images}"
         + os.linesep
-        + f"Images uploaded to cloud and paths updated: {uploaded_images}"
+        + f"Images uploaded to cloud: {uploaded_images}"
         + os.linesep
         + f"Not uploaded images: {not_uploaded_images}"
-    )  # TODO: Add logging
+    )
+    return
