@@ -135,11 +135,11 @@ def get_all_recipes(
 
 
 @recipes_router.get("/{recipe_id}", response_model=RecipeResponse)
-def get_recipe(recipe_id: int = fastapi.Path()):
+def get_recipe(user: common.authentication.optional_user, recipe_id: int = fastapi.Path()):
     """Get recipe"""
 
     try:
-        return features.recipes.operations.get_recipe_by_id(recipe_id)
+        return features.recipes.operations.get_recipe_by_id(recipe_id, user)
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,

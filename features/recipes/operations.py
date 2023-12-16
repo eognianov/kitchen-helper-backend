@@ -1,6 +1,6 @@
 """Recipes feature business logic"""
 from datetime import datetime
-from typing import Type
+from typing import Type, Optional
 
 import sqlalchemy.exc
 from sqlalchemy import update, and_, or_
@@ -147,6 +147,25 @@ def create_recipe(
     return recipe
 
 
+def _get_published_filter_expression(user: Optional[common.authentication.AuthenticatedUser]):
+    """
+    Get published filters
+
+    :param user:
+    :return:
+    """
+    published_expression = []
+
+    if user:
+        if not user.is_admin:
+            published_expression.append(and_(Recipe.is_deleted.is_(False)))
+            published_expression.append(and_(or_(Recipe.created_by.is_(user.id), Recipe.is_published.is_(True))))
+    else:
+        published_expression = [and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True))]
+
+    return published_expression
+
+
 def get_all_recipes(
     paginated_input_model: PSFRecipesInputModel, user: common.authentication.AuthenticatedUser
 ) -> PSFRecipesResponseModel:
@@ -159,15 +178,9 @@ def get_all_recipes(
 
     filter_expression = paginated_input_model.filter_expression
     order_expression = paginated_input_model.order_expression
-    published_expression = []
-    if user:
-        if not user.is_admin:
-            published_expression.append(and_(Recipe.is_deleted.is_(False)))
-            published_expression.append(and_(or_(Recipe.created_by.is_(user.id), Recipe.is_published.is_(True))))
-    else:
-        published_expression = [and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True))]
-
+    published_expression = _get_published_filter_expression(user)
     filter_expression.extend(published_expression)
+
     with db.connection.get_session() as session:
         filtered_recipes = (
             session.query(Recipe)
@@ -182,13 +195,10 @@ def get_all_recipes(
         return response
 
 
-def get_recipe_by_id(recipe_id: int):
+def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUser):
     """Get recipe by id"""
 
-    filters = [Recipe.is_deleted.is_(False)]
-
-    if not CONFIG.context == configuration.ContextOptions.TEST:
-        filters.append(Recipe.is_published.is_(True))
+    filters = _get_published_filter_expression(user)
 
     with db.connection.get_session() as session:
         recipe = (
