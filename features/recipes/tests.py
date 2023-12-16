@@ -316,7 +316,7 @@ class TestInstructionsEndpoints:
         )
 
     def test_patch_instruction_with_wrong_field_fail(self, use_test_db, mocker):
-        operations.create_category("Category")
+        operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
             recipe_id=1,
