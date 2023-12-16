@@ -19,8 +19,10 @@ from .input_models import CreateInstructionInputModel, PSFRecipesInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse, PSFRecipesResponseModel
 
-
+import configuration
 import khLogging
+
+CONFIG = configuration.Config()
 
 logging = khLogging.Logger.get_child_logger(__file__)
 
@@ -182,12 +184,17 @@ def get_all_recipes(
 def get_recipe_by_id(recipe_id: int):
     """Get recipe by id"""
 
+    filters = [Recipe.is_deleted.is_(False)]
+
+    if not CONFIG.context == configuration.ContextOptions.TEST:
+        filters.append(Recipe.is_published.is_(True))
+
     with db.connection.get_session() as session:
         recipe = (
             session.query(Recipe)
             .join(Recipe.category, isouter=True)
             .where(Recipe.id == recipe_id)
-            .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+            .filter(and_(*filters))
             .first()
         )
         if not recipe:
