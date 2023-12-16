@@ -12,6 +12,13 @@ from features.recipes.exceptions import (
 )
 from fastapi.testclient import TestClient
 from api import app
+from pytest import fixture
+
+
+@fixture
+def bypass_published_filter(mocker):
+    mocker.patch('features.recipes.operations._get_published_filter_expression', return_value=[])
+    yield
 
 
 class TestCategoryOperations:
@@ -91,9 +98,7 @@ class TestCategoriesEndpoints:
             headers={"Authorization": "Bearer token"},
         )
         assert response.status_code == 200
-        update_category_spy.assert_called_with(
-            category_id=1, field="name", value="updated", updated_by=1
-        )
+        update_category_spy.assert_called_with(category_id=1, field="name", value="updated", updated_by=1)
 
 
 class TestInstructionsOperations:
@@ -123,7 +128,7 @@ class TestInstructionsOperations:
         assert len(recipes) == 1
         assert len(recipe.instructions) == 0
 
-    def test_create_recipe_with_instructions_success(self, use_test_db):
+    def test_create_recipe_with_instructions_success(self, use_test_db, bypass_published_filter):
         instruction = {
             "instruction": "instruction",
             "category": "Lunch",
@@ -152,7 +157,7 @@ class TestInstructionsOperations:
         assert recipes[0].complexity == 4.5
         assert recipes[0].instructions[0].category == "Lunch"
 
-    def test_create_instruction_for_recipe_success(self, use_test_db):
+    def test_create_instruction_for_recipe_success(self, use_test_db, bypass_published_filter):
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -177,7 +182,7 @@ class TestInstructionsOperations:
             assert instruction.time == new_instruction["time"]
             assert instruction.complexity == new_instruction["complexity"]
 
-    def test_get_instruction_by_id_success(self, use_test_db):
+    def test_get_instruction_by_id_success(self, use_test_db, bypass_published_filter):
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -199,7 +204,7 @@ class TestInstructionsOperations:
         assert instruction.time == new_instruction["time"]
         assert instruction.complexity == new_instruction["complexity"]
 
-    def test_update_instruction_success(self, use_test_db):
+    def test_update_instruction_success(self, use_test_db, bypass_published_filter):
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -226,9 +231,7 @@ class TestInstructionsOperations:
             field="category",
             value="Breakfast",
         )
-        operations.update_instruction(
-            recipe_id=1, instruction_id=created_instruction.id, field="time", value="20"
-        )
+        operations.update_instruction(recipe_id=1, instruction_id=created_instruction.id, field="time", value="20")
         operations.update_instruction(
             recipe_id=1,
             instruction_id=created_instruction.id,
@@ -241,7 +244,7 @@ class TestInstructionsOperations:
         assert updated_instruction.time == 20
         assert updated_instruction.complexity == 1
 
-    def test_delete_instruction_success(self, use_test_db):
+    def test_delete_instruction_success(self, use_test_db, bypass_published_filter):
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -298,7 +301,7 @@ class TestInstructionsEndpoints:
             "complexity": 5,
         }
 
-    def test_patch_instruction_success(self, use_test_db, mocker):
+    def test_patch_instruction_success(self, use_test_db, mocker, bypass_published_filter):
         operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
@@ -314,11 +317,9 @@ class TestInstructionsEndpoints:
             json=patch_payload,
         )
         assert response.status_code == 200
-        update_instruction_spy.assert_called_with(
-            recipe_id=1, instruction_id=1, field="instruction", value="updated"
-        )
+        update_instruction_spy.assert_called_with(recipe_id=1, instruction_id=1, field="instruction", value="updated")
 
-    def test_patch_instruction_with_wrong_field_fail(self, use_test_db, mocker):
+    def test_patch_instruction_with_wrong_field_fail(self, use_test_db, mocker, bypass_published_filter):
         operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
@@ -334,7 +335,7 @@ class TestInstructionsEndpoints:
         )
         assert response.status_code == 422
 
-    def test_delete_instruction_success(self, use_test_db, mocker):
+    def test_delete_instruction_success(self, use_test_db, mocker, bypass_published_filter):
         operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
@@ -343,15 +344,11 @@ class TestInstructionsEndpoints:
         )
 
         delete_instruction_spy = mocker.spy(operations, "delete_instruction")
-        response = self.client.delete(
-            f"/recipes/{created_recipe.id}/instructions/{created_instruction.id}"
-        )
+        response = self.client.delete(f"/recipes/{created_recipe.id}/instructions/{created_instruction.id}")
         assert response.status_code == 204
         delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=1)
 
-    def test_delete_instruction_with_non_existing_recipe_fail(
-        self, use_test_db, mocker
-    ):
+    def test_delete_instruction_with_non_existing_recipe_fail(self, use_test_db, mocker, bypass_published_filter):
         operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
@@ -360,15 +357,11 @@ class TestInstructionsEndpoints:
         )
 
         delete_instruction_spy = mocker.spy(operations, "delete_instruction")
-        response = self.client.delete(
-            f"/recipes/{2}/instructions/{created_instruction.id}"
-        )
+        response = self.client.delete(f"/recipes/{2}/instructions/{created_instruction.id}")
         assert response.status_code == 404
         delete_instruction_spy.assert_called_with(recipe_id=2, instruction_id=1)
 
-    def test_delete_instruction_with_non_existing_instruction_fail(
-        self, use_test_db, mocker
-    ):
+    def test_delete_instruction_with_non_existing_instruction_fail(self, use_test_db, mocker):
         operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
