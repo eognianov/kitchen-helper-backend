@@ -1211,10 +1211,8 @@ class TestUserEndpoints:
         user = operations.create_new_user(
             user=input_models.RegisterUserInputModel(**cls.USER_DATA)
         )
-        token = operations.generate_email_password_token(
-            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
-        )
-        headers = {"Authentication": f"Bearer {token.token}"}
+        token, _ = operations.create_token(user_id=user.id)
+        headers = {"Authorization": f"Bearer {token}"}
 
         response = cls.client.get(f"/users/{user.id}/", headers=headers)
 
