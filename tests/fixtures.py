@@ -16,3 +16,9 @@ def use_test_db(monkeypatch, mocker):
 def admin(mocker):
     mocker.patch("jose.jwt.decode", return_value={"sub": "1", "roles": [1]})
     yield
+
+
+@fixture
+def user(mocker):
+    mocker.patch("jose.jwt.decode", return_value={"sub": "1"})
+    yield

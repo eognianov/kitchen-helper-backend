@@ -1,9 +1,11 @@
+import unittest.mock
+
 import pytest
 
 import common.authentication
 import db.connection
 from features.recipes.input_models import CreateInstructionInputModel
-from tests.fixtures import use_test_db, admin
+from tests.fixtures import use_test_db, admin, user
 from features.recipes import operations
 from features.recipes.models import RecipeCategory, RecipeInstruction, Recipe
 from features.recipes.exceptions import (
@@ -335,7 +337,7 @@ class TestInstructionsEndpoints:
         )
         assert response.status_code == 422
 
-    def test_delete_instruction_success(self, use_test_db, mocker, bypass_published_filter):
+    def test_delete_instruction_success(self, use_test_db, mocker, bypass_published_filter, user):
         operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
@@ -343,12 +345,16 @@ class TestInstructionsEndpoints:
             instruction_request=CreateInstructionInputModel(**self.new_instruction),
         )
 
+        headers = {"Authorization": "Bearer token"}
+
         delete_instruction_spy = mocker.spy(operations, "delete_instruction")
-        response = self.client.delete(f"/recipes/{created_recipe.id}/instructions/{created_instruction.id}")
+        response = self.client.delete(
+            f"/recipes/{created_recipe.id}/instructions/{created_instruction.id}", headers=headers
+        )
         assert response.status_code == 204
-        delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=1)
+        delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=1, user=unittest.mock.ANY)
 
-    def test_delete_instruction_with_non_existing_recipe_fail(self, use_test_db, mocker, bypass_published_filter):
+    def test_delete_instruction_with_non_existing_recipe_fail(self, use_test_db, mocker, bypass_published_filter, user):
         operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
@@ -357,11 +363,14 @@ class TestInstructionsEndpoints:
         )
 
         delete_instruction_spy = mocker.spy(operations, "delete_instruction")
-        response = self.client.delete(f"/recipes/{2}/instructions/{created_instruction.id}")
+        headers = {"Authorization": "Bearer token"}
+        response = self.client.delete(f"/recipes/{2}/instructions/{created_instruction.id}", headers=headers)
         assert response.status_code == 404
-        delete_instruction_spy.assert_called_with(recipe_id=2, instruction_id=1)
+        delete_instruction_spy.assert_called_with(recipe_id=2, instruction_id=1, user=unittest.mock.ANY)
 
-    def test_delete_instruction_with_non_existing_instruction_fail(self, use_test_db, mocker, bypass_published_filter):
+    def test_delete_instruction_with_non_existing_instruction_fail(
+        self, use_test_db, mocker, bypass_published_filter, user
+    ):
         operations.create_category("Category", 1)
         created_recipe = operations.create_recipe(**self.recipe)
         created_instruction = operations.create_instruction(
@@ -370,11 +379,12 @@ class TestInstructionsEndpoints:
         )
 
         delete_instruction_spy = mocker.spy(operations, "delete_instruction")
-        response = self.client.delete(f"/recipes/{created_recipe.id}/instructions/{2}")
+        headers = {"Authorization": "Bearer token"}
+        response = self.client.delete(f"/recipes/{created_recipe.id}/instructions/{2}", headers=headers)
         assert response.status_code == 404
-        delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2)
+        delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2, user=unittest.mock.ANY)
 
-    def test_delete_instruction_with_wrong_recipe_fail(self, use_test_db, mocker, bypass_published_filter):
+    def test_delete_instruction_with_wrong_recipe_fail(self, use_test_db, mocker, bypass_published_filter, user):
         operations.create_category("Category", 1)
         operations.create_recipe(**self.recipe)
         operations.create_recipe(**self.recipe)
@@ -388,6 +398,7 @@ class TestInstructionsEndpoints:
         )
 
         delete_instruction_spy = mocker.spy(operations, "delete_instruction")
-        response = self.client.delete(f"/recipes/{1}/instructions/{2}")
+        headers = {"Authorization": "Bearer token"}
+        response = self.client.delete(f"/recipes/{1}/instructions/{2}", headers=headers)
         assert response.status_code == 404
-        delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2)
+        delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2, user=unittest.mock.ANY)
