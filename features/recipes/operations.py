@@ -6,8 +6,14 @@ import sqlalchemy.exc
 from sqlalchemy import update, and_
 
 import db.connection
-from .exceptions import CategoryNotFoundException, CategoryNameViolationException, RecipeNotFoundException, \
-    InstructionNotFoundException, InstructionNameViolationException, RecipeWithInstructionNotFoundException
+from .exceptions import (
+    CategoryNotFoundException,
+    CategoryNameViolationException,
+    RecipeNotFoundException,
+    InstructionNotFoundException,
+    InstructionNameViolationException,
+    RecipeWithInstructionNotFoundException,
+)
 from .helpers import paginate_recipes
 from .input_models import CreateInstructionInputModel, PSFRecipesInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
@@ -37,21 +43,32 @@ def get_category_by_id(category_id: int) -> Type[RecipeCategory]:
     """
 
     with db.connection.get_session() as session:
-        category = session.query(RecipeCategory).where(RecipeCategory.id == category_id).first()
+        category = (
+            session.query(RecipeCategory)
+            .where(RecipeCategory.id == category_id)
+            .first()
+        )
         if not category:
             raise CategoryNotFoundException()
         return category
 
 
-def update_category(category_id: int, field: str, value: str, updated_by: str = 'me') -> Type[RecipeCategory]:
+def update_category(
+    category_id: int, field: str, value: str, updated_by: str = "me"
+) -> Type[RecipeCategory]:
     """Update category"""
     category = get_category_by_id(category_id)
     try:
         with db.connection.get_session() as session:
-            session.execute(update(RecipeCategory), [{"id": category.id, f"{field}": value, "updated_by": updated_by}])
+            session.execute(
+                update(RecipeCategory),
+                [{"id": category.id, f"{field}": value, "updated_by": updated_by}],
+            )
             session.commit()
             RecipeCategory.__setattr__(category, field, value)
-            logging.info(f"User {updated_by} updated Category (#{category_id}). Set {field} to {value}")
+            logging.info(
+                f"User {updated_by} updated Category (#{category_id}). Set {field} to {value}"
+            )
             return category
     except sqlalchemy.exc.IntegrityError as ex:
         raise CategoryNameViolationException(ex)
@@ -72,9 +89,21 @@ def create_category(category_name: str, created_by: int = 1) -> RecipeCategory:
         raise CategoryNameViolationException(ex)
 
 
-def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, picture: str = None, summary: str = None,
-                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0,
-                  created_by: int = 1, instructions: list[CreateInstructionInputModel]):
+def create_recipe(
+    *,
+    name: str,
+    time_to_prepare: int,
+    category_id: int = None,
+    picture: str = None,
+    summary: str = None,
+    calories: float = 0,
+    carbo: float = 0,
+    fats: float = 0,
+    proteins: float = 0,
+    cholesterol: float = 0,
+    created_by: int = 1,
+    instructions: list[CreateInstructionInputModel],
+):
     """
     Create recipe
 
@@ -109,7 +138,6 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
         proteins=proteins,
         cholesterol=cholesterol,
         created_by=created_by,
-        is_published=True
     )
 
     with db.connection.get_session() as session:
@@ -124,7 +152,9 @@ def create_recipe(*, name: str, time_to_prepare: int, category_id: int = None, p
     return recipe
 
 
-def get_all_recipes(paginated_input_model: PSFRecipesInputModel) -> PSFRecipesResponseModel:
+def get_all_recipes(
+    paginated_input_model: PSFRecipesInputModel,
+) -> PSFRecipesResponseModel:
     """
     Get all recipes paginated, sorted, and filtered
     :param paginated_input_model:
@@ -135,10 +165,15 @@ def get_all_recipes(paginated_input_model: PSFRecipesInputModel) -> PSFRecipesRe
     order_expression = paginated_input_model.order_expression
 
     with db.connection.get_session() as session:
-        filtered_recipes = session.query(Recipe) \
-            .join(RecipeCategory) \
-            .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)), *filter_expression) \
+        filtered_recipes = (
+            session.query(Recipe)
+            .join(RecipeCategory, isouter=True)
+            .filter(
+                and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)),
+                *filter_expression,
+            )
             .order_by(*order_expression)
+        )
 
         response = paginate_recipes(filtered_recipes, paginated_input_model)
         return response
@@ -148,11 +183,13 @@ def get_recipe_by_id(recipe_id: int):
     """Get recipe by id"""
 
     with db.connection.get_session() as session:
-        recipe = (session.query(Recipe)
-                  .join(Recipe.category, isouter=True)
-                  .where(Recipe.id == recipe_id)
-                  .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
-                  .first())
+        recipe = (
+            session.query(Recipe)
+            .join(Recipe.category, isouter=True)
+            .where(Recipe.id == recipe_id)
+            .filter(and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True)))
+            .first()
+        )
         if not recipe:
             raise RecipeNotFoundException
         return recipe
@@ -168,9 +205,15 @@ def update_recipe(recipe_id: int) -> None:
     with db.connection.get_session() as session:
         recipe = get_recipe_by_id(recipe_id=recipe_id)
 
-        total_complexity = (sum([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
-        complexity_len = (len([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]))
-        time_to_prepare = (sum([InstructionResponse(**x.__dict__).time for x in recipe.instructions]))
+        total_complexity = sum(
+            [InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]
+        )
+        complexity_len = len(
+            [InstructionResponse(**x.__dict__).complexity for x in recipe.instructions]
+        )
+        time_to_prepare = sum(
+            [InstructionResponse(**x.__dict__).time for x in recipe.instructions]
+        )
 
         if complexity_len == 0:
             recipe.complexity = 0
@@ -185,7 +228,9 @@ def update_recipe(recipe_id: int) -> None:
     logging.info(f"Recipe #{recipe_id} was updated")
 
 
-def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe_id: int) -> None:
+def create_instructions(
+    instructions_request: list[CreateInstructionInputModel], recipe_id: int
+) -> None:
     """
     Create instructions
     :param instructions_request:
@@ -199,7 +244,9 @@ def create_instructions(instructions_request: list[CreateInstructionInputModel],
             new_instruction.recipe_id = recipe_id
             session.add(new_instruction)
             session.commit()
-    logging.info(f"Recipe #{recipe_id} was updated with {len(instructions_request)} instructions")
+    logging.info(
+        f"Recipe #{recipe_id} was updated with {len(instructions_request)} instructions"
+    )
     update_recipe(recipe_id=recipe_id)
 
 
@@ -207,7 +254,11 @@ def get_instruction_by_id(instruction_id: int):
     """Get instruction by id"""
 
     with db.connection.get_session() as session:
-        instruction = session.query(RecipeInstruction).filter(RecipeInstruction.id == instruction_id).first()
+        instruction = (
+            session.query(RecipeInstruction)
+            .filter(RecipeInstruction.id == instruction_id)
+            .first()
+        )
         if not instruction:
             raise InstructionNotFoundException
         return instruction
@@ -230,12 +281,16 @@ def update_instruction(recipe_id: int, instruction_id: int, field: str, value: s
 
     try:
         with db.connection.get_session() as session:
-            session.execute(update(RecipeInstruction), [{"id": instruction.id, f"{field}": value}])
+            session.execute(
+                update(RecipeInstruction), [{"id": instruction.id, f"{field}": value}]
+            )
             session.commit()
             RecipeInstruction.__setattr__(instruction, field, value)
 
             update_recipe(recipe_id=recipe.id)
-            logging.info(f"Instruction #({instruction_id}) was updated. Set {field} = {value}")
+            logging.info(
+                f"Instruction #({instruction_id}) was updated. Set {field} = {value}"
+            )
             return instruction
 
     except sqlalchemy.exc.IntegrityError as ex:
@@ -277,8 +332,11 @@ def delete_instruction(recipe_id: int, instruction_id: int):
     with db.connection.get_session() as session:
         session.delete(instruction)
         session.commit()
-        logging.info(f"Instruction #{instruction_id} was deleted from Recipe #{recipe_id}")
+        logging.info(
+            f"Instruction #{instruction_id} was deleted from Recipe #{recipe_id}"
+        )
         update_recipe(recipe_id=recipe.id)
+
 
 def delete_recipe(*, recipe_id: int, deleted_by: int):
     """
@@ -293,12 +351,15 @@ def delete_recipe(*, recipe_id: int, deleted_by: int):
 
     with db.connection.get_session() as session:
         session.execute(
-            update(Recipe), [{
-                "id": recipe.id,
-                "is_deleted": True,
-                "deleted_on": datetime.utcnow(),
-                "deleted_by": deleted_by
-            }]
+            update(Recipe),
+            [
+                {
+                    "id": recipe.id,
+                    "is_deleted": True,
+                    "deleted_on": datetime.utcnow(),
+                    "deleted_by": deleted_by,
+                }
+            ],
         )
         session.commit()
         return recipe
