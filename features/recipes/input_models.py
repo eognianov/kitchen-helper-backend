@@ -6,7 +6,7 @@ import pydantic
 
 import features.recipes.helpers
 
-INSTRUCTION_CATEGORIES = ('BREAKFAST', 'LUNCH', 'DINNER')
+INSTRUCTION_CATEGORIES = ("BREAKFAST", "LUNCH", "DINNER")
 
 
 class PatchCategoryInputModel(pydantic.BaseModel):
@@ -15,12 +15,10 @@ class PatchCategoryInputModel(pydantic.BaseModel):
     field: str
     value: str
 
-    @pydantic.field_validator('field')
+    @pydantic.field_validator("field")
     @classmethod
     def validate_field(cls, field: str):
-        allowed_fields_to_edit = [
-            'NAME'
-        ]
+        allowed_fields_to_edit = ["NAME"]
 
         if field.upper() not in allowed_fields_to_edit:
             raise ValueError(f"You are not allowed to edit {field} column")
@@ -36,12 +34,13 @@ class CreateCategoryInputModel(pydantic.BaseModel):
 
 class CreateInstructionInputModel(pydantic.BaseModel):
     """Create instruction"""
+
     instruction: str = pydantic.Field(max_length=300)
     category: str = pydantic.Field(max_length=100)
     time: int = pydantic.Field(ge=1, lt=100)
     complexity: float = pydantic.Field(ge=1, le=5)
 
-    @pydantic.field_validator('category', mode='after')
+    @pydantic.field_validator("category", mode="after")
     @classmethod
     def validate_category(cls, field: str):
         if field.upper() not in INSTRUCTION_CATEGORIES:
@@ -71,11 +70,9 @@ class PatchInstructionInputModel(pydantic.BaseModel):
     field: str
     value: Union[str, int]
 
-    @pydantic.model_validator(mode='after')
-    def check_fields(self) -> 'PatchInstructionInputModel':
-        allowed_fields_to_edit = [
-            'INSTRUCTION', 'CATEGORY', 'TIME', 'COMPLEXITY'
-        ]
+    @pydantic.model_validator(mode="after")
+    def check_fields(self) -> "PatchInstructionInputModel":
+        allowed_fields_to_edit = ["INSTRUCTION", "CATEGORY", "TIME", "COMPLEXITY"]
 
         field = self.field
         value = self.value
@@ -83,19 +80,19 @@ class PatchInstructionInputModel(pydantic.BaseModel):
         if field.upper() not in allowed_fields_to_edit:
             raise ValueError(f"You are not allowed to edit {field} column")
 
-        if field.upper() in ['TIME', 'COMPLEXITY']:
+        if field.upper() in ["TIME", "COMPLEXITY"]:
             try:
                 value = int(value)
             except ValueError:
                 raise ValueError(f"{field} must be an integer")
             if value < 1:
                 raise ValueError(f"{field} must be greater then 1")
-            if field.upper() == 'TIME' and value > 99:
+            if field.upper() == "TIME" and value > 99:
                 raise ValueError(f"Time must be less then 100")
-            if field.upper() == 'COMPLEXITY' and value > 5:
+            if field.upper() == "COMPLEXITY" and value > 5:
                 raise ValueError(f"Complexity must be less then 6")
 
-        if field.upper() == 'CATEGORY':
+        if field.upper() == "CATEGORY":
             if value.upper() not in INSTRUCTION_CATEGORIES:
                 raise ValueError(f"{value} is not valid category")
 
@@ -106,38 +103,28 @@ class PatchInstructionInputModel(pydantic.BaseModel):
 
 class PSFRecipesInputModel(pydantic.BaseModel):
     """Paginate, sort, filter Recipes"""
+
     page: int = pydantic.Field(default=1, gt=0)
     page_size: int = pydantic.Field(default=10, gt=0)
     sort: Optional[str] = None
     filters: Optional[str] = None
-    order_expression: Optional[list] = []
-    filter_expression: Optional[list] = []
-
-    # otherwise gives an internal server error
-    @pydantic.field_validator('page', mode='before')
-    @classmethod
-    def validate_page(cls, field: str):
-        if int(field) < 1:
-            raise fastapi.HTTPException(status_code=422, detail=f"Page must be greater than 0.")
-        return field
-
-    # otherwise gives an internal server error
-    @pydantic.field_validator('page_size', mode='before')
-    @classmethod
-    def validate_page_size(cls, field: str):
-        if int(field) < 1:
-            raise fastapi.HTTPException(status_code=422, detail=f"Page size must be greater than 0.")
-        return field
+    order_expression: Optional[list] = None
+    filter_expression: Optional[list] = None
 
     def model_post_init(self, __context: Any) -> None:
-
         try:
-            self.order_expression = features.recipes.helpers.sort_recipes(self.sort)
+            self.order_expression = (
+                features.recipes.helpers.sort_recipes(self.sort) or []
+            )
         except ValueError as ve:
             raise fastapi.HTTPException(status_code=422, detail=str(ve))
 
         if self.filters:
             try:
-                self.filter_expression = features.recipes.helpers.filter_recipes(self.filters)
+                self.filter_expression = (
+                    features.recipes.helpers.filter_recipes(self.filters) or []
+                )
             except ValueError as ve:
                 raise fastapi.HTTPException(status_code=422, detail=str(ve))
+        else:
+            self.filter_expression = []

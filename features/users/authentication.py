@@ -7,6 +7,7 @@ class AdminOrMe:
     """
     Authentication wrapper for Admin or Me
     """
+
     def __init__(self, identifier_variable: str = None):
         """
         Initialize the authenticator and set identifier field
@@ -15,7 +16,9 @@ class AdminOrMe:
         """
         self.identifier_variable = identifier_variable
 
-    def __call__(self, user: common.authentication.authenticated_user, request: fastapi.Request):
+    def __call__(
+        self, user: common.authentication.authenticated_user, request: fastapi.Request
+    ):
         """
         Actual authentication
 
@@ -23,13 +26,9 @@ class AdminOrMe:
         :param request:
         :return:
         """
-        if int(request.path_params.get(self.identifier_variable)) == user.id or common.constants.ADMIN_ROLE_ID in user.roles:
-            return user
-        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_401_UNAUTHORIZED)
-
-
-class Admin:
-    def __call__(self, user: common.authentication.authenticated_user):
-        if common.constants.ADMIN_ROLE_ID in user.roles:
+        if (
+            int(request.path_params.get(self.identifier_variable)) == user.id
+            or common.constants.ADMIN_ROLE_ID in user.roles
+        ):
             return user
         raise fastapi.HTTPException(status_code=fastapi.status.HTTP_401_UNAUTHORIZED)

@@ -22,7 +22,7 @@ from .responses import (
 )
 from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
-from .authentication import AdminOrMe, Admin
+from .authentication import AdminOrMe
 
 user_router = APIRouter()
 roles_router = APIRouter()
@@ -80,7 +80,12 @@ async def signin(request: Annotated[OAuth2PasswordRequestForm, fastapi.Depends()
 
 
 @user_router.get("/all", response_model=list[UsersResponseModel])
-async def show_all_users():
+async def show_all_users(
+    user: Annotated[
+        common.authentication.AuthenticatedUser,
+        fastapi.Depends(common.authentication.admin),
+    ]
+):
     """
     Show all users
 
@@ -102,6 +107,7 @@ async def get_user(
     Show user details
 
     :param user_id:
+    :param user:
     :return:
     """
     try:
@@ -126,6 +132,7 @@ def patch_user(
     """
     Update user email
 
+    :param user:
     :param user_id:
     :param update_user_input_model:
     :return:
@@ -144,7 +151,10 @@ def patch_user(
 
 @roles_router.get("/")
 def get_all_roles(
-    user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(Admin)],
+    user: Annotated[
+        common.authentication.AuthenticatedUser,
+        fastapi.Depends(common.authentication.admin),
+    ],
     include_users: bool = False,
 ):
     """
@@ -165,7 +175,10 @@ def get_all_roles(
 @roles_router.get("/{role_id}", response_model=RolesWithUsersResponseModel)
 def get_role_with_users(
     role_id: int,
-    user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(Admin)],
+    user: Annotated[
+        common.authentication.AuthenticatedUser,
+        fastapi.Depends(common.authentication.admin),
+    ],
 ):
     """
     Get role
@@ -183,7 +196,10 @@ def get_role_with_users(
 )
 def create_role(
     role_request: CreateUserRole,
-    user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(Admin)],
+    user: Annotated[
+        common.authentication.AuthenticatedUser,
+        fastapi.Depends(common.authentication.admin),
+    ],
 ):
     """
     Create role
@@ -210,7 +226,10 @@ def create_role(
 def add_user_to_role(
     user_id: int,
     role_id: int,
-    user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(Admin)],
+    user: Annotated[
+        common.authentication.AuthenticatedUser,
+        fastapi.Depends(common.authentication.admin),
+    ],
 ):
     """
     Add role to user
@@ -244,7 +263,10 @@ def add_user_to_role(
 def remove_user_from_role(
     user_id: int,
     role_id: int,
-    user: Annotated[common.authentication.AuthenticatedUser, fastapi.Depends(Admin)],
+    user: Annotated[
+        common.authentication.AuthenticatedUser,
+        fastapi.Depends(common.authentication.admin),
+    ],
 ):
     """
     Remove user from role
