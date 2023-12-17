@@ -224,7 +224,9 @@ class TestInstructionsOperations:
         operations.update_instruction(
             recipe_id=1, instruction_id=created_instruction.id, field="category", value="Breakfast", user=user
         )
-        operations.update_instruction(recipe_id=1, instruction_id=created_instruction.id, field="time", value="20")
+        operations.update_instruction(
+            recipe_id=1, instruction_id=created_instruction.id, field="time", value="20", user=user
+        )
         operations.update_instruction(
             recipe_id=1, instruction_id=created_instruction.id, field="complexity", value="1", user=user
         )
