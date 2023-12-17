@@ -219,23 +219,14 @@ class TestInstructionsOperations:
             recipe_id=1, instruction_request=CreateInstructionInputModel(**new_instruction), user=user
         )
         operations.update_instruction(
-            recipe_id=1,
-            instruction_id=created_instruction.id,
-            field="instruction",
-            value="new_name",
+            recipe_id=1, instruction_id=created_instruction.id, field="instruction", value="new_name", user=user
         )
         operations.update_instruction(
-            recipe_id=1,
-            instruction_id=created_instruction.id,
-            field="category",
-            value="Breakfast",
+            recipe_id=1, instruction_id=created_instruction.id, field="category", value="Breakfast", user=user
         )
         operations.update_instruction(recipe_id=1, instruction_id=created_instruction.id, field="time", value="20")
         operations.update_instruction(
-            recipe_id=1,
-            instruction_id=created_instruction.id,
-            field="complexity",
-            value="1",
+            recipe_id=1, instruction_id=created_instruction.id, field="complexity", value="1", user=user
         )
         updated_instruction = operations.get_instruction_by_id(created_instruction.id)
         assert updated_instruction.instruction == "new_name"
@@ -311,9 +302,12 @@ class TestInstructionsEndpoints:
         response = self.client.patch(
             f"/recipes/{created_recipe.id}/instructions/{created_instruction.id}",
             json=patch_payload,
+            headers={'Authorization': 'Bearer token'},
         )
         assert response.status_code == 200
-        update_instruction_spy.assert_called_with(recipe_id=1, instruction_id=1, field="instruction", value="updated")
+        update_instruction_spy.assert_called_with(
+            recipe_id=1, instruction_id=1, field="instruction", value="updated", user=unittest.mock.ANY
+        )
 
     def test_patch_instruction_with_wrong_field_fail(self, use_test_db, mocker, bypass_published_filter, user):
         operations.create_category("Category", 1)
@@ -327,6 +321,7 @@ class TestInstructionsEndpoints:
         response = self.client.patch(
             f"/recipes/{created_recipe.id}/instructions/{created_instruction.id}",
             json=patch_payload,
+            headers={'Authorization': 'Bearer token'},
         )
         assert response.status_code == 422
 
