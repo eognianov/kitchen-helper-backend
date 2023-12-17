@@ -268,7 +268,9 @@ def get_instruction_by_id(instruction_id: int):
         return instruction
 
 
-def update_instruction(recipe_id: int, instruction_id: int, field: str, value: str):
+def update_instruction(
+    recipe_id: int, instruction_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser
+):
     """
     Update instruction
     :param recipe_id:
@@ -278,7 +280,7 @@ def update_instruction(recipe_id: int, instruction_id: int, field: str, value: s
     """
 
     instruction = get_instruction_by_id(instruction_id)
-    recipe = get_recipe_by_id(recipe_id)
+    recipe = get_recipe_by_id(recipe_id, user=user)
 
     if instruction.recipe_id != recipe_id:
         raise RecipeWithInstructionNotFoundException

@@ -171,12 +171,14 @@ def create_recipe(
 
 @recipes_router.patch("/{recipe_id}/instructions/{instruction_id}", response_model=InstructionResponse)
 def update_instructions(
+    user: common.authentication.authenticated_user,
     recipe_id: int = fastapi.Path(),
     instruction_id: int = fastapi.Path(),
     patch_instruction_input_model: PatchInstructionInputModel = fastapi.Body(),
 ):
     """
     Update instructions
+    :param user:
     :param recipe_id:
     :param instruction_id:
     :param patch_instruction_input_model:
@@ -184,7 +186,7 @@ def update_instructions(
     """
     try:
         updated_instruction = features.recipes.operations.update_instruction(
-            recipe_id, instruction_id, **patch_instruction_input_model.model_dump()
+            recipe_id, instruction_id, **patch_instruction_input_model.model_dump(), user=user
         )
         return updated_instruction
     except features.recipes.exceptions.InstructionNotFoundException:
