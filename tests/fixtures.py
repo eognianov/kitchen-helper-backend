@@ -1,4 +1,6 @@
 from pytest import fixture
+
+import common.authentication
 from db import connection
 from features import DbBaseModel
 from common.authentication import AuthenticatedUser
@@ -21,4 +23,4 @@ def admin(mocker):
 @fixture
 def user(mocker):
     mocker.patch("jose.jwt.decode", return_value={"sub": "1"})
-    yield
+    yield common.authentication.AuthenticatedUser(id=1)
