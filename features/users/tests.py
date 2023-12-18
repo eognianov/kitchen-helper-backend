@@ -1494,3 +1494,58 @@ class TestUserEndpoints:
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'No user with this role'}
+
+    @classmethod
+    def test_confirm_email_endpoint_expected_success(cls, use_test_db):
+        """
+        Test confirm email. Expected success
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        confirmation_token = operations.generate_email_password_token(
+            user=admin, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.get(f"/users/confirm-email/{confirmation_token.token}", headers=headers)
+
+        assert response.status_code == 200
+        assert admin.is_email_confirmed is True
+
+    @classmethod
+    def test_confirm_email_endpoint_invalid_token_expected_exception(cls, use_test_db):
+        """
+        Test confirm email with invalid token. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        confirmation_token = operations.generate_email_password_token(
+            user=admin, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
+        )
+        operations.expire_all_existing_tokens_for_user(user=admin, token_type=constants.TokenTypes.EMAIL_CONFIRMATION)
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.get(f"/users/confirm-email/{confirmation_token.token}", headers=headers)
+
+        assert response.status_code == 400
+        assert response.json() == {'detail': 'Invalid token'}
