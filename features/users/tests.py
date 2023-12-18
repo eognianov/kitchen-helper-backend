@@ -1300,3 +1300,197 @@ class TestUserEndpoints:
 
         assert response.status_code == 409
         assert response.json() == {'detail': 'Role already exist'}
+
+    @classmethod
+    def test_add_user_to_role_endpoint_expected_success(cls, use_test_db):
+        """
+        Test add user to role. Expected success
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        second_role = operations.create_role(name="Moderator", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.post(f"/users/{admin.id}/roles/{second_role.id}", headers=headers)
+
+        assert response.status_code == 201
+
+    @classmethod
+    def test_add_user_to_role_endpoint_user_does_not_exist_expected_exception(cls, use_test_db):
+        """
+        Test add user to role with not existing user. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        second_role = operations.create_role(name="Moderator", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.post(f"/users/{999}/roles/{second_role.id}", headers=headers)
+
+        assert response.status_code == 404
+        assert response.json() == {'detail': 'User does not exist'}
+
+    @classmethod
+    def test_add_user_to_role_endpoint_role_does_not_exist_expected_exception(cls, use_test_db):
+        """
+        Test add user to role with not existing role. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.post(f"/users/{admin.id}/roles/{999}", headers=headers)
+
+        assert response.status_code == 404
+        assert response.json() == {'detail': 'Role does not exist'}
+
+    @classmethod
+    def test_add_user_to_role_endpoint_user_is_added_to_role_expected_exception(cls, use_test_db):
+        """
+        Test add user to role when is already added. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.post(f"/users/{admin.id}/roles/{role.id}", headers=headers)
+
+        assert response.status_code == 404
+        assert response.json() == {'detail': 'User already have this role'}
+
+    @classmethod
+    def test_remove_user_from_role_endpoint_expected_success(cls, use_test_db):
+        """
+        Test remove user to role. Expected success
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.delete(f"/users/{admin.id}/roles/{role.id}", headers=headers)
+
+        assert response.status_code == 204
+
+    @classmethod
+    def test_remove_user_from_role_endpoint_user_does_not_exist_expected_exception(cls, use_test_db):
+        """
+        Test remove user from role with not existing user. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        second_role = operations.create_role(name="Moderator", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.delete(f"/users/{999}/roles/{second_role.id}", headers=headers)
+
+        assert response.status_code == 404
+        assert response.json() == {'detail': 'User does not exist'}
+
+    @classmethod
+    def test_remove_user_from_role_endpoint_role_does_not_exist_expected_exception(cls, use_test_db):
+        """
+        Test remove user from role with not existing role. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.delete(f"/users/{admin.id}/roles/{999}", headers=headers)
+
+        assert response.status_code == 404
+        assert response.json() == {'detail': 'Role does not exist'}
+
+    @classmethod
+    def test_remove_user_from_role_endpoint_user_is_not_added_to_role_expected_exception(cls, use_test_db):
+        """
+        Test remove user from role when is not added. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.delete(f"/users/{user.id}/roles/{role.id}", headers=headers)
+
+        assert response.status_code == 404
+        assert response.json() == {'detail': 'No user with this role'}
