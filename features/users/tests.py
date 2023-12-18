@@ -855,7 +855,7 @@ class TestUserEndpoints:
     USER_DATA = {
         "username": "test_user",
         "email": "test@mail.com",
-        "password": "Password!@",
+        "password": "Password1@",
     }
 
     @classmethod
@@ -869,13 +869,10 @@ class TestUserEndpoints:
             mock_send_mail.return_value = {"status": 201}
             response = cls.client.post("/users/signup/", json=cls.USER_DATA)
 
-            with db.connection.get_session() as session:
-                user = session.query(models.User).first()
-
-            assert user.id == 1
-            assert user.username == cls.USER_DATA["username"]
-            assert user.email == cls.USER_DATA["email"]
-            assert user.roles == []
+            assert response.json()["id"] == 1
+            assert response.json()["username"] == cls.USER_DATA["username"]
+            assert response.json()["email"] == cls.USER_DATA["email"]
+            assert response.json()["roles"] == []
             assert response.status_code == 201
             assert response.json() == {
                 "email": "test@mail.com",
