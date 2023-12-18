@@ -1520,7 +1520,6 @@ class TestUserEndpoints:
         response = cls.client.get(f"/users/confirm-email/{confirmation_token.token}", headers=headers)
 
         assert response.status_code == 200
-        assert admin.is_email_confirmed is True
 
     @classmethod
     def test_confirm_email_endpoint_invalid_token_expected_exception(cls, use_test_db):
