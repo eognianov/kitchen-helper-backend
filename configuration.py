@@ -3,7 +3,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
 from pydantic import BaseModel, model_validator
-from typing import Optional, List
+from typing import Optional, List, Dict
 from enum import StrEnum, auto
 
 
@@ -19,12 +19,18 @@ _ENV_FILES_PATHS = (
 
 
 class CustomBaseSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=_ENV_FILES_PATHS, validate_default=True,
-                                      case_sensitive=False, env_nested_delimiter='__', extra='ignore')
+    model_config = SettingsConfigDict(
+        env_file=_ENV_FILES_PATHS,
+        validate_default=True,
+        case_sensitive=False,
+        env_nested_delimiter='__',
+        extra='ignore',
+    )
 
 
 class CaseInsensitiveEnum(StrEnum):
     """Case insensitive enum"""
+
     @classmethod
     def _missing_(cls, value: str):
         value = value.lower()
@@ -36,6 +42,7 @@ class CaseInsensitiveEnum(StrEnum):
 
 class ContextOptions(CaseInsensitiveEnum):
     """Context options"""
+
     PROD = auto()
     DEV = auto()
     TEST = auto()
@@ -43,6 +50,7 @@ class ContextOptions(CaseInsensitiveEnum):
 
 class DbTypeOptions(CaseInsensitiveEnum):
     """DB type options"""
+
     SQLITE = auto()
     POSTGRES = auto()
 
@@ -85,6 +93,7 @@ class PostgresConfig(BaseModel):
 
 class JwtToken(CustomBaseSettings):
     """JWT Token settings"""
+
     access_token_expire_minutes: int
     refresh_token_expire_minutes: int
     algorithm: str
@@ -94,6 +103,7 @@ class JwtToken(CustomBaseSettings):
 
 class CorsSettings(CustomBaseSettings):
     """CORSMiddleware settings"""
+
     allow_origins: List[str]
     allow_methods: List[str]
     allow_headers: List[str]
@@ -101,6 +111,7 @@ class CorsSettings(CustomBaseSettings):
 
 class BrevoSettings(CustomBaseSettings):
     """Brevo settings"""
+
     email_api_key: str
     email_api_url: str
     email_sender: str
@@ -109,6 +120,7 @@ class BrevoSettings(CustomBaseSettings):
 
 class ConfirmationToken(CustomBaseSettings):
     """Email confirmation and password reset token"""
+
     email_token_expiration_minutes: int
     password_token_expiration_minutes: int
 
@@ -151,3 +163,7 @@ class Cloudinary(CustomBaseSettings):
     cloud_name: str
     api_key: str
     api_secret: str
+
+
+class AppAdmins(CustomBaseSettings):
+    admins: List[Dict[str, str]]
