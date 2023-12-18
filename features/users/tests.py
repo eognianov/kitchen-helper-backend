@@ -1606,3 +1606,129 @@ class TestUserEndpoints:
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'User not found'}
+
+    @classmethod
+    def test_reset_password_endpoint_expected_success(cls, use_test_db):
+        """
+        Test reset password. Expected success
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+        new_password = "NewPassword1@"
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        reset_token = operations.generate_email_password_token(
+            user=admin, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.post(
+            f"/users/reset-password/{reset_token.token}/?new_password={new_password}",
+            headers=headers,
+        )
+
+        assert response.status_code == 200
+
+    @classmethod
+    def test_reset_password_endpoint_with_invalid_token_expected_exception(cls, use_test_db):
+        """
+        Test reset password with invalid token. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+        new_password = "NewPassword1@"
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        reset_token = operations.generate_email_password_token(
+            user=admin, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+        operations.expire_all_existing_tokens_for_user(user=admin, token_type=constants.TokenTypes.PASSWORD_RESET)
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.post(
+            f"/users/reset-password/{reset_token.token}/?new_password={new_password}",
+            headers=headers,
+        )
+
+        assert response.status_code == 400
+        assert response.json() == {'detail': 'Invalid token'}
+
+    @classmethod
+    def test_reset_password_endpoint_with_same_password_expected_exception(cls, use_test_db):
+        """
+        Test reset password with same password. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+        new_password = "adminPassword1@"
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        reset_token = operations.generate_email_password_token(
+            user=admin, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.post(
+            f"/users/reset-password/{reset_token.token}/?new_password={new_password}",
+            headers=headers,
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {'detail': 'The new password can not be the same as the old password'}
+
+    @classmethod
+    def test_reset_password_endpoint_with_invalid_password_expected_exception(cls, use_test_db):
+        """
+        Test reset password with invalid password. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+        new_password = "p@"
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        reset_token = operations.generate_email_password_token(
+            user=admin, token_type=constants.TokenTypes.PASSWORD_RESET
+        )
+
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.post(
+            f"/users/reset-password/{reset_token.token}/?new_password={new_password}",
+            headers=headers,
+        )
+
+        assert response.status_code == 422
+        assert "detail" in response.json()
