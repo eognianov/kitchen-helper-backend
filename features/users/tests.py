@@ -49,9 +49,7 @@ class TestUserOperations:
         """
         assert (
             operations.check_password(
-                operations.create_new_user(
-                    user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-                ),
+                operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA)),
                 cls.USER_DATA["password"],
             )
             is True
@@ -67,9 +65,7 @@ class TestUserOperations:
         different_password = "different password"
         assert (
             operations.check_password(
-                user=operations.create_new_user(
-                    user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-                ),
+                user=operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA)),
                 password=different_password,
             )
             is False
@@ -82,9 +78,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         assert user.username == cls.USER_DATA["username"]
         assert user.email == cls.USER_DATA["email"]
         assert user.id == 1
@@ -97,9 +91,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         operations.add_user_to_role(user_id=user.id, role_id=role.id, added_by=user.id)
         updated_user = operations.get_user_from_db(pk=user.id)
@@ -117,15 +109,8 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
-        assert (
-            operations.signin_user(
-                username=cls.USER_DATA["username"], password=cls.USER_DATA["password"]
-            )
-            == user
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        assert operations.signin_user(username=cls.USER_DATA["username"], password=cls.USER_DATA["password"]) == user
 
     @classmethod
     def test_signin_user_not_existing_username_expected_exception(cls, use_test_db):
@@ -135,13 +120,9 @@ class TestUserOperations:
         :return:
         """
         different_username = "different_username"
-        operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         with pytest.raises(exceptions.UserDoesNotExistException):
-            operations.signin_user(
-                username=different_username, password=cls.USER_DATA["password"]
-            )
+            operations.signin_user(username=different_username, password=cls.USER_DATA["password"])
 
     @classmethod
     def test_signin_user_wrong_password_expected_exception(cls, use_test_db):
@@ -151,9 +132,7 @@ class TestUserOperations:
         :return:
         """
         wrong_password = "wrong_password"
-        operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         with pytest.raises(exceptions.AccessDenied):
             operations.signin_user(cls.USER_DATA["username"], wrong_password)
 
@@ -164,9 +143,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         assert operations.get_user_from_db(pk=user.id) == user
 
     @classmethod
@@ -176,9 +153,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         with pytest.raises(exceptions.UserDoesNotExistException):
             operations.get_user_from_db(pk=2)
 
@@ -189,9 +164,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**cls.USER_DATA))
         assert operations.get_user_from_db(username=user.username) == user
 
     @classmethod
@@ -212,9 +185,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**cls.USER_DATA))
         assert operations.get_user_from_db(email=user.email) == user
 
     @classmethod
@@ -240,25 +211,19 @@ class TestUserOperations:
         assert len(all_users) == 0
 
     @classmethod
-    def test_get_all_users_one_user_in_database_expected_list_with_one_user(
-        cls, use_test_db
-    ):
+    def test_get_all_users_one_user_in_database_expected_list_with_one_user(cls, use_test_db):
         """
         Test get all users from database with one user in the database
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(input_models.RegisterUserInputModel(**cls.USER_DATA))
         all_users = operations.get_all_users()
         assert all_users[0] == user
         assert len(all_users) == 1
 
     @classmethod
-    def test_get_all_users_more_users_in_database_expected_list_with_same_users(
-        cls, use_test_db
-    ):
+    def test_get_all_users_more_users_in_database_expected_list_with_same_users(cls, use_test_db):
         """
         Test get all users from database with more users in the database
         :param use_test_db:
@@ -288,13 +253,9 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         new_email = "updated@tets.com"
-        updated_user = operations.update_user(
-            user_id=user.id, field="email", value=new_email, updated_by=user.id
-        )
+        updated_user = operations.update_user(user_id=user.id, field="email", value=new_email, updated_by=user.id)
         assert updated_user.email == new_email
 
     @classmethod
@@ -304,9 +265,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         _, token_type = operations.create_token(user_id=user.id)
         assert token_type == "Bearer"
 
@@ -317,9 +276,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         _, token_type = operations.create_token(user_id=user.id, access=False)
         assert token_type == "Refresh"
 
@@ -335,17 +292,13 @@ class TestUserOperations:
         assert len(all_roles) == 0
 
     @classmethod
-    def test_get_all_roles_one_role_in_database_expected_list_with_one_role(
-        cls, use_test_db
-    ):
+    def test_get_all_roles_one_role_in_database_expected_list_with_one_role(cls, use_test_db):
         """
         Test get all roles from database with one role in the database
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         all_roles = operations.get_all_roles()
         assert all_roles[0] == role
@@ -354,25 +307,17 @@ class TestUserOperations:
         assert all_roles[0].created_by == user.id
 
     @classmethod
-    def test_get_all_roles_more_roles_in_database_expected_list_with_same_len(
-        cls, use_test_db
-    ):
+    def test_get_all_roles_more_roles_in_database_expected_list_with_same_len(cls, use_test_db):
         """
         Test get all roles from database with three role in the database
         :param use_test_db:
         :return:
         """
         number_of_roles = 3
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         roles = []
         for i in range(number_of_roles):
-            roles.append(
-                operations.create_role(
-                    name=f"{cls.ROLE_DATA['name']}{i}", created_by=user.id
-                )
-            )
+            roles.append(operations.create_role(name=f"{cls.ROLE_DATA['name']}{i}", created_by=user.id))
 
         all_roles = operations.get_all_roles()
         assert all_roles[0] == roles[0]
@@ -389,9 +334,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         assert operations.get_role(pk=role.id) == role
 
@@ -402,9 +345,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         with pytest.raises(exceptions.RoleDoesNotExistException):
             operations.get_role(pk=2)
@@ -416,9 +357,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         assert operations.get_role(role_name=role.name) == role
 
@@ -429,9 +368,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         with pytest.raises(exceptions.RoleDoesNotExistException):
             operations.get_role(role_name="wrong_name")
@@ -450,9 +387,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         operations.add_user_to_role(user_id=user.id, role_id=role.id, added_by=user.id)
         assert operations.check_user_role(user_id=user.id, role_id=role.id) is True
@@ -464,9 +399,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         assert operations.check_user_role(user_id=user.id, role_id=role.id) is False
 
@@ -477,9 +410,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         assert role.name == cls.ROLE_DATA["name"]
         assert role.created_by == user.id
@@ -492,9 +423,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         with pytest.raises(exceptions.RoleAlreadyExists):
             operations.create_role(cls.ROLE_DATA["name"], created_by=user.id)
@@ -506,9 +435,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(cls.ROLE_DATA["name"], created_by=user.id)
         user_roles = user.roles
         operations.add_user_to_role(role_id=role.id, user_id=user.id, added_by=user.id)
@@ -525,15 +452,11 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         operations.add_user_to_role(role_id=role.id, user_id=user.id, added_by=user.id)
         with pytest.raises(exceptions.UserWithRoleExist):
-            operations.add_user_to_role(
-                role_id=role.id, user_id=user.id, added_by=user.id
-            )
+            operations.add_user_to_role(role_id=role.id, user_id=user.id, added_by=user.id)
 
     @classmethod
     def test_remove_user_from_role_user_not_added_expected_exception(cls, use_test_db):
@@ -542,33 +465,23 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(name=cls.ROLE_DATA["name"], created_by=user.id)
         with pytest.raises(exceptions.UserWithRoleDoesNotExist):
-            operations.remove_user_from_role(
-                role_id=role.id, user_id=user.id, removed_by=user.id
-            )
+            operations.remove_user_from_role(role_id=role.id, user_id=user.id, removed_by=user.id)
 
     @classmethod
-    def test_remove_user_from_role_when_user_is_added_expected_success(
-        cls, use_test_db
-    ):
+    def test_remove_user_from_role_when_user_is_added_expected_success(cls, use_test_db):
         """
         Test removing user from role when added expected success
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         role = operations.create_role(cls.ROLE_DATA["name"], created_by=user.id)
         operations.add_user_to_role(role_id=role.id, user_id=user.id, added_by=user.id)
         user_roles = operations.get_user_from_db(pk=user.id).roles
-        operations.remove_user_from_role(
-            user_id=user.id, role_id=role.id, removed_by=user.id
-        )
+        operations.remove_user_from_role(user_id=user.id, role_id=role.id, removed_by=user.id)
         db_user = operations.get_user_from_db(pk=user.id)
 
         assert db_user.roles != user_roles
@@ -576,20 +489,14 @@ class TestUserOperations:
         assert db_user.roles == []
 
     @classmethod
-    def test__prepare_mail_template_email_confirmation_expected_success(
-        cls, use_test_db
-    ):
+    def test__prepare_mail_template_email_confirmation_expected_success(cls, use_test_db):
         """
         Test that the email template include the correct url
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
-        token = operations.generate_email_password_token(
-            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        token = operations.generate_email_password_token(user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION)
         confirmation_link = f"{cls.config.server.host}:{cls.config.server.port}/users/confirm-email/{token.token}"
         html_content = operations._prepare_mail_template(
             token_type=token.token_type, token=token.token, recipient=user.email
@@ -605,12 +512,8 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
-        token = operations.generate_email_password_token(
-            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        token = operations.generate_email_password_token(user=user, token_type=constants.TokenTypes.PASSWORD_RESET)
         confirmation_link = f"{cls.config.server.host}:{cls.config.server.port}/users/reset-password/{token.token}"
         html_content = operations._prepare_mail_template(
             token_type=token.token_type, token=token.token, recipient=user.email
@@ -627,17 +530,11 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        with patch(
-            "features.users.operations._send_mail", new_callable=AsyncMock
-        ) as mock_send_mail:
+        with patch("features.users.operations._send_mail", new_callable=AsyncMock) as mock_send_mail:
             mock_send_mail.return_value = {"status": 201}
 
-            user = operations.create_new_user(
-                user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-            )
-            token = operations.generate_email_password_token(
-                user=user, token_type=constants.TokenTypes.PASSWORD_RESET
-            )
+            user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+            token = operations.generate_email_password_token(user=user, token_type=constants.TokenTypes.PASSWORD_RESET)
             response = await operations.send_email(token=token, recipient=user)
 
             assert response == {"status": 201}
@@ -657,19 +554,11 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        with patch(
-            "features.users.operations._send_mail", new_callable=AsyncMock
-        ) as mock_send_mail:
-            mock_send_mail.side_effect = exceptions.FailedToSendEmailException(
-                status_code=400, text="Bad Request"
-            )
+        with patch("features.users.operations._send_mail", new_callable=AsyncMock) as mock_send_mail:
+            mock_send_mail.side_effect = exceptions.FailedToSendEmailException(status_code=400, text="Bad Request")
 
-            user = operations.create_new_user(
-                user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-            )
-            token = operations.generate_email_password_token(
-                user=user, token_type=constants.TokenTypes.PASSWORD_RESET
-            )
+            user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+            token = operations.generate_email_password_token(user=user, token_type=constants.TokenTypes.PASSWORD_RESET)
 
             with pytest.raises(exceptions.FailedToSendEmailException) as exception_info:
                 await operations.send_email(token=token, recipient=user)
@@ -678,76 +567,53 @@ class TestUserOperations:
             assert exception_info.value.text == "Bad Request"
 
     @classmethod
-    def test_generate_email_password_token_expected_email_confirmation_token(
-        cls, use_test_db
-    ):
+    def test_generate_email_password_token_expected_email_confirmation_token(cls, use_test_db):
         """
         Test generate email confirmation token. Expected correct token
         :param use_test_db:
         :return:
         """
 
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
-        token = operations.generate_email_password_token(
-            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        token = operations.generate_email_password_token(user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION)
 
         assert token.token_type == constants.TokenTypes.EMAIL_CONFIRMATION
         assert token.expired_on > datetime.datetime.utcnow()
         assert token.user_id == user.id
 
     @classmethod
-    def test_generate_email_password_token_expected_password_reset_token(
-        cls, use_test_db
-    ):
+    def test_generate_email_password_token_expected_password_reset_token(cls, use_test_db):
         """
         Test generate password reset token. Expected correct token
         :param use_test_db:
         :return:
         """
 
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
-        token = operations.generate_email_password_token(
-            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        token = operations.generate_email_password_token(user=user, token_type=constants.TokenTypes.PASSWORD_RESET)
 
         assert token.token_type == constants.TokenTypes.PASSWORD_RESET
         assert token.expired_on > datetime.datetime.utcnow()
         assert token.user_id == user.id
 
     @classmethod
-    def test_expire_all_existing_tokens_for_user_expected_to_be_expired(
-        cls, use_test_db
-    ):
+    def test_expire_all_existing_tokens_for_user_expected_to_be_expired(cls, use_test_db):
         """
         Test that the existing tokens are expired
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         number_of_tokens = 3
         tokens = []
         for _ in range(number_of_tokens):
-            token = operations.generate_email_password_token(
-                user=user, token_type=constants.TokenTypes.PASSWORD_RESET
-            )
+            token = operations.generate_email_password_token(user=user, token_type=constants.TokenTypes.PASSWORD_RESET)
             tokens.append(token)
-        operations.expire_all_existing_tokens_for_user(
-            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
-        )
+        operations.expire_all_existing_tokens_for_user(user=user, token_type=constants.TokenTypes.PASSWORD_RESET)
         with db.connection.get_session() as session:
             all_tokens = (
                 session.query(models.ConfirmationToken)
-                .filter(
-                    models.ConfirmationToken.token_type
-                    == constants.TokenTypes.PASSWORD_RESET
-                )
+                .filter(models.ConfirmationToken.token_type == constants.TokenTypes.PASSWORD_RESET)
                 .all()
             )
         for idx in range(len(all_tokens) - 1):
@@ -762,22 +628,15 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         password_token = operations.generate_email_password_token(
             user=user, token_type=constants.TokenTypes.PASSWORD_RESET
         )
         email_token = operations.generate_email_password_token(
             user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
         )
-        assert (
-            operations.check_if_token_is_valid(token=password_token.token)
-            == password_token
-        )
-        assert (
-            operations.check_if_token_is_valid(token=email_token.token) == email_token
-        )
+        assert operations.check_if_token_is_valid(token=password_token.token) == password_token
+        assert operations.check_if_token_is_valid(token=email_token.token) == email_token
 
     @classmethod
     def test_check_if_token_is_valid_expected_to_be_expired(cls, use_test_db):
@@ -786,21 +645,15 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         password_token = operations.generate_email_password_token(
             user=user, token_type=constants.TokenTypes.PASSWORD_RESET
         )
         email_token = operations.generate_email_password_token(
             user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
         )
-        operations.expire_all_existing_tokens_for_user(
-            user=user, token_type=constants.TokenTypes.PASSWORD_RESET
-        )
-        operations.expire_all_existing_tokens_for_user(
-            user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
-        )
+        operations.expire_all_existing_tokens_for_user(user=user, token_type=constants.TokenTypes.PASSWORD_RESET)
+        operations.expire_all_existing_tokens_for_user(user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION)
 
         assert operations.check_if_token_is_valid(token=password_token.token) is None
         assert operations.check_if_token_is_valid(token=email_token.token) is None
@@ -812,9 +665,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         email_token = operations.generate_email_password_token(
             user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION
         )
@@ -832,9 +683,7 @@ class TestUserOperations:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         password_token = operations.generate_email_password_token(
             user=user, token_type=constants.TokenTypes.PASSWORD_RESET
         )
@@ -842,18 +691,8 @@ class TestUserOperations:
         user_with_new_password = operations.update_user_password(
             user=user, new_password=new_password, token=password_token
         )
-        assert (
-            operations.check_password(
-                user=user_with_new_password, password=new_password
-            )
-            is True
-        )
-        assert (
-            operations.check_password(
-                user=user_with_new_password, password=cls.USER_DATA["password"]
-            )
-            is False
-        )
+        assert operations.check_password(user=user_with_new_password, password=new_password) is True
+        assert operations.check_password(user=user_with_new_password, password=cls.USER_DATA["password"]) is False
         assert password_token.expired_on < datetime.datetime.utcnow()
 
 
@@ -876,9 +715,7 @@ class TestUserInputModelEmailValidation:
         :return:
         """
         assert (
-            input_models.RegisterUserInputModel.validate_user_email(
-                email=cls.USER_DATA["email"]
-            )
+            input_models.RegisterUserInputModel.validate_user_email(email=cls.USER_DATA["email"])
             == cls.USER_DATA["email"]
         )
 
@@ -897,9 +734,7 @@ class TestUserInputModelPasswordValidation:
         """
 
         valid_password = "Password1@"
-        validated_password = input_models.RegisterUserInputModel.validate_password(
-            password=valid_password
-        )
+        validated_password = input_models.RegisterUserInputModel.validate_password(password=valid_password)
         assert validated_password == valid_password
 
     @staticmethod
@@ -911,9 +746,7 @@ class TestUserInputModelPasswordValidation:
         """
         invalid_password = "pass"
         try:
-            input_models.RegisterUserInputModel.validate_password(
-                password=invalid_password
-            )
+            input_models.RegisterUserInputModel.validate_password(password=invalid_password)
         except ValueError as e:
             assert "Password must be at least 8 characters long" in str(e)
 
@@ -971,9 +804,7 @@ class TestUserInputModelPasswordValidation:
         try:
             input_models.RegisterUserInputModel.validate_password(invalid_password)
         except ValueError as e:
-            assert "Password must contain at least one special symbol: !@#$%^&?" in str(
-                e
-            )
+            assert "Password must contain at least one special symbol: !@#$%^&?" in str(e)
 
 
 class TestUpdateUserInputModel:
@@ -1014,9 +845,7 @@ class TestUpdateUserInputModel:
         """
 
         valid_email = "test@test.bg"
-        validated_email = input_models.UpdateUserInputModel.validate_value(
-            value=valid_email
-        )
+        validated_email = input_models.UpdateUserInputModel.validate_value(value=valid_email)
         assert validated_email == valid_email
 
 
@@ -1036,9 +865,7 @@ class TestUserEndpoints:
         :param use_test_db:
         :return:
         """
-        with patch(
-            "features.users.operations._send_mail", new_callable=AsyncMock
-        ) as mock_send_mail:
+        with patch("features.users.operations._send_mail", new_callable=AsyncMock) as mock_send_mail:
             mock_send_mail.return_value = {"status": 201}
             response = cls.client.post("/users/signup/", json=cls.USER_DATA)
 
@@ -1065,20 +892,13 @@ class TestUserEndpoints:
         :return:
         """
 
-        operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
-        with patch(
-            "features.users.operations._send_mail", new_callable=AsyncMock
-        ) as mock_send_mail:
+        operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        with patch("features.users.operations._send_mail", new_callable=AsyncMock) as mock_send_mail:
             mock_send_mail.return_value = {"status": 201}
             response = cls.client.post("/users/signup/", json=cls.USER_DATA)
 
         assert response.status_code == 409
-        assert (
-            response.json()["detail"]
-            == "User with this username or email already exists!"
-        )
+        assert response.json()["detail"] == "User with this username or email already exists!"
 
     @classmethod
     def test_signup_endpoint_failed_to_send_email_expected_exception(cls, use_test_db):
@@ -1090,9 +910,7 @@ class TestUserEndpoints:
 
         with patch(
             "features.users.operations._send_mail",
-            side_effect=exceptions.FailedToSendEmailException(
-                status_code=400, text="Bad Request"
-            ),
+            side_effect=exceptions.FailedToSendEmailException(status_code=400, text="Bad Request"),
         ):
             response = cls.client.post("/users/signup/", json=cls.USER_DATA)
 
@@ -1107,9 +925,7 @@ class TestUserEndpoints:
         :return:
         """
 
-        operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         payload = {
             "username": cls.USER_DATA["username"],
             "password": cls.USER_DATA["password"],
@@ -1129,9 +945,7 @@ class TestUserEndpoints:
         :return:
         """
 
-        operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         payload = {"username": "wrong username", "password": cls.USER_DATA["password"]}
         response = cls.client.post("/users/signin/", data=payload)
 
@@ -1146,9 +960,7 @@ class TestUserEndpoints:
         :return:
         """
 
-        operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         payload = {"username": cls.USER_DATA["username"], "password": "wrong password"}
         response = cls.client.post("/users/signin/", data=payload)
 
@@ -1156,18 +968,26 @@ class TestUserEndpoints:
         assert response.json() == {"detail": "Incorrect username or password"}
 
     @classmethod
-    def test_show_all_users_endpoint_no_users_expected_empty_list(cls, use_test_db):
+    def test_show_all_users_endpoint_one_user_expected_success(cls, use_test_db):
         """
-        Test all users endpoint without users. Expected empty list
+        Test all users endpoint wit one user. Expected list with one user
         :param use_test_db:
         :return:
         """
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        role = operations.create_role(name="Admin", created_by=user.id)
+        operations.add_user_to_role(user_id=user.id, role_id=role.id, added_by=user.id)
+        user.roles.append(role)
+        token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
+        headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.get("/users/all/")
+        response = cls.client.get("/users/all/", headers=headers)
 
         assert response.status_code == 200
-        assert response.json() == []
-        assert len(response.json()) == 0
+        assert response.json() == [
+            {'email': 'test@mail.com', 'id': 1, 'roles': [{'id': 1, 'name': 'Admin'}], 'username': 'test_user'}
+        ]
+        assert len(response.json()) == 1
 
     @classmethod
     def test_show_all_users_endpoint_users_expected_list_with_users(cls, use_test_db):
@@ -1186,19 +1006,17 @@ class TestUserEndpoints:
                     password=f'{i}{cls.USER_DATA["password"]}',
                 )
             )
-            all_users.append(
-                {
-                    "email": user.email,
-                    "id": user.id,
-                    "roles": user.roles,
-                    "username": user.username,
-                }
-            )
+            all_users.append(user)
 
-        response = cls.client.get("/users/all/")
+        role = operations.create_role(name="Admin", created_by=all_users[0].id)
+        operations.add_user_to_role(user_id=all_users[0].id, role_id=role.id, added_by=all_users[0].id)
+        all_users[0].roles.append(role)
+        token, _ = operations.create_token(user_id=all_users[0].id, user_role_ids=[x.id for x in all_users[0].roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.get("/users/all/", headers=headers)
 
         assert response.status_code == 200
-        assert response.json() == all_users
         assert len(response.json()) == users
 
     @classmethod
@@ -1208,9 +1026,7 @@ class TestUserEndpoints:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         token, _ = operations.create_token(user_id=user.id)
         headers = {"Authorization": f"Bearer {token}"}
 
@@ -1231,9 +1047,7 @@ class TestUserEndpoints:
         :param use_test_db:
         :return:
         """
-        user = operations.create_new_user(
-            user=input_models.RegisterUserInputModel(**cls.USER_DATA)
-        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
         token, _ = operations.create_token(user_id=user.id)
 
         response = cls.client.get(f"/users/{user.id}/")
@@ -1241,9 +1055,7 @@ class TestUserEndpoints:
         assert response.status_code == 401
 
     @classmethod
-    def test_show_user_endpoint_with_not_existing_user_id_expected_exception(
-        cls, use_test_db
-    ):
+    def test_show_user_endpoint_with_not_existing_user_id_expected_exception(cls, use_test_db):
         """
         Test show user endpoint without user. Expected exception
         :param use_test_db:
@@ -1254,3 +1066,240 @@ class TestUserEndpoints:
 
         assert response.status_code == 401
         assert response.json() == {"detail": "Unauthorized"}
+
+    @classmethod
+    def test_show_user_endpoint_user_is_admin_expected_success(cls, use_test_db):
+        """
+        Test show user endpoint when user is admin. Expected success
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.get(f"/users/{user.id}/", headers=headers)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "email": user.email,
+            "id": user.id,
+            "roles": user.roles,
+            "username": user.username,
+        }
+
+    @classmethod
+    def test_patch_user_endpoint_user_expected_success(cls, use_test_db):
+        """
+        Test show user endpoint when user. Expected success
+        :param use_test_db:
+        :return:
+        """
+
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        token, _ = operations.create_token(user_id=user.id)
+        headers = {"Authorization": f"Bearer {token}"}
+        new_email = "new@test.com"
+        data = {"field": "email", "value": new_email}
+
+        response = cls.client.patch(f"/users/{user.id}/", headers=headers, json=data)
+
+        assert response.status_code == 200
+        assert response.json() == {'email': new_email, 'id': user.id, 'roles': user.roles, 'username': user.username}
+
+    @classmethod
+    def test_patch_user_endpoint_user_is_admin_expected_success(cls, use_test_db):
+        """
+        Test show user endpoint when user is admin. Expected success
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+        new_email = "new@test.com"
+        data = {"field": "email", "value": new_email}
+
+        response = cls.client.patch(f"/users/{user.id}/", headers=headers, json=data)
+
+        assert response.status_code == 200
+        assert response.json() == {'email': new_email, 'id': user.id, 'roles': user.roles, 'username': user.username}
+
+    @classmethod
+    def test_patch_user_endpoint_with_admin_user_does_not_exist_expected_exception(cls, use_test_db):
+        """
+        Test show user endpoint when admin and user does not exist. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+        new_email = "new@test.com"
+        data = {"field": "email", "value": new_email}
+        not_existing_user_id = 999
+
+        response = cls.client.patch(f"/users/{not_existing_user_id}/", headers=headers, json=data)
+
+        assert response.status_code == 404
+        assert response.json() == {'detail': f'User with user_id={not_existing_user_id} does not exist'}
+
+    @classmethod
+    def test_get_all_roles_expected_success(cls, use_test_db):
+        """
+        Test get all roles. Expected success
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        all_roles = []
+        response_roles = []
+        total_roles = 3
+        role_name = "Admin"
+        for i in range(total_roles):
+            role = operations.create_role(name=f"{i}{role_name}", created_by=admin.id)
+            all_roles.append(role)
+            response_roles.append({'id': role.id, 'name': role.name})
+
+        operations.add_user_to_role(user_id=admin.id, role_id=all_roles[0].id, added_by=admin.id)
+        admin.roles.append(all_roles[0])
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.get("/roles/", headers=headers)
+
+        assert response.status_code == 200
+        assert response.json() == response_roles
+
+    @classmethod
+    def test_get_all_roles_include_users_expected_success(cls, use_test_db):
+        """
+        Test get all roles include users. Expected success
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        all_roles = []
+        response_roles = []
+        total_roles = 3
+        role_name = "Admin"
+        for i in range(total_roles):
+            role = operations.create_role(name=f"{i}{role_name}", created_by=admin.id)
+            all_roles.append(role)
+            response_roles.append({'id': role.id, 'name': role.name, "users": []})
+
+        operations.add_user_to_role(user_id=admin.id, role_id=all_roles[0].id, added_by=admin.id)
+        admin.roles.append(all_roles[0])
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+        response_roles[0]["users"].append({'email': admin.email, 'id': admin.id, 'username': admin.username})
+
+        response = cls.client.get("/roles/", headers=headers, params={"include_users": True})
+
+        assert response.status_code == 200
+        assert response.json() == response_roles
+
+    @classmethod
+    def test_get_role_with_users_expected_success(cls, use_test_db):
+        """
+        Test get role with users. Expected success
+        :param use_test_db:
+        :return:
+        """
+        admin = operations.create_new_user(
+            user=input_models.RegisterUserInputModel(
+                username="admin", email="admin@admin.com", password="adminPassword1@"
+            )
+        )
+
+        role = operations.create_role(name="Admin", created_by=admin.id)
+
+        operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=admin.id)
+        admin.roles.append(role)
+        token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.get(f"/roles/{role.id}", headers=headers)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'id': role.id,
+            'name': role.name,
+            'users': [{'email': admin.email, 'id': admin.id, 'username': admin.username}],
+        }
+
+    @classmethod
+    def test_create_role_endpoint_expected_success(cls, use_test_db):
+        """
+        Test create role. Expected success
+        :param use_test_db:
+        :return:
+        """
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        role = operations.create_role(name="Admin", created_by=user.id)
+        operations.add_user_to_role(user_id=user.id, role_id=role.id, added_by=user.id)
+        user.roles.append(role)
+        token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
+
+        headers = {"Authorization": f"Bearer {token}"}
+        data = {"name": "new_role"}
+
+        response = cls.client.post("/roles/", headers=headers, json=data)
+
+        assert response.status_code == 201
+        assert response.json() == {'id': 2, 'name': 'new_role'}
+
+    @classmethod
+    def test_create_role_endpoint_role_exists_expected_exception(cls, use_test_db):
+        """
+        Test create role when role exists. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        role = operations.create_role(name="Admin", created_by=user.id)
+        operations.add_user_to_role(user_id=user.id, role_id=role.id, added_by=user.id)
+        user.roles.append(role)
+        token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
+
+        headers = {"Authorization": f"Bearer {token}"}
+        data = {"name": "Admin"}
+
+        response = cls.client.post("/roles/", headers=headers, json=data)
+
+        assert response.status_code == 409
+        assert response.json() == {'detail': 'Role already exist'}

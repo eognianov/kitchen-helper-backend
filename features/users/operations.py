@@ -1,4 +1,5 @@
 import os
+import pathlib
 import secrets
 
 import features.users.exceptions
@@ -68,9 +69,7 @@ def create_new_user(user: RegisterUserInputModel) -> User:
                 raise features.users.exceptions.UserAlreadyExists()
         except features.users.exceptions.UserDoesNotExistException:
             user.password = _hash_password(password=user.password)
-            db_user = User(
-                username=user.username, email=user.email, password=user.password
-            )
+            db_user = User(username=user.username, email=user.email, password=user.password)
             session.add(db_user)
             session.commit()
             session.refresh(db_user)
@@ -88,6 +87,8 @@ def signin_user(username: str, password: str) -> User:
     """
 
     current_user = get_user_from_db(username=username)
+    if config.context == configuration.ContextOptions.PROD and not current_user.is_email_confirmed:
+        raise features.users.exceptions.AccessDenied()
     if not current_user or not check_password(current_user, password):
         logging.warning(f"Failed logging attempt for {username}")
         raise features.users.exceptions.AccessDenied()
@@ -95,9 +96,7 @@ def signin_user(username: str, password: str) -> User:
     return current_user
 
 
-def get_user_from_db(
-    *, pk: int = None, username: str = None, email: str = None
-) -> User | None:
+def get_user_from_db(*, pk: int = None, username: str = None, email: str = None) -> User | None:
     """
     Get user from DB by pk, username or email
 
@@ -153,9 +152,7 @@ def update_user(user_id: int, field: str, value: str, updated_by) -> User:
     """
     user = get_user_from_db(pk=user_id)
     with get_session() as session:
-        session.execute(
-            update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}]
-        )
+        session.execute(update(User), [{"id": user.id, f"{field}": value, "updated_by": updated_by}])
         session.commit()
         user.__setattr__(field, value)
         logging.info(f"User #{user.id} updated. {updated_by} set {field}={value}")
@@ -178,11 +175,7 @@ def create_token(
     :return:
     """
     jwt_config = configuration.JwtToken()
-    minutes = (
-        jwt_config.access_token_expire_minutes
-        if access
-        else jwt_config.refresh_token_expire_minutes
-    )
+    minutes = jwt_config.access_token_expire_minutes if access else jwt_config.refresh_token_expire_minutes
     secret_key = jwt_config.secret_key if access else jwt_config.refresh_secret_key
     algorithm = jwt_config.algorithm
     token_type = "Bearer" if access else "Refresh"
@@ -337,23 +330,17 @@ def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
     :return:
     """
 
-    templates_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "templates"
-    )
+    templates_path = os.path.join(pathlib.Path(f'{configuration.ROOT_PATH}/features/users/'), "templates")
     templates = Jinja2Templates(directory=templates_path)
 
     template_name = None
     confirmation_link = None
     if token_type == TokenTypes.EMAIL_CONFIRMATION:
         template_name = "confirmation-email-template.html"
-        confirmation_link = (
-            f"{config.server.host}:{config.server.port}/users/confirm-email/{token}"
-        )
+        confirmation_link = f"{config.server.host}:{config.server.port}/users/confirm-email/{token}"
     elif token_type == TokenTypes.PASSWORD_RESET:
         template_name = "password-reset-email.html"
-        confirmation_link = (
-            f"{config.server.host}:{config.server.port}/users/reset-password/{token}"
-        )
+        confirmation_link = f"{config.server.host}:{config.server.port}/users/reset-password/{token}"
 
     template = templates.get_template(template_name)
 
@@ -365,9 +352,7 @@ def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
     return html_content
 
 
-async def _send_mail(
-    *, token_type: str, recipient_email: str, username: str, html_content
-):
+async def _send_mail(*, token_type: str, recipient_email: str, username: str, html_content):
     """
     Create headers, payload and send email
 
@@ -413,9 +398,7 @@ async def send_email(*, token: ConfirmationToken, recipient: User):
     :return:
     """
 
-    html_content = _prepare_mail_template(
-        token_type=token.token_type, token=token.token, recipient=recipient.username
-    )
+    html_content = _prepare_mail_template(token_type=token.token_type, token=token.token, recipient=recipient.username)
     response = await _send_mail(
         token_type=token.token_type,
         recipient_email=recipient.email,
@@ -535,9 +518,7 @@ def confirm_email(token: ConfirmationToken) -> User:
     return user
 
 
-def update_user_password(
-    user: User, new_password: str, token: ConfirmationToken
-) -> User:
+def update_user_password(user: User, new_password: str, token: ConfirmationToken) -> User:
     """
     Validate the new password
     Check if the new password does not match the old password
