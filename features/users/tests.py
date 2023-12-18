@@ -1549,3 +1549,60 @@ class TestUserEndpoints:
 
         assert response.status_code == 400
         assert response.json() == {'detail': 'Invalid token'}
+
+    @classmethod
+    @pytest.mark.asyncio
+    async def test_request_password_reset_expected_success(cls, use_test_db):
+        """
+        Test request password reset expected success
+        :param use_test_db:
+        :return:
+        """
+        with patch("features.users.operations._send_mail", new_callable=AsyncMock) as mock_send_mail:
+            mock_send_mail.return_value = {"status": 201}
+
+            user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+            token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
+            data = {"email": user.email}
+            headers = {"Authorization": f"Bearer {token}"}
+            response = cls.client.post("/users/request-password-reset/", headers=headers, params=data)
+
+        assert response.status_code == 200
+
+    @classmethod
+    @pytest.mark.asyncio
+    async def test_request_password_reset_failed_to_send_email_expected_success(cls, use_test_db):
+        """
+        Test request password reset failed to send email. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        with patch("features.users.operations._send_mail", new_callable=AsyncMock) as mock_send_mail:
+            mock_send_mail.side_effect = exceptions.FailedToSendEmailException(status_code=400, text="Bad Request")
+
+            user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+            token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
+            data = {"email": user.email}
+            headers = {"Authorization": f"Bearer {token}"}
+            response = cls.client.post("/users/request-password-reset/", headers=headers, params=data)
+
+        assert response.status_code == 400
+        assert response.json() == {'detail': 'Failed to send email: Bad Request'}
+
+    @classmethod
+    @pytest.mark.asyncio
+    async def test_request_password_reset_invalid_email_expected_success(cls, use_test_db):
+        """
+        Test request password reset with invalid email. Expected exception
+        :param use_test_db:
+        :return:
+        """
+        user = operations.create_new_user(user=input_models.RegisterUserInputModel(**cls.USER_DATA))
+        token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
+        data = {"email": "invalid_email@test.com"}
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = cls.client.post("/users/request-password-reset/", headers=headers, params=data)
+
+        assert response.status_code == 404
+        assert response.json() == {'detail': 'User not found'}
