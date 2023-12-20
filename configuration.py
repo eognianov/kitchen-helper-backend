@@ -135,6 +135,15 @@ class RabbitmqConfiguration(BaseModel):
     password: str
 
 
+class CelerySettings(BaseModel):
+    """Cloudinary settings"""
+
+    broker: str
+    backend: str
+    host: str
+    port: int
+
+
 class Config(CustomBaseSettings):
     """Base configurations"""
 
@@ -144,6 +153,7 @@ class Config(CustomBaseSettings):
     postgres: PostgresConfig
     server: ServerConfiguration
     rabbitmq: RabbitmqConfiguration
+    celery: CelerySettings
 
     @property
     def connection_string(self):
@@ -156,6 +166,11 @@ class Config(CustomBaseSettings):
         if self.database == DbTypeOptions.POSTGRES and not self.postgres.are_all_fields_populated:
             raise ValueError('You have selected postgres as database but did not provide its configuration')
 
+    def get_broker_url(self) -> str:
+        return (
+            f"{self.celery.broker}{self.rabbitmq.user}:{self.rabbitmq.password}@{self.celery.host}:{self.celery.port}//"
+        )
+
 
 class Cloudinary(CustomBaseSettings):
     """Cloudinary settings"""
@@ -167,3 +182,7 @@ class Cloudinary(CustomBaseSettings):
 
 class AppAdmins(CustomBaseSettings):
     admins: List[Dict[str, str]]
+
+
+class AppAdminRoles(CustomBaseSettings):
+    admin_role: str
