@@ -3,8 +3,9 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
 from pydantic import BaseModel, model_validator
-from typing import Optional, List
+from typing import Optional, List, Dict, Union, Tuple
 from enum import StrEnum, auto
+from celery import Celery
 
 
 _module_path = pathlib.Path(__file__).resolve()
@@ -142,6 +143,14 @@ class CelerySettings(BaseModel):
     backend: str
     host: str
     port: int
+    task_serializer: str
+    result_serializer: str
+    accept_content: List[str]
+    timezone: str
+    enable_utc: bool
+    broker_connection_retry_on_startup: bool
+    include_tasks: List[str]
+    beat_schedule: Dict[str, Dict[str, Union[str, int]]]
 
 
 class Config(CustomBaseSettings):
@@ -181,3 +190,21 @@ class Cloudinary(CustomBaseSettings):
     cloud_name: str
     api_key: str
     api_secret: str
+
+
+""" Celery configuration"""
+config = Config()
+
+celery = Celery(
+    __name__,
+    broker=config.get_broker_url(),
+    backend=config.celery.backend,
+    task_serializer=config.celery.task_serializer,
+    result_serializer=config.celery.result_serializer,
+    accept_content=config.celery.accept_content,
+    timezone=config.celery.timezone,
+    enable_utc=config.celery.enable_utc,
+    broker_connection_retry_on_startup=config.celery.broker_connection_retry_on_startup,
+    include=config.celery.include_tasks,
+    beat_schedule=config.celery.beat_schedule,
+)

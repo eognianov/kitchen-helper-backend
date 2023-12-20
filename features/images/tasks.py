@@ -5,7 +5,7 @@ import os
 import db.connection
 import features.images.models
 import khLogging
-from celery_config import celery
+from configuration import celery
 from .operations import upload_image_to_cloud
 from .helpers import read_image_as_bytes
 
