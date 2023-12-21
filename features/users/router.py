@@ -80,8 +80,8 @@ async def signin(request: Annotated[OAuth2PasswordRequestForm, fastapi.Depends()
 
     except features.users.exceptions.UserDoesNotExistException:
         raise HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail="User does not exist",
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail="User does not exists",
         )
 
 
