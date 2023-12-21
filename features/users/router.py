@@ -28,7 +28,11 @@ user_router = APIRouter()
 roles_router = APIRouter()
 
 
-@user_router.post("/signup", response_model=UsersResponseModel)
+@user_router.post(
+    "/signup",
+    response_model=UsersResponseModel,
+    status_code=fastapi.status.HTTP_201_CREATED,
+)
 async def signup(user: RegisterUserInputModel):
     """
     Sing up user
@@ -41,9 +45,7 @@ async def signup(user: RegisterUserInputModel):
         token = features.users.operations.generate_email_password_token(
             user=db_user, token_type=TokenTypes.EMAIL_CONFIRMATION
         )
-        await features.users.operations.send_email(
-            token=token.token_type, recipient=db_user
-        )
+        await features.users.operations.send_email(token=token, recipient=db_user)
         return db_user
     except features.users.exceptions.UserAlreadyExists:
         raise HTTPException(
@@ -68,14 +70,18 @@ async def signin(request: Annotated[OAuth2PasswordRequestForm, fastapi.Depends()
     try:
         # Sign in user and create jwt token
         user = signin_user(request.username, request.password)
-        token, token_type = create_token(
-            user_id=user.id, user_role_ids=user.user_role_ids
-        )
+        token, token_type = create_token(user_id=user.id, user_role_ids=user.user_role_ids)
         return {"access_token": token, "token_type": token_type}
     except features.users.exceptions.AccessDenied:
         raise HTTPException(
             status_code=fastapi.status.HTTP_403_FORBIDDEN,
             detail="Incorrect username or password",
+        )
+
+    except features.users.exceptions.UserDoesNotExistException:
+        raise HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail="User does not exists",
         )
 
 
@@ -191,9 +197,7 @@ def get_role_with_users(
     return role
 
 
-@roles_router.post(
-    "/", status_code=fastapi.status.HTTP_201_CREATED, response_model=RolesResponseModel
-)
+@roles_router.post("/", status_code=fastapi.status.HTTP_201_CREATED, response_model=RolesResponseModel)
 def create_role(
     role_request: CreateUserRole,
     user: Annotated[
@@ -209,20 +213,14 @@ def create_role(
     :return:
     """
     try:
-        role = features.users.operations.create_role(
-            role_request.name, created_by=user.id
-        )
+        role = features.users.operations.create_role(role_request.name, created_by=user.id)
     except features.users.exceptions.RoleAlreadyExists:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_409_CONFLICT, detail=f"Role already exist"
-        )
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_409_CONFLICT, detail=f"Role already exist")
 
     return role
 
 
-@user_router.post(
-    "/{user_id}/roles/{role_id}", status_code=fastapi.status.HTTP_201_CREATED
-)
+@user_router.post("/{user_id}/roles/{role_id}", status_code=fastapi.status.HTTP_201_CREATED)
 def add_user_to_role(
     user_id: int,
     role_id: int,
@@ -243,13 +241,9 @@ def add_user_to_role(
     try:
         features.users.operations.add_user_to_role(user_id, role_id, added_by=user.id)
     except features.users.exceptions.UserDoesNotExistException:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=f"User does not exist"
-        )
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=f"User does not exist")
     except features.users.exceptions.RoleDoesNotExistException:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=f"Role does not exist"
-        )
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=f"Role does not exist")
     except features.users.exceptions.UserWithRoleExist:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -257,9 +251,7 @@ def add_user_to_role(
         )
 
 
-@user_router.delete(
-    "/{user_id}/roles/{role_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT
-)
+@user_router.delete("/{user_id}/roles/{role_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT)
 def remove_user_from_role(
     user_id: int,
     role_id: int,
@@ -278,15 +270,11 @@ def remove_user_from_role(
     """
 
     try:
-        features.users.operations.remove_user_from_role(user_id, role_id)
+        features.users.operations.remove_user_from_role(user_id, role_id, user.id)
     except features.users.exceptions.UserDoesNotExistException:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=f"User does not exist"
-        )
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=f"User does not exist")
     except features.users.exceptions.RoleDoesNotExistException:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=f"Role does not exist"
-        )
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=f"Role does not exist")
     except features.users.exceptions.UserWithRoleDoesNotExist:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
@@ -305,9 +293,7 @@ async def confirm_email(token: str):
 
     confirm_token = features.users.operations.check_if_token_is_valid(token=token)
     if confirm_token is None:
-        raise HTTPException(
-            status_code=fastapi.status.HTTP_400_BAD_REQUEST, detail="Invalid token"
-        )
+        raise HTTPException(status_code=fastapi.status.HTTP_400_BAD_REQUEST, detail="Invalid token")
 
     features.users.operations.confirm_email(confirm_token)
 
@@ -331,9 +317,7 @@ async def request_password_reset(email: str):
         return fastapi.status.HTTP_200_OK
 
     except features.users.exceptions.UserDoesNotExistException:
-        raise HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="User not found")
     except features.users.exceptions.FailedToSendEmailException as e:
         raise HTTPException(
             status_code=e.status_code,
@@ -354,22 +338,16 @@ async def reset_password(token: str, new_password: str):
     reset_token = features.users.operations.check_if_token_is_valid(token=token)
 
     if reset_token is None:
-        raise HTTPException(
-            status_code=fastapi.status.HTTP_400_BAD_REQUEST, detail="Invalid token"
-        )
+        raise HTTPException(status_code=fastapi.status.HTTP_400_BAD_REQUEST, detail="Invalid token")
     try:
         user = get_user_from_db(pk=reset_token.user_id)
         features.users.operations.update_user_password(user, new_password, reset_token)
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.args
-        )
+        raise HTTPException(status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.args)
 
     except features.users.exceptions.UserDoesNotExistException:
-        raise HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="User not found")
 
     except features.users.exceptions.SamePasswordsException:
         raise HTTPException(
