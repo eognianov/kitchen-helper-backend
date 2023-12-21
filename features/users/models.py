@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.orm import relationship
 from sqlalchemy import String, LargeBinary, ForeignKey, Boolean, DateTime, func, Integer
 from sqlalchemy.orm import Mapped, mapped_column
@@ -19,7 +21,15 @@ class User(DbBaseModel):
     is_email_confirmed: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default="false"
     )
-    # TODO add updated by and update on
+    updated_by: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("Users.id"), nullable=True, init=False
+    )
+    updated_on: Mapped[datetime.datetime] = mapped_column(
+        DateTime,
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
+        init=False,
+    )
 
     roles = relationship(
         "Role",
