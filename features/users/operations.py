@@ -329,7 +329,7 @@ def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
     :return:
     """
 
-    templates_path = pathlib.Path.joinpath(configuration.ROOT_PATH, "features/users/templates")
+    templates_path = configuration.ROOT_PATH.joinpath("features/users/templates")
     templates = Jinja2Templates(directory=templates_path)
 
     template_name = None
