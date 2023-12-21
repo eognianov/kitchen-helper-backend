@@ -19,6 +19,8 @@ services:
       - postgres__database=kitchen-helper
       - rabbitmq__user=${RABBITMQ_USER}
       - rabbitmq__password=${RABBITMQ_PASSWORD}
+      - CELERY_BROKER_URL=${CELERY_BROKER}${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:${CELERY_PORT}//
+      - CELERY_RESULT_BACKEND=${CELERY_BACKEND}
     depends_on:
       - db
       - rabbitmq
@@ -66,6 +68,7 @@ services:
       - rabbitmq__user=${RABBITMQ_USER}
       - rabbitmq__password=${RABBITMQ_PASSWORD}
       - CELERY_BROKER_URL=${CELERY_BROKER}${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:${CELERY_PORT}//
+      - CELERY_RESULT_BACKEND=${CELERY_BACKEND}
     depends_on:
       - db
       - rabbitmq
@@ -78,6 +81,7 @@ services:
       - ./:/usr/src/app
     environment:
       - CELERY_BROKER_URL=${CELERY_BROKER}${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:${CELERY_PORT}//
+      - CELERY_RESULT_BACKEND=${CELERY_BACKEND}
     depends_on:
       - db
       - rabbitmq
