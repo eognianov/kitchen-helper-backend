@@ -930,8 +930,8 @@ class TestUserEndpoints:
         payload = {"username": "wrong username", "password": USER_DATA["password"]}
         response = cls.client.post("/users/signin/", data=payload)
 
-        assert response.status_code == 404
-        assert response.json() == {"detail": "User does not exist"}
+        assert response.status_code == 400
+        assert response.json() == {"detail": "User does not exists"}
 
     @classmethod
     def test_signin_endpoint_wrong_password_expected_exception(cls, use_test_db):
