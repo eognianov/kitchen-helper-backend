@@ -882,7 +882,7 @@ class TestUserEndpoints:
         assert response.json()["detail"] == "User with this username or email already exists!"
 
     @classmethod
-    def test_signup_endpoint_failed_to_send_email_expected_exception(cls, use_test_db):
+    def test_signup_endpoint_failed_to_send_email_expected_exception(cls, use_test_db, monkeypatch):
         """
         Test signup user endpoint when sed email fails. Expected exception
         :param use_test_db:
