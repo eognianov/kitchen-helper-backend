@@ -5,7 +5,7 @@ import configuration
 import khLogging
 import features.users.operations
 from sqlalchemy.orm import joinedload
-from celery_config import celery
+from configuration import celery
 from features.users import models, input_models, exceptions
 
 logging = khLogging.Logger("celery")
@@ -14,7 +14,7 @@ app_admin_role = configuration.AppAdminRoles()
 
 
 @celery.task
-def seed_admins():
+def seed_admins() -> str:
     """
     Adds admin users to the database
     :return:
@@ -42,7 +42,7 @@ def seed_admins():
 
 
 @celery.task
-def seed_roles():
+def seed_roles() -> str:
     """
     Adds admin roles to the database
     :return:
@@ -66,7 +66,7 @@ def seed_roles():
 
 
 @celery.task
-def add_roles_to_admins():
+def add_roles_to_admins() -> str:
     """
     Adds roles to admins
     :return:
@@ -100,7 +100,11 @@ def add_roles_to_admins():
 
 
 @celery.task
-def app_seeder():
+def app_seeder() -> str:
+    """
+    Task for seeding admins, admin role and adding admins to admin role
+    :return:
+    """
     message_seed_admins = seed_admins()
     message_seed_roles = seed_roles()
     message_add_roles_to_admins = add_roles_to_admins()
