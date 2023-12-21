@@ -3,7 +3,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
 from pydantic import BaseModel, model_validator
-from typing import Optional, List, Dict, Union, Tuple
+from typing import Optional, List, Dict, Union
 from enum import StrEnum, auto
 from celery import Celery
 
