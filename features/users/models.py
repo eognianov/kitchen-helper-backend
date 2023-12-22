@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.orm import relationship
 from sqlalchemy import String, LargeBinary, ForeignKey, Boolean, DateTime, func, Integer
 from sqlalchemy.orm import Mapped, mapped_column
@@ -19,10 +21,23 @@ class User(DbBaseModel):
     is_email_confirmed: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default="false"
     )
-    # TODO add updated by and update on
+    updated_by: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("Users.id"), nullable=True, init=False
+    )
+    updated_on: Mapped[datetime.datetime] = mapped_column(
+        DateTime,
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
+        init=False,
+    )
 
     roles = relationship(
-        "Role", secondary="user_roles", back_populates="users", lazy="selectin"
+        "Role",
+        secondary="user_roles",
+        back_populates="users",
+        lazy="selectin",
+        primaryjoin="User.id == user_roles.c.user_id",
+        secondaryjoin="Role.id == user_roles.c.role_id",
     )
 
     @property
@@ -59,7 +74,12 @@ class Role(DbBaseModel):
     created_by: Mapped[int] = mapped_column(ForeignKey("Users.id"), nullable=True)
 
     users = relationship(
-        "User", secondary="user_roles", back_populates="roles", lazy="selectin"
+        "User",
+        secondary="user_roles",
+        back_populates="roles",
+        lazy="selectin",
+        primaryjoin="Role.id == user_roles.c.role_id",
+        secondaryjoin="User.id == user_roles.c.user_id",
     )
 
 
