@@ -24,8 +24,8 @@ class CustomBaseSettings(BaseSettings):
         env_file=_ENV_FILES_PATHS,
         validate_default=True,
         case_sensitive=False,
-        env_nested_delimiter="__",
-        extra="ignore",
+        env_nested_delimiter='__',
+        extra='ignore',
     )
 
 
@@ -165,6 +165,11 @@ class Config(CustomBaseSettings):
     celery: CelerySettings
 
     @property
+    def running_on_dev(self) -> bool:
+        """Check if app is running on dev"""
+        return self.context == ContextOptions.DEV
+
+    @property
     def connection_string(self):
         if self.database == DbTypeOptions.POSTGRES:
             return self.postgres.connection_string
@@ -172,16 +177,13 @@ class Config(CustomBaseSettings):
 
     @model_validator(mode="after")
     def validate_db_configuration(self):
-        if (
-            self.database == DbTypeOptions.POSTGRES
-            and not self.postgres.are_all_fields_populated
-        ):
-            raise ValueError(
-                "You have selected postgres as database but did not provide its configuration"
-            )
+        if self.database == DbTypeOptions.POSTGRES and not self.postgres.are_all_fields_populated:
+            raise ValueError("You have selected postgres as database but did not provide its configuration")
 
     def get_broker_url(self) -> str:
-        return f"{self.celery.broker}{self.rabbitmq.user}:{self.rabbitmq.password}@{self.celery.host}:{self.celery.port}//"
+        return (
+            f"{self.celery.broker}{self.rabbitmq.user}:{self.rabbitmq.password}@{self.celery.host}:{self.celery.port}//"
+        )
 
 
 class Cloudinary(CustomBaseSettings):

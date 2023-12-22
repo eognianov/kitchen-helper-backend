@@ -1,0 +1,932 @@
+2023-12-21 10:12:46,150 - 5714 - 139886215057408 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 10:12:46,164 - 5714 - 139886215057408 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 10:18:08,792 - 5813 - 140327913848832 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 10:18:08,808 - 5813 - 140327913848832 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 10:34:11,193 - 6552 - 140432971157504 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 10:34:11,214 - 6552 - 140432879851072 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 updated Category (#1). Set name to updated
+2023-12-21 10:36:33,903 - 6588 - 140516613287936 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 10:36:33,917 - 6588 - 140516613287936 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 10:38:41,517 - 6626 - 140439598645248 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 10:38:41,530 - 6626 - 140439598645248 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 10:39:43,339 - 6666 - 140706225758208 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 10:39:43,352 - 6666 - 140706225758208 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 10:40:10,508 - 6681 - 139981627678720 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 10:40:10,523 - 6681 - 139981627678720 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 10:40:42,525 - 6691 - 139918968332288 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 10:40:42,539 - 6691 - 139918968332288 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 10:41:16,980 - 6702 - 140559333752832 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 10:41:16,993 - 6702 - 140559333752832 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 10:45:25,200 - 6787 - 139859036663808 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 10:45:25,214 - 6787 - 139859036663808 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 10:48:36,317 - 7057 - 140254382465024 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 10:48:36,330 - 7057 - 140254382465024 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:01:25,704 - 7445 - 140250108864064 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:02:02,994 - 7464 - 139726130193984 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:03:16,099 - 7485 - 140403438986816 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:03:25,114 - 7500 - 140192449766976 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:05:40,925 - 7557 - 139640530740800 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:06:05,060 - 7574 - 140176055281216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:06:43,783 - 7591 - 140370060715584 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:07:05,280 - 7608 - 139925911184960 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:07:31,611 - 7625 - 140088182515264 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:08:21,110 - 7646 - 140455078209088 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:08:53,965 - 7686 - 139942224633856 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:08:53,979 - 7686 - 139942224633856 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:10:50,184 - 7723 - 140163847624256 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:16:28,390 - 7831 - 139925975474176 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:16:28,403 - 7831 - 139925975474176 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:23:55,340 - 7961 - 139903374508032 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:23:55,353 - 7961 - 139903374508032 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:26:02,486 - 7993 - 140153859842048 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:26:02,499 - 7993 - 140153859842048 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:27:51,937 - 8028 - 139839405002752 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:27:51,951 - 8028 - 139839405002752 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:33,474 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,488 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,510 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,554 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,572 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,578 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 updated Category (#1). Set name to new_name
+2023-12-21 11:38:33,618 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,640 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,663 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,672 - 8269 - 140031562552896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 updated Category (#1). Set name to updated
+2023-12-21 11:38:33,686 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,698 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:33,724 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,733 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated with 2 instructions
+2023-12-21 11:38:33,741 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,742 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:33,761 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,769 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:33,784 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,803 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,810 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:33,823 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,840 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,848 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:33,863 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,872 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,872 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #(1) was updated. Set instruction = new_name
+2023-12-21 11:38:33,880 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,880 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #(1) was updated. Set category = Breakfast
+2023-12-21 11:38:33,887 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,887 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #(1) was updated. Set time = 20
+2023-12-21 11:38:33,895 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,895 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #(1) was updated. Set complexity = 1
+2023-12-21 11:38:33,909 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,920 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:33,932 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,939 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,945 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #2 was deleted from Recipe #1
+2023-12-21 11:38:33,949 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:33,968 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:33,976 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:33,988 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:34,005 - 8269 - 140031562552896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:34,006 - 8269 - 140031562552896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #(1) was updated. Set instruction = updated
+2023-12-21 11:38:34,024 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:34,032 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:34,046 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:34,065 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:34,073 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:34,085 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:34,096 - 8269 - 140031562552896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #1 was deleted from Recipe #1
+2023-12-21 11:38:34,099 - 8269 - 140031562552896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:34,116 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:34,126 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:34,138 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:34,161 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:34,169 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:34,181 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:34,214 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:38:34,285 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:38:34,290 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#2).
+2023-12-21 11:38:34,303 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:38:34,309 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #2 was updated
+2023-12-21 11:38:36,782 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:36,793 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:38,317 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:38:42,331 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=updated@tets.com
+2023-12-21 11:38:43,279 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:43,595 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin0 with #1 was created by #1
+2023-12-21 11:38:43,597 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin1 with #2 was created by #1
+2023-12-21 11:38:43,599 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin2 with #3 was created by #1
+2023-12-21 11:38:43,919 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:44,236 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:44,546 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:44,861 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:45,184 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:45,194 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:45,509 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:45,830 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:46,142 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:46,460 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:46,470 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:46,781 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:46,791 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:47,107 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:47,428 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:38:47,441 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:47,448 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 11:38:54,409 - 8269 - 140031570945600 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:38:54,725 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:38:54,735 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:55,736 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:38:55,748 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:57,138 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:38:57,148 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:57,973 - 8269 - 140031562552896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=new@test.com
+2023-12-21 11:38:58,609 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:38:58,620 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:58,686 - 8269 - 140031562552896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #2 updated. 1 set email=new@test.com
+2023-12-21 11:38:59,006 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:38:59,015 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:59,396 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 11:38:59,398 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 11:38:59,400 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 11:38:59,413 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:38:59,743 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 11:38:59,745 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 11:38:59,747 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 11:38:59,756 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:00,080 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:00,089 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:00,417 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:00,429 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:00,444 - 8269 - 140031562552896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role new_role with #2 was created by #1
+2023-12-21 11:39:00,760 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:00,770 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:01,100 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:01,102 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 11:39:01,111 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:01,127 - 8269 - 140031562552896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #2 by #1
+2023-12-21 11:39:01,445 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:01,447 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 11:39:01,457 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:01,785 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:01,795 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:02,129 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:02,139 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:02,474 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:02,483 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:02,501 - 8269 - 140031562552896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 11:39:02,816 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:02,818 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 11:39:02,828 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:03,157 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:03,166 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:03,797 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:03,806 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:04,137 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:04,146 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:04,487 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:04,500 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:04,904 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:04,922 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:05,941 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:05,953 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:06,288 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:06,297 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:39:06,951 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:39:06,960 - 8269 - 140031654940672 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:28,377 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:28,389 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:29,952 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:47:34,026 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=updated@tets.com
+2023-12-21 11:47:35,019 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:35,342 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin0 with #1 was created by #1
+2023-12-21 11:47:35,345 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin1 with #2 was created by #1
+2023-12-21 11:47:35,347 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin2 with #3 was created by #1
+2023-12-21 11:47:35,674 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:36,000 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:36,326 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:36,649 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:36,982 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:36,992 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:37,308 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:37,637 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:37,973 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:38,354 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:38,364 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:38,682 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:38,692 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:39,013 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:39,339 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:47:39,348 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:39,356 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 11:47:46,888 - 8680 - 139730136802880 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:47:47,232 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:47,243 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:48,174 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:48,183 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:49,538 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:49,549 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:50,104 - 8680 - 139730126485056 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=new@test.com
+2023-12-21 11:47:50,740 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:50,753 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:51,013 - 8680 - 139730126485056 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #2 updated. 1 set email=new@test.com
+2023-12-21 11:47:51,330 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:51,339 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:51,721 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 11:47:51,723 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 11:47:51,725 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 11:47:51,736 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:52,073 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 11:47:52,076 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 11:47:52,078 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 11:47:52,087 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:52,418 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:52,428 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:52,756 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:52,765 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:52,780 - 8680 - 139730126485056 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role new_role with #2 was created by #1
+2023-12-21 11:47:53,099 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:53,110 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:53,441 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:53,443 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 11:47:53,453 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:53,470 - 8680 - 139730126485056 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #2 by #1
+2023-12-21 11:47:53,790 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:53,792 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 11:47:53,802 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:54,132 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:54,142 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:54,473 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:54,482 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:54,817 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:54,826 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:54,845 - 8680 - 139730126485056 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 11:47:55,231 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:55,234 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 11:47:55,243 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:55,576 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:55,586 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:56,221 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:56,231 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:56,565 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:56,574 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:56,918 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:56,930 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:58,301 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:58,310 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:59,261 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:59,270 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:47:59,611 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:47:59,623 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:00,278 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:00,288 - 8680 - 139730221113344 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:11,152 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,168 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,184 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,209 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,225 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,230 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 updated Category (#1). Set name to new_name
+2023-12-21 11:48:11,268 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,293 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,315 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,325 - 8780 - 140296381789760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 updated Category (#1). Set name to updated
+2023-12-21 11:48:11,338 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,349 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,371 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,385 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated with 2 instructions
+2023-12-21 11:48:11,394 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,396 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,417 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,428 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,444 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,469 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,533 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,550 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,568 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,581 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,597 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,611 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,611 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #(1) was updated. Set instruction = new_name
+2023-12-21 11:48:11,621 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,621 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #(1) was updated. Set category = Breakfast
+2023-12-21 11:48:11,631 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,631 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #(1) was updated. Set time = 20
+2023-12-21 11:48:11,642 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,642 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #(1) was updated. Set complexity = 1
+2023-12-21 11:48:11,660 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,671 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,686 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,696 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,704 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #2 was deleted from Recipe #1
+2023-12-21 11:48:11,708 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,727 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,735 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,747 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,778 - 8780 - 140296381789760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,779 - 8780 - 140296381789760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #(1) was updated. Set instruction = updated
+2023-12-21 11:48:11,796 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,806 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,820 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,838 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,848 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,860 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,870 - 8780 - 140296381789760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Instruction #1 was deleted from Recipe #1
+2023-12-21 11:48:11,874 - 8780 - 140296381789760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,889 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,900 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,913 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,932 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,942 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:11,955 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:11,991 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 created Category (#1).
+2023-12-21 11:48:11,999 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#1).
+2023-12-21 11:48:12,004 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - User 1 create Recipe (#2).
+2023-12-21 11:48:12,016 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #1 was updated
+2023-12-21 11:48:12,022 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/recipes/operations.py - INFO - Recipe #2 was updated
+2023-12-21 11:48:14,498 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:14,511 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:16,035 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:48:20,039 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=updated@tets.com
+2023-12-21 11:48:20,993 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:21,308 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin0 with #1 was created by #1
+2023-12-21 11:48:21,311 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin1 with #2 was created by #1
+2023-12-21 11:48:21,312 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin2 with #3 was created by #1
+2023-12-21 11:48:21,629 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:22,021 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:22,330 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:22,643 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:22,963 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:22,975 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:23,291 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:23,613 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:23,922 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:24,237 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:24,247 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:24,559 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:24,568 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:24,885 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:25,206 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 11:48:25,218 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:25,226 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 11:48:32,665 - 8780 - 140296458020416 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 11:48:33,005 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:33,014 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:33,950 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:33,959 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:35,241 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:35,251 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:35,626 - 8780 - 140296381789760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=new@test.com
+2023-12-21 11:48:36,242 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:36,252 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:36,318 - 8780 - 140296381789760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #2 updated. 1 set email=new@test.com
+2023-12-21 11:48:36,642 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:36,651 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:37,031 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 11:48:37,034 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 11:48:37,035 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 11:48:37,045 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:37,371 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 11:48:37,373 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 11:48:37,375 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 11:48:37,384 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:37,709 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:37,721 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:38,049 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:38,058 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:38,072 - 8780 - 140296381789760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role new_role with #2 was created by #1
+2023-12-21 11:48:38,384 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:38,394 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:38,720 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:38,722 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 11:48:38,734 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:38,828 - 8780 - 140296381789760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #2 by #1
+2023-12-21 11:48:39,151 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:39,153 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 11:48:39,162 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:39,487 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:39,496 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:39,826 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:39,835 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:40,166 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:40,176 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:40,193 - 8780 - 140296381789760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 11:48:40,507 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:40,509 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 11:48:40,518 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:40,849 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:40,858 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:41,484 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:41,493 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:41,822 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:41,834 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:42,174 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:42,183 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:43,537 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:43,548 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:44,484 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:44,493 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:44,832 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:44,842 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 11:48:45,497 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 11:48:45,507 - 8780 - 140296536879104 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:03:58,893 - 41417 - 140311446269952 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:03:58,912 - 41417 - 140311446269952 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:05:03,673 - 41557 - 139820395741184 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:05:03,687 - 41557 - 139820395741184 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:06:48,274 - 42659 - 140198379843584 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:06:48,288 - 42659 - 140198379843584 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:14:42,730 - 43588 - 139786097127424 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:14:42,742 - 43588 - 139786097127424 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:15:52,434 - 43737 - 139775409655808 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:15:52,448 - 43737 - 139775409655808 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:16:54,964 - 43858 - 139838764965888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:16:54,978 - 43858 - 139838764965888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:17:35,960 - 43954 - 139660114194432 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:17:35,973 - 43954 - 139660114194432 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:18:23,783 - 44100 - 140319744151552 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:18:23,803 - 44100 - 140319744151552 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:19:12,344 - 44217 - 140176285683712 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:19:12,360 - 44217 - 140176285683712 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:21:09,169 - 44435 - 140549951098880 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:21:09,185 - 44435 - 140549951098880 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:22:38,901 - 44610 - 140687962972160 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:22:38,913 - 44610 - 140687962972160 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:23:20,289 - 44697 - 140129858576384 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:23:20,315 - 44697 - 140129858576384 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:23:55,135 - 44799 - 140188545363968 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:23:55,149 - 44799 - 140188545363968 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:24:31,613 - 44859 - 140371792019456 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:24:31,628 - 44859 - 140371792019456 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:26:06,321 - 45050 - 140020013264896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:26:06,336 - 45050 - 140020013264896 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:26:54,582 - 45161 - 140583032573952 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:26:54,595 - 45161 - 140583032573952 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:27:17,894 - 45207 - 140201039511552 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:27:17,907 - 45207 - 140201039511552 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:27:46,258 - 45270 - 140495722684416 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:27:46,270 - 45270 - 140495722684416 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:27:53,316 - 45295 - 140157939818496 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:27:53,328 - 45295 - 140157939818496 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 16:29:33,647 - 45516 - 139921694879744 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 16:29:33,659 - 45516 - 139921694879744 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:31,563 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:31,581 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:33,121 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 19:56:37,183 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=updated@tets.com
+2023-12-21 19:56:38,148 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:38,471 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin0 with #1 was created by #1
+2023-12-21 19:56:38,473 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin1 with #2 was created by #1
+2023-12-21 19:56:38,475 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin2 with #3 was created by #1
+2023-12-21 19:56:38,795 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:39,117 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:39,434 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:39,755 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:40,087 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:40,096 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:40,417 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:40,740 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:41,054 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:41,371 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:41,380 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:41,711 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:41,778 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:42,097 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:42,423 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:56:42,432 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:42,440 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 19:56:50,406 - 6401 - 140720145638976 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 19:56:50,731 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:50,743 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:51,685 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:51,696 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:53,371 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:53,380 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:54,425 - 6401 - 140720135321152 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=new@test.com
+2023-12-21 19:56:55,072 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:55,083 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:55,469 - 6401 - 140720135321152 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #2 updated. 1 set email=new@test.com
+2023-12-21 19:56:55,798 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:55,807 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:56,211 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 19:56:56,214 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 19:56:56,216 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 19:56:56,226 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:56,554 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 19:56:56,556 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 19:56:56,558 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 19:56:56,570 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:56,901 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:56,910 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:57,245 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:57,258 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:57,271 - 6401 - 140720135321152 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role new_role with #2 was created by #1
+2023-12-21 19:56:57,611 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:57,620 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:57,955 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:57,957 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 19:56:57,966 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:57,982 - 6401 - 140720135321152 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #2 by #1
+2023-12-21 19:56:58,308 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:58,310 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 19:56:58,319 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:58,647 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:58,656 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:58,993 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:59,003 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:59,338 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:59,348 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:56:59,369 - 6401 - 140720135321152 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 19:56:59,688 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:56:59,692 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 19:56:59,704 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:00,030 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:57:00,039 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:00,671 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:57:00,683 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:01,015 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:57:01,025 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:01,370 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:57:01,379 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:02,997 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:57:03,006 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:03,975 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:57:03,986 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:04,342 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:57:04,352 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:05,039 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:57:05,049 - 6401 - 140720229908480 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:23,316 - 6500 - 139713964879872 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:57:23,328 - 6500 - 139713964879872 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:50,701 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:57:50,725 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:52,336 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 19:57:56,497 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=updated@tets.com
+2023-12-21 19:57:57,469 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:57:57,785 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin0 with #1 was created by #1
+2023-12-21 19:57:57,788 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin1 with #2 was created by #1
+2023-12-21 19:57:57,789 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin2 with #3 was created by #1
+2023-12-21 19:57:58,119 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:57:58,444 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:57:58,760 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:57:59,081 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:57:59,406 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:57:59,415 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:57:59,734 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:58:00,075 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:58:00,394 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:58:00,714 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:58:00,724 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:01,047 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:58:01,115 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:01,433 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:58:01,755 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 19:58:01,764 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:01,772 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 19:58:10,906 - 6512 - 140673833350720 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 19:58:11,296 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:11,317 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:12,390 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:12,400 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:13,923 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:13,938 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:14,381 - 6512 - 140673833350720 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=new@test.com
+2023-12-21 19:58:14,996 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:15,007 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:15,169 - 6512 - 140673833350720 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #2 updated. 1 set email=new@test.com
+2023-12-21 19:58:15,503 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:15,518 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:16,186 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 19:58:16,191 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 19:58:16,195 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 19:58:16,223 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:16,822 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 19:58:16,827 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 19:58:16,831 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 19:58:16,878 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:17,472 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:17,496 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:18,030 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:18,050 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:18,097 - 6512 - 140673833350720 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role new_role with #2 was created by #1
+2023-12-21 19:58:18,506 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:18,537 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:18,962 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:18,967 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 19:58:18,986 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:19,012 - 6512 - 140673843668544 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #2 by #1
+2023-12-21 19:58:19,386 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:19,390 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 19:58:19,409 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:19,823 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:19,838 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:20,171 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:20,180 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:20,516 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:20,528 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:20,548 - 6512 - 140673833350720 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 19:58:20,868 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:20,870 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 19:58:20,879 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:21,209 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:21,223 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:21,860 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:21,869 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:22,201 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:22,211 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:22,569 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:22,580 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:24,189 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:24,199 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:25,143 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:25,153 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:25,503 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:25,512 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 19:58:26,191 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 19:58:26,201 - 6512 - 140673927413760 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:17,530 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:17,544 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:19,100 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 20:02:23,137 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=updated@tets.com
+2023-12-21 20:02:24,120 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:24,437 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin0 with #1 was created by #1
+2023-12-21 20:02:24,439 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin1 with #2 was created by #1
+2023-12-21 20:02:24,441 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin2 with #3 was created by #1
+2023-12-21 20:02:24,759 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:25,079 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:25,395 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:25,713 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:26,040 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:26,050 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:26,370 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:26,696 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:27,012 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:27,334 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:27,343 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:27,666 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:27,732 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:28,051 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:28,379 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:02:28,389 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:28,397 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 20:02:35,939 - 6744 - 139659222656576 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 20:02:36,258 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:36,268 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:37,199 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:37,209 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:38,676 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:38,686 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:39,237 - 6744 - 139659212338752 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=new@test.com
+2023-12-21 20:02:39,855 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:39,865 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:39,933 - 6744 - 139659212338752 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #2 updated. 1 set email=new@test.com
+2023-12-21 20:02:40,252 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:40,262 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:40,782 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 20:02:40,785 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 20:02:40,786 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 20:02:40,796 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:41,127 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 20:02:41,129 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 20:02:41,131 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 20:02:41,141 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:41,469 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:41,481 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:41,814 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:41,823 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:41,837 - 6744 - 139659212338752 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role new_role with #2 was created by #1
+2023-12-21 20:02:42,154 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:42,164 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:42,489 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:42,491 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 20:02:42,503 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:42,520 - 6744 - 139659212338752 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #2 by #1
+2023-12-21 20:02:42,836 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:42,839 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 20:02:42,848 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:43,182 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:43,192 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:43,525 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:43,536 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:43,883 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:43,893 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:43,911 - 6744 - 139659212338752 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 20:02:44,231 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:44,233 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 20:02:44,243 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:44,573 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:44,653 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:45,276 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:45,286 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:45,615 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:45,625 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:45,978 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:45,987 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:47,374 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:47,384 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:48,339 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:48,351 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:02:48,975 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:02:48,985 - 6744 - 139659307089920 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:03:38,101 - 6846 - 140482640601088 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:03:38,121 - 6846 - 140482640601088 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:16:06,820 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:06,837 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:16:08,414 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 20:16:12,584 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=updated@tets.com
+2023-12-21 20:16:13,558 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:13,891 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin0 with #1 was created by #1
+2023-12-21 20:16:13,895 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin1 with #2 was created by #1
+2023-12-21 20:16:13,899 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin2 with #3 was created by #1
+2023-12-21 20:16:14,222 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:14,556 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:14,891 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:15,225 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:15,558 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:15,572 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:16:15,892 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:16,218 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:16,537 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:16,859 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:16,870 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:16:17,186 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:17,195 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:16:17,516 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:17,918 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:16:17,928 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:16:17,936 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 20:16:25,628 - 7792 - 139828318119488 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 20:16:25,945 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:16:25,955 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:16:27,079 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:16:27,112 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:16:46,345 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:16:46,355 - 7792 - 139828402597888 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:16:46,818 - 7792 - 139828307801664 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=new@test.com
+2023-12-21 20:17:00,518 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:00,530 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:02,066 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 20:17:06,132 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=updated@tets.com
+2023-12-21 20:17:07,105 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:07,426 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin0 with #1 was created by #1
+2023-12-21 20:17:07,428 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin1 with #2 was created by #1
+2023-12-21 20:17:07,430 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin2 with #3 was created by #1
+2023-12-21 20:17:07,749 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:08,073 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:08,396 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:08,713 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:09,041 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:09,050 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:09,367 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:09,695 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:10,010 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:10,335 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:10,345 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:10,665 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:10,674 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:10,998 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:11,379 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:11,389 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:11,396 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 20:17:19,017 - 7878 - 139850413712960 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 20:17:19,344 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:19,353 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:20,288 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:20,298 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:21,609 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:21,619 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:22,102 - 7878 - 139850403395136 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=new@test.com
+2023-12-21 20:17:22,725 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:22,737 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:22,786 - 7878 - 139850403395136 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #2 updated. 1 set email=new@test.com
+2023-12-21 20:17:23,107 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:23,116 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:23,481 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 20:17:23,484 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 20:17:23,485 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 20:17:23,495 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:23,827 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 20:17:23,829 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 20:17:23,831 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 20:17:23,845 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:24,193 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:24,207 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:24,548 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:24,558 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:24,573 - 7878 - 139850403395136 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role new_role with #2 was created by #1
+2023-12-21 20:17:24,899 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:24,908 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:25,241 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:25,244 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 20:17:25,253 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:25,269 - 7878 - 139850403395136 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #2 by #1
+2023-12-21 20:17:25,594 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:25,599 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 20:17:25,611 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:25,960 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:26,053 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:26,400 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:26,411 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:26,758 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:26,771 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:26,795 - 7878 - 139850403395136 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 20:17:27,122 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:27,126 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 20:17:27,137 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:27,473 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:27,484 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:28,119 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:28,134 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:28,474 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:28,487 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:28,840 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:28,851 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:30,247 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:30,259 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:31,250 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:31,267 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:31,631 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:31,641 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:32,322 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:17:32,333 - 7878 - 139850497417216 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:53,884 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:17:53,896 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:17:55,435 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 20:17:59,472 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=updated@tets.com
+2023-12-21 20:18:00,447 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:00,764 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin0 with #1 was created by #1
+2023-12-21 20:18:00,766 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin1 with #2 was created by #1
+2023-12-21 20:18:00,768 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin2 with #3 was created by #1
+2023-12-21 20:18:01,087 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:01,406 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:01,726 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:02,044 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:02,367 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:02,377 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:02,693 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:03,018 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:03,332 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:03,652 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:03,661 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:03,978 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:03,987 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:04,308 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:04,686 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role admin with #1 was created by #1
+2023-12-21 20:18:04,695 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:04,703 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 20:18:12,212 - 7977 - 139744955278912 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - WARNING - Failed logging attempt for test_user
+2023-12-21 20:18:12,537 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:12,547 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:13,478 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:13,487 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:14,793 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:14,803 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:15,439 - 7977 - 139744955278912 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 updated. 1 set email=new@test.com
+2023-12-21 20:18:16,062 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:16,075 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:16,205 - 7977 - 139744955278912 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #2 updated. 1 set email=new@test.com
+2023-12-21 20:18:16,527 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:16,537 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:17,097 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 20:18:17,099 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 20:18:17,101 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 20:18:17,111 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:17,461 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 0Admin with #1 was created by #1
+2023-12-21 20:18:17,463 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 1Admin with #2 was created by #1
+2023-12-21 20:18:17,465 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role 2Admin with #3 was created by #1
+2023-12-21 20:18:17,475 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:17,805 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:17,814 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:18,147 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:18,156 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:18,170 - 7977 - 139744955278912 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role new_role with #2 was created by #1
+2023-12-21 20:18:18,491 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:18,500 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:18,831 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:18,833 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 20:18:18,842 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:18,858 - 7977 - 139744955278912 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #2 by #1
+2023-12-21 20:18:19,178 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:19,180 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 20:18:19,189 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:19,521 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:19,531 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:19,861 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:19,870 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:20,202 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:20,212 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:20,232 - 7977 - 139744955278912 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was removed from role #1 by #1
+2023-12-21 20:18:20,546 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:20,548 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Moderator with #2 was created by #1
+2023-12-21 20:18:20,557 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:20,889 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:20,899 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:21,532 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:21,545 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:21,960 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:21,970 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:22,316 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:22,325 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:23,688 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:23,701 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:24,665 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:24,674 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:25,022 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:25,034 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
+2023-12-21 20:18:25,683 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - Role Admin with #1 was created by #1
+2023-12-21 20:18:25,694 - 7977 - 139745039474688 - api./home/linuxmint/SoftUni/KH/kitchen-helper-backend/features/users/operations.py - INFO - User #1 was add to role #1 by #1
