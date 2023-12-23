@@ -30,7 +30,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['Users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.add_column('Users', sa.Column('is_email_confirmed', sa.Boolean(), nullable=False))
+    op.add_column('Users', sa.Column('is_email_confirmed', sa.Boolean(), server_default='false', nullable=False))
     # ### end Alembic commands ###
 
 

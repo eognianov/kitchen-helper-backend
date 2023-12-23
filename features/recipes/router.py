@@ -1,15 +1,33 @@
 """Recipes feature endpoints"""
-from typing import List, Optional
+from typing import List
 
 import fastapi
 
 import common.authentication
-import features.recipes.exceptions
-import features.recipes.exceptions
-import features.recipes.operations
-import features.recipes.responses
-import features.recipes.input_models
-from features import recipes
+
+from features.recipes.responses import RecipeResponse, Ingredient, IngredientCategory, RecipeCategory
+from features.recipes.responses import InstructionResponse, PSFRecipesResponseModel, CategoryShortResponse
+
+from .input_models import (
+    RecipesPatchCategoryInputModel,
+    CreateRecipesCategoryInputModel,
+    CreateRecipeInputModel,
+    PSFRecipesInputModel,
+    IngredientInputModel, PatchIngredientCategoryInputModel, PatchIngredientInputModel, PatchInstructionInputModel,
+    CreateInstructionInputModel,
+)
+
+from features.recipes.operations import (
+    get_all_ingredients_category, get_all_ingredients, get_all_recipe_categories, get_category_by_id, get_recipe_by_id,
+    update_instruction,
+)
+
+from features.recipes.exceptions import IngredientCategoryNameViolation, IngredientCategoryNotFoundException, \
+    IngredientCategoryIntegrityViolation, IngredientNotFoundException, IngredientNameViolationException, \
+    RecipesCategoryNotFoundException, RecipesCategoryNameViolationException, RecipeNotFoundException, \
+    InstructionNotFoundException, RecipeWithInstructionNotFoundException
+
+from typing import Annotated, Optional
 
 ingredients_categories_router = fastapi.APIRouter()
 ingredients_router = fastapi.APIRouter()
@@ -19,19 +37,28 @@ recipes_categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
 
 
-@ingredients_categories_router.get("/", response_model=list[recipes.responses.IngredientCategory])
-def get_all_ingredients_categories_endpoint() -> List[Optional[recipes.responses.IngredientCategory]]:
+def _common_parameters(
+    page: int = 1,
+    page_size: int = 10,
+    sort: Optional[str] = None,
+    filters: Optional[str] = None,
+):
+    return PSFRecipesInputModel(**locals())
+
+
+@ingredients_categories_router.get("/", response_model=list[IngredientCategory])
+def get_all_ingredients_categories_endpoint() -> List[Optional[IngredientCategory]]:
     """Get all ingredients categories
     ...
     :return: list of ingredients categories
     :rtype: List[Ingredient]
     """
 
-    return recipes.operations.get_all_ingredients_category()
+    return get_all_ingredients_category()
 
 
 @ingredients_categories_router.get("/{category_id}")
-def get_ingredient_category_by_id(category_id: int = fastapi.Path()) -> recipes.responses.IngredientCategory:
+def get_ingredient_category_by_id(category_id: int = fastapi.Path()) -> IngredientCategory:
     """Get ingredient category by id
     ...
     :return: ingredient category
@@ -40,7 +67,7 @@ def get_ingredient_category_by_id(category_id: int = fastapi.Path()) -> recipes.
 
     try:
         return get_ingredient_category_by_id(category_id)
-    except recipes.exceptions.IngredientCategoryNotFoundException:
+    except IngredientCategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Ingredient category with {category_id=} not found",
@@ -49,8 +76,8 @@ def get_ingredient_category_by_id(category_id: int = fastapi.Path()) -> recipes.
 
 @ingredients_categories_router.post("/")
 def create_ingredient_category(
-    created_category_input_model: recipes.input_models.IngredientInputModel,
-) -> recipes.responses.IngredientCategory:
+    created_category_input_model: IngredientInputModel,
+) -> IngredientCategory:
     """Create ingredient category
     ...
     :return: created ingredient category
@@ -61,7 +88,7 @@ def create_ingredient_category(
         return create_ingredient_category(
             created_category_input_model.name, created_category_input_model.created_by
         )
-    except recipes.exceptions.IngredientCategoryNameViolation:
+    except IngredientCategoryNameViolation:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Ingredient category with name {created_category_input_model.name} already exists",
@@ -71,8 +98,8 @@ def create_ingredient_category(
 @ingredients_categories_router.patch("/{category_id}")
 def patch_ingredient_category(
     category_id: int = fastapi.Path(),
-    patch_ingredient_category_input_model: recipes.input_models.PatchIngredientCategoryInputModel = fastapi.Body(),
-) -> recipes.input_models.PatchIngredientCategoryInputModel:
+    patch_ingredient_category_input_model: PatchIngredientCategoryInputModel = fastapi.Body(),
+) -> PatchIngredientCategoryInputModel:
     """Patch ingredient category
     ...
     :return: updated ingredient category
@@ -80,14 +107,14 @@ def patch_ingredient_category(
     """
 
     try:
-        return patch_ingredient_category_input_model(
-            category_id, **patch_ingredient_category_input_model.model_dump()
+        return patch_ingredient_category(
+            category_id=category_id, **patch_ingredient_category_input_model.model_dump()
         )
-    except recipes.exceptions.IngredientCategoryIntegrityViolation:
+    except IngredientCategoryIntegrityViolation:
         raise fastapi.HTTPException(status_code=fastapi.status.HTTP_400_BAD_REQUEST)
 
 
-@ingredients_categories_router.delete("/{category_id", response_model=recipes.responses.IngredientCategory)
+@ingredients_categories_router.delete("/{category_id", response_model=IngredientCategory)
 def delete_category(category_id: int = fastapi.Path()):
     """Delete ingredient category
 
@@ -103,14 +130,14 @@ def delete_category(category_id: int = fastapi.Path()):
         return get_ingredient_category_by_id(
             category_id=category_id
         )
-    except recipes.exceptions.IngredientCategoryNotFoundException:
+    except IngredientCategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Category with f'{category_id}' id does not exist",
         )
 
 
-@ingredients_router.get("/", response_model=List[recipes.responses.Ingredient])
+@ingredients_router.get("/", response_model=List[Ingredient])
 def get_all_ingredients_endpoint():
     """Get all ingredients
     ...
@@ -118,10 +145,10 @@ def get_all_ingredients_endpoint():
     :rtype: List[Ingredient]
     """
 
-    return recipes.operations.get_all_ingredients()
+    return get_all_ingredients()
 
 
-@ingredients_router.get("/{ingredient_id}", response_model=recipes.responses.Ingredient)
+@ingredients_router.get("/{ingredient_id}", response_model=Ingredient)
 def get_ingredient(ingredient_id: int = fastapi.Path()):
     """Get ingredient
 
@@ -135,70 +162,41 @@ def get_ingredient(ingredient_id: int = fastapi.Path()):
 
     try:
         return get_ingredient(ingredient_id)
-    except recipes.exceptions.IngredientNotFoundException:
+    except IngredientNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Ingredient with {ingredient_id} not found",
         )
 
 
-@ingredients_router.post("/", response_model=recipes.responses.Ingredient)
-def create_ingredient(create_ingredient_input_model: recipes.input_models.IngredientInputModel):
-    """Create ingredient
+@ingredients_router.post("/", response_model=Ingredient)
+def create_ingredient(create_ingredient_input_model: IngredientInputModel):
 
-    :param : name of ingredient
-    ...
-    :param : category of ingredient
-    ...
-    :param : calories of ingredient
-    ...
-    :param : carbo of ingredient
-    ...
-    :param : fats of ingredient
-    :type float
-    ...
-    :param : protein of ingredient
-    :type float
-    ...
-    :param : cholesterol of ingredient
-    :type float
-    ...
-    :param : measurement of ingredient
-    :type float
-    ...
-    ...
-    :raises HTTPException: Raised if ingredient with the same name already exists
-    ...
-    :return: Created ingredient
-    :rtype: Ingredient
+    """
+    Create ingredient
+    :param create_ingredient_input_model:
+    :return:
     """
 
     try:
-        return create_ingredient(
-            recipes.input_models.IngredientInputModel.name,
-            )
+        return create_ingredient(**create_ingredient_input_model.__dict__)
 
-    except recipes.exceptions.IngredientNameViolationException:
+    except IngredientNameViolationException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Ingredient with name {create_ingredient_input_model.name} already exists",
         )
 
-
-@ingredients_router.put("/{ingredient_id}", response_model=recipes.responses.Ingredient)
+@ingredients_router.put("/{ingredient_id}", response_model=Ingredient)
 def update_ingredient(
     ingredient_id: int = fastapi.Path(),
-    update_ingredient_input_model: recipes.input_models.IngredientInputModel = fastapi.Body(),
+    update_ingredient_input_model: IngredientInputModel = fastapi.Body(),
 ):
-    """Update ingredient
-
-    :param ingredient_id: Identifier for ingredient
-    :type int
-    ...
-    :raises HTTPException: Raised if ingredient with ingredient_id not found
-    ...
-    :return: Updated ingredient
-    :rtype: Ingredient
+    """
+    Update ingredient
+    :param ingredient_id:
+    :param update_ingredient_input_model:
+    :return:
     """
 
     try:
@@ -206,26 +204,22 @@ def update_ingredient(
             ingredient_id=ingredient_id, **update_ingredient_input_model.model_dump()
         )
 
-    except recipes.exceptions.IngredientNameViolationException:
+    except IngredientNameViolationException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail=f"Ingredient with f'{ingredient_id.name}' name not found",
+            detail=f"Ingredient with f'{ingredient_id}' id not found",
         )
 
-@ingredients_router.patch("/{ingredient_id}", response_model= recipes.responses.Ingredient)
+@ingredients_router.patch("/{ingredient_id}", response_model= Ingredient)
 def patch_ingredient(
     ingredient_id: int = fastapi.Path(),
-    patch_ingredient_input_model: recipes.input_models.PatchIngredientInputModel = fastapi.Body(),
+    patch_ingredient_input_model: PatchIngredientInputModel = fastapi.Body(),
 ):
-    """Patch ingredient
-
-    :param ingredient_id: Identifier for ingredient
-    :type int
-    ...
-    :raises HTTPException: Raised if ingredient with ingredient_id not found
-    ...
-    :return: Updated ingredient
-    :rtype: Ingredient
+    """
+    Patch ingredient
+    :param ingredient_id:
+    :param patch_ingredient_input_model:
+    :return:
     """
 
     try:
@@ -233,13 +227,13 @@ def patch_ingredient(
             ingredient_id=ingredient_id, **patch_ingredient_input_model.model_dump()
         )
 
-    except recipes.exceptions.IngredientNameViolationException:
+    except IngredientNameViolationException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail=f"Ingredient with f'{ingredient_id.name}' name not found",
+            detail=f"Ingredient with f'{ingredient_id}' id not found"
         )
 
-@ingredients_router.delete("/{ingredient_id", response_model=recipes.responses.Ingredient)
+@ingredients_router.delete("/{ingredient_id", response_model=Ingredient)
 def delete_ingredient(ingredient_id: int = fastapi.Path()):
     """Soft delete ingredient
 
@@ -256,24 +250,24 @@ def delete_ingredient(ingredient_id: int = fastapi.Path()):
             ingredient_id=ingredient_id
         )
 
-    except recipes.exceptions.IngredientNotFoundException:
+    except IngredientNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Ingredient with f'{ingredient_id}' id does not exist",
         )
 
 
-@recipes_categories_router.get('/', response_model=list[recipes.responses.RecipeCategory])
+@recipes_categories_router.get('/', response_model=list[RecipeCategory])
 def get_all_categories():
     """
     Get all recipe categories
     :return:
     """
 
-    return recipes.operations.get_all_recipe_categories()
+    return get_all_recipe_categories()
 
 
-@recipes_categories_router.get('/{category_id}', response_model= recipes.responses.RecipeCategory)
+@recipes_categories_router.get("/{category_id}", response_model= RecipeCategory)
 def get_category(category_id: int = fastapi.Path()):
     """
     Get recipe category
@@ -283,192 +277,236 @@ def get_category(category_id: int = fastapi.Path()):
     """
 
     try:
-        return recipes.operations.get_category_by_id(category_id)
-    except recipes.exceptions.RecipesCategoryNotFoundException:
+        return get_category_by_id(category_id)
+    except RecipesCategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Category with {category_id=} does not exist"
+            detail=f"Category with {category_id=} does not exist",
         )
 
 
-@recipes_categories_router.post('/', response_model=recipes.responses.RecipeCategory)
-def create_category(create_category_input_model: recipes.input_models.CreateRecipesCategoryInputModel):
+@recipes_categories_router.post("/", response_model=CategoryShortResponse)
+def create_category(
+    create_category_input_model: CreateRecipesCategoryInputModel,
+    user: Annotated[
+        common.authentication.AuthenticatedUser,
+        fastapi.Depends(common.authentication.admin),
+    ],
+):
     """
     Crate recipe category
 
     :param create_category_input_model:
+    :param user:
     :return:
     """
 
     try:
-        return recipes.operations.create_category(create_category_input_model.name)
-    except recipes.exceptions.RecipesCategoryNameViolationException:
+        return create_category(create_category_input_model.name, created_by=user.id)
+    except RecipesCategoryNameViolationException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail=f"Category with name {create_category_input_model.name} already exists"
+            detail=f"Category with name {create_category_input_model.name} already exists",
         )
 
 
-@recipes_categories_router.patch('/{category_id}', response_model=recipes.responses.RecipeCategory)
-def update_category(category_id: int = fastapi.Path(),
-                    patch_category_input_model: recipes.input_models.RecipesPatchCategoryInputModel = fastapi.Body()):
+@recipes_categories_router.patch("/{category_id}", response_model=RecipeCategory)
+def update_category(
+    user: Annotated[
+        common.authentication.AuthenticatedUser,
+        fastapi.Depends(common.authentication.admin),
+    ],
+    category_id: int = fastapi.Path(),
+    patch_category_input_model: RecipesPatchCategoryInputModel = fastapi.Body(),
+):
     """
     Update recipe category
 
+    :param user:
     :param category_id:
     :param patch_category_input_model:
     :return:
     """
     try:
-        return recipes.operations.update_category(category_id=category_id,
-                                                           **patch_category_input_model.model_dump())
-    except recipes.exceptions.RecipesCategoryNotFoundException:
+        return update_category(
+            category_id=category_id,
+            **patch_category_input_model.model_dump(),
+            updated_by=user.id,
+        )
+    except RecipesCategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Category with id {category_id} does not exist"
+            detail=f"Category with id {category_id} does not exist",
         )
-    except recipes.exceptions.RecipesCategoryNameViolationException:
+    except RecipesCategoryNameViolationException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail=f"Category with name {patch_category_input_model.name} already exists"
+            detail=f"Category with name {patch_category_input_model.name} already exists",
         )
 
 
-@recipes_router.get('/', response_model=list[recipes.responses.Recipe])
-def get_all_recipes():
-    """Get all recipes"""
-    return recipes.operations.get_all_recipes()
+@recipes_router.get("/", response_model=PSFRecipesResponseModel)
+def get_all_recipes(
+    paginated_input_model: Annotated[PSFRecipesInputModel, fastapi.Depends(_common_parameters)],
+    user: common.authentication.optional_user,
+):
+    """
+    Get all recipes
+    :param paginated_input_model:
+    :param user:
+    """
+
+    return get_all_recipes(paginated_input_model, user=user)
 
 
-@recipes_router.get('/{recipe_id}', response_model=recipes.responses.Recipe)
-def get_recipe(recipe_id: int = fastapi.Path()):
+@recipes_router.get("/{recipe_id}", response_model=RecipeResponse)
+def get_recipe(user: common.authentication.optional_user, recipe_id: int = fastapi.Path()):
     """Get recipe"""
 
     try:
-        return recipes.operations.get_recipe_by_id(recipe_id)
-    except recipes.exceptions.RecipeNotFoundException:
+        return get_recipe_by_id(recipe_id, user)
+    except RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Recipe with {recipe_id=} does not exist"
+            detail=f"Recipe with {recipe_id=} does not exist",
         )
 
 
-@recipes_router.post('/', response_model=recipes.responses.Recipe)
-def create_recipe(create_recipe_input_model: recipes.input_models.CreateRecipeInputModel):
+@recipes_router.post("/", response_model=RecipeResponse)
+def create_recipe(
+    create_recipe_input_model: CreateRecipeInputModel,
+    created_by: common.authentication.authenticated_user,
+):
     """
     Create recipe
 
     :param create_recipe_input_model:
+    :param created_by:
     :return:
     """
     try:
-        return recipes.operations.create_recipe(**create_recipe_input_model.__dict__)
+        return create_recipe(**create_recipe_input_model.__dict__, created_by=created_by.id)
 
-    except recipes.exceptions.RecipesCategoryNotFoundException:
+    except RecipesCategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail=f"Category with id {create_recipe_input_model.category_id} does not exist"
+            detail=f"Category with id {create_recipe_input_model.category_id} does not exist",
         )
 
 
-@recipes_router.patch('/{recipe_id}/instructions/{instruction_id}', response_model=recipes.responses.InstructionResponse)
-def update_instructions(recipe_id: int = fastapi.Path(),
-                        instruction_id: int = fastapi.Path(),
-                        patch_instruction_input_model: recipes.input_models.PatchInstructionInputModel = fastapi.Body()):
+@recipes_router.patch("/{recipe_id}/instructions/{instruction_id}", response_model=InstructionResponse)
+def update_instructions(
+    user: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    instruction_id: int = fastapi.Path(),
+    patch_instruction_input_model: PatchInstructionInputModel = fastapi.Body(),
+):
     """
     Update instructions
-
+    :param user:
     :param recipe_id:
     :param instruction_id:
     :param patch_instruction_input_model:
     :return:
     """
     try:
-        updated_instruction = recipes.operations.update_instruction(
-            recipe_id, instruction_id, **patch_instruction_input_model.model_dump()
+        updated_instruction = update_instruction(
+            recipe_id, instruction_id, **patch_instruction_input_model.model_dump(), user=user
         )
         return updated_instruction
-    except recipes.exceptions.InstructionNotFoundException:
+    except InstructionNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Instruction with id {instruction_id} does not exist"
+            detail=f"Instruction with id {instruction_id} does not exist",
         )
-    except recipes.exceptions.RecipeNotFoundException:
+    except RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Recipe with id {recipe_id} does not exist"
+            detail=f"Recipe with id {recipe_id} does not exist",
         )
-    except recipes.exceptions.RecipeWithInstructionNotFoundException:
+    except RecipeWithInstructionNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Combination of {recipe_id=} and {instruction_id=} does not exist"
+            detail=f"Combination of {recipe_id=} and {instruction_id=} does not exist",
         )
 
 
-@recipes_router.post('/{recipe_id}/instructions/', response_model=recipes.responses.InstructionResponse)
-def create_instruction(recipe_id: int = fastapi.Path(),
-                       create_instruction_input_model: recipes.input_models.CreateInstructionInputModel = fastapi.Body()):
+@recipes_router.post("/{recipe_id}/instructions/", response_model=InstructionResponse)
+def create_instruction(
+    user: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    create_instruction_input_model: CreateInstructionInputModel = fastapi.Body(),
+):
     """
     Create instructions
 
+    :param user:
     :param recipe_id:
     :param create_instruction_input_model:
     :return:
     """
     try:
-        updated_instruction = recipes.operations.create_instruction(
-            recipe_id, create_instruction_input_model
+        updated_instruction = create_instruction(
+            recipe_id, create_instruction_input_model, user=user
         )
         return updated_instruction
-    except recipes.exceptions.RecipeNotFoundException:
+    except RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Recipe with id {recipe_id} does not exist"
+            detail=f"Recipe with id {recipe_id} does not exist",
         )
 
 
-@recipes_router.delete('/{recipe_id}/instructions/{instruction_id}', status_code=fastapi.status.HTTP_204_NO_CONTENT)
-def delete_instruction(recipe_id: int = fastapi.Path(), instruction_id: int = fastapi.Path()):
+@recipes_router.delete(
+    "/{recipe_id}/instructions/{instruction_id}",
+    status_code=fastapi.status.HTTP_204_NO_CONTENT,
+)
+def delete_instruction(
+    user: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    instruction_id: int = fastapi.Path(),
+):
     """
     Delete instruction
 
+    :param user:
     :param recipe_id:
     :param instruction_id:
     :return:
     """
     try:
-        recipes.operations.delete_instruction(recipe_id, instruction_id)
-    except recipes.exceptions.InstructionNotFoundException:
+        delete_instruction(recipe_id, instruction_id, user)
+    except InstructionNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Instruction with id {instruction_id} does not exist"
+            detail=f"Instruction with id {instruction_id} does not exist",
         )
-    except recipes.exceptions.RecipeNotFoundException:
+    except RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Recipe with id {recipe_id} does not exist"
+            detail=f"Recipe with id {recipe_id} does not exist",
         )
-    except recipes.exceptions.RecipeWithInstructionNotFoundException:
+    except RecipeWithInstructionNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Combination of {recipe_id=} and {instruction_id=} does not exist"
+            detail=f"Combination of {recipe_id=} and {instruction_id=} does not exist",
         )
 
 
-@recipes_router.delete('/{recipe_id}', response_model=recipes.responses.Recipe)
-def delete_recipe(recipe_id: int, user_id: int = 1):
+@recipes_router.delete("/{recipe_id}", response_model=RecipeResponse)
+def delete_recipe(recipe_id: int, user: common.authentication.authenticated_user):
     """
     Delete recipe
 
     :param recipe_id
-    :param user_id
+    :param user
     :return:
     """
 
     try:
-        return recipes.operations.delete_recipe(recipe_id=recipe_id, deleted_by=user_id)
-    except recipes.exceptions.RecipeNotFoundException:
+        return delete_recipe(recipe_id=recipe_id, deleted_by=user)
+    except RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Recipe with {recipe_id=} does not exist"
+            detail=f"Recipe with {recipe_id=} does not exist",
         )

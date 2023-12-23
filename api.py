@@ -1,22 +1,18 @@
 """Kitchen Helper API"""
-import fastapi
 import fastapi.staticfiles
 
 import features.health
 import features.images
 import features.users
 import features.recipes
-
 import multiprocessing
-cpus = multiprocessing.cpu_count()
-
 import uvicorn
-
 from fastapi.middleware.cors import CORSMiddleware
-
 import configuration
 import khLogging
 
+CPUS = multiprocessing.cpu_count()
+config = configuration.Config()
 
 logging = khLogging.Logger('api')
 
@@ -39,6 +35,14 @@ app.include_router(features.images.router, prefix='/images')
 app.include_router(features.recipes.ingredients_router, prefix='/ingredients')
 app.include_router(features.recipes.ingredients_category_router, prefix='/ingredient-categories')
 app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
+app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 
 if __name__ == '__main__':
-    uvicorn.run("api:app", workers=cpus, log_config=khLogging.UVICORN_LOG_CONFIG, port=8000, host='0.0.0.0')
+    uvicorn.run(
+        "api:app",
+        reload=config.running_on_dev,
+        workers=CPUS,
+        log_config=khLogging.UVICORN_LOG_CONFIG,
+        port=8000,
+        host='0.0.0.0',
+    )
