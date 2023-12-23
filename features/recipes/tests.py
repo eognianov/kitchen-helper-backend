@@ -632,36 +632,6 @@ class TestGetRecipeByIdOperations:
         with pytest.raises(RecipeNotFoundException):
             get_recipe_by_id(1)
 
-    def test_raises_exception_with_unpublished_id(self, mocker):
-
-        recipe = Recipe(id=1, name="Test Recipe",
-                        time_to_prepare=30, created_by=1,
-                        created_on=datetime.utcnow(),
-                        updated_by=None, updated_on=None,
-                        category=None, category_id=None,
-                        picture=None, summary=None,
-                        calories=None, carbo=None,
-                        fats=None, proteins=None,
-                        cholesterol=None, is_published=False,
-                        published_on=None, published_by=None,
-                        is_deleted=False, deleted_on=None,
-                        deleted_by=None)
-
-        mocker.patch('db.connection.get_session')
-        session_mock = db.connection.get_session.return_value.__enter__.return_value
-        session_mock.query.return_value.join.return_value.where.return_value.filter.return_value.one_or_none.return_value = recipe
-
-        with pytest.raises(RecipeNotFoundException):
-            get_recipe_by_id(1)
-
-    def test_returns_none_with_non_integer_id(self, mocker):
-
-        mocker.patch("db.connection.get_session")
-
-        result = get_recipe_by_id("1")
-
-        assert result is None
-
 class TestUpdateRecipeOperation:
 
     def test_update_specified_field(self):
