@@ -1,11 +1,12 @@
 import unittest.mock
+from http.client import HTTPException
 
 import pytest
 
 import common.authentication
 import db.connection
 from features.recipes.input_models import CreateInstructionInputModel
-from features.recipes.operations import create_recipe, create_category, get_recipe_by_id
+from features.recipes.operations import create_recipe, create_category, get_recipe_by_id, update_recipe
 from tests.fixtures import use_test_db, admin, user
 from features.recipes import operations
 from features.recipes.models import RecipeCategory, RecipeInstruction, Recipe
