@@ -63,6 +63,7 @@ class RecipeInputModel(pydantic.BaseModel):
     category_id: Optional[int] = None
     instructions: Optional[list[CreateInstructionInputModel]] = None
 
+
 class PatchRecipeInputModel(pydantic.BaseModel):
     """Patch recipe"""
 
@@ -71,9 +72,7 @@ class PatchRecipeInputModel(pydantic.BaseModel):
 
     @pydantic.model_validator(mode='after')
     def check_fields(self) -> 'PatchRecipeInputModel':
-        allowed_fields_to_edit = [
-            'NAME', 'TIME_TO_PREPARE', 'CATEGORY_ID'
-        ]
+        allowed_fields_to_edit = ['NAME', 'TIME_TO_PREPARE', 'CATEGORY_ID']
 
         field = self.field
         value = self.value
@@ -88,8 +87,6 @@ class PatchRecipeInputModel(pydantic.BaseModel):
                 raise ValueError(f"{field} must be an integer")
             if value < 1:
                 raise ValueError(f"{field} must be greater then 1")
-            if field.upper() == 'TIME_TO_PREPARE' and value > 99:
-                raise ValueError(f"Time must be less then 100")
 
         return self
 
@@ -143,17 +140,13 @@ class PSFRecipesInputModel(pydantic.BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
         try:
-            self.order_expression = (
-                features.recipes.helpers.sort_recipes(self.sort) or []
-            )
+            self.order_expression = features.recipes.helpers.sort_recipes(self.sort) or []
         except ValueError as ve:
             raise fastapi.HTTPException(status_code=422, detail=str(ve))
 
         if self.filters:
             try:
-                self.filter_expression = (
-                    features.recipes.helpers.filter_recipes(self.filters) or []
-                )
+                self.filter_expression = features.recipes.helpers.filter_recipes(self.filters) or []
             except ValueError as ve:
                 raise fastapi.HTTPException(status_code=422, detail=str(ve))
         else:

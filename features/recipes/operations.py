@@ -4,7 +4,9 @@ from typing import Type, Optional
 
 import sqlalchemy.exc
 from sqlalchemy import update, and_, or_
+from fastapi import Depends
 
+from sqlalchemy.orm.exc import NoResultFound
 import common.authentication
 import db.connection
 from .exceptions import (
@@ -14,11 +16,14 @@ from .exceptions import (
     InstructionNotFoundException,
     InstructionNameViolationException,
     RecipeWithInstructionNotFoundException,
+    UnauthorizedAccessException,
 )
 from .helpers import paginate_recipes
 from .input_models import CreateInstructionInputModel, PSFRecipesInputModel
 from .models import RecipeCategory, Recipe, RecipeInstruction
 from .responses import InstructionResponse, PSFRecipesResponseModel
+
+from features.users.authentication import AdminOrMe
 
 import configuration
 import khLogging
@@ -196,7 +201,12 @@ def get_all_recipes(
 
 
 def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUser = None):
-    """Get recipe by id"""
+    """
+    Get recipe by id
+    :param recipe_id:
+    :param user:
+    :return:
+    """
 
     filters = _get_published_filter_expression(user)
 
@@ -212,45 +222,81 @@ def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUs
             raise RecipeNotFoundException
         return recipe
 
-def update_recipe(recipe_id: int) -> None:
+
+def update_recipe(recipe_id: int, user: common.authentication.AuthenticatedUser = Depends(AdminOrMe())) -> None:
     """
-    Update recipe after adding or editing instructions
+    Update recipe
     :param recipe_id:
+    :param user:
     :return:
     """
 
-    with db.connection.get_session() as session:
-        recipe = get_recipe_by_id(recipe_id=recipe_id)
-
-        total_complexity = sum([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions])
-        complexity_len = len([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions])
-        time_to_prepare = sum([InstructionResponse(**x.__dict__).time for x in recipe.instructions])
-
-        if complexity_len == 0:
-            recipe.complexity = 0
-        else:
-            recipe.complexity = round(total_complexity / complexity_len, 1)
-
-        recipe.time_to_prepare = time_to_prepare
-
-        session.add(recipe)
-        session.commit()
-        session.refresh(recipe)
-    logging.info(f"Recipe #{recipe_id} was updated")
-
-
-def patch_recipe(recipe_id: int, field: str, value: str, updated_by: str = 'me') -> Type[Recipe]:
-    """Patch recipe"""
-
     recipe = get_recipe_by_id(recipe_id)
 
+    if user != 'admin' and user != recipe.created_by:
+        raise UnauthorizedAccessException(f"User {user} is not authorized to update Recipe #{recipe_id}")
+
+    with db.connection.get_session() as session:
+        session.execute(
+            update(Recipe),
+            [
+                {
+                    "id": recipe.id,
+                    "name": recipe.name,
+                    "time_to_prepare": recipe.time_to_prepare,
+                    "category_id": recipe.category_id,
+                    "picture": recipe.picture,
+                    "summary": recipe.summary,
+                    "calories": recipe.calories,
+                    "carbo": recipe.carbo,
+                    "fats": recipe.fats,
+                    "proteins": recipe.proteins,
+                    "cholesterol": recipe.cholesterol,
+                    "created_by": recipe.created_by,
+                    "is_published": recipe.is_published,
+                    "is_deleted": recipe.is_deleted,
+                    "deleted_on": recipe.deleted_on,
+                    "deleted_by": recipe.deleted_by,
+                    "updated_by": recipe.updated_by,
+                }
+            ],
+        )
+        session.commit()
+        logging.info(f"Recipe #{recipe_id} was updated")
+
+
+def patch_recipe(
+    recipe_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser = Depends(AdminOrMe())
+) -> Type[Recipe]:
+    """
+    Patch Recipe
+    :param recipe_id:
+    :param field:
+    :param value:
+    :param user:
+    :return:
+    """
     try:
+        recipe = get_recipe_by_id(recipe_id, user=user)
+
+        if not recipe.is_published:
+            raise RecipeNotFoundException(f"Recipe #{recipe_id} not found or not published")
+
+        if user != 'admin' and user != recipe.created_by:
+            raise UnauthorizedAccessException(f"User {user} is not authorized to update Recipe #{recipe_id}")
+
         with db.connection.get_session() as session:
-            session.execute(update(Recipe), [{"id": recipe.id, f"{field}": value, "updated_by": updated_by}])
+            session.execute(
+                update(Recipe).where(Recipe.id == recipe.id).values({f"{field}": value, "updated_by": user})
+            )
             session.commit()
             Recipe.__setattr__(recipe, field, value)
-            logging.info(f"User {updated_by} updated Recipe (#{recipe_id}). Set {field} to {value}")
+            logging.info(f"User {user} updated Recipe (#{recipe_id}). Set {field} to {value}")
             return recipe
+
+    except NoResultFound:
+        raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
+
     except sqlalchemy.exc.IntegrityError as ex:
         raise CategoryNameViolationException(ex)
 
