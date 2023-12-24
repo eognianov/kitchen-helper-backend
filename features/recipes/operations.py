@@ -167,9 +167,7 @@ def get_all_ingredients(self):
     return ingredients
 
 
-def update_ingredient(
-    ingredient_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser
-) -> IngredientInputModel:
+def update_ingredient(ingredient_id: int, user: common.authentication.AuthenticatedUser) -> IngredientInputModel:
     """
     Update ingredient
     :param ingredient_id:
@@ -179,29 +177,36 @@ def update_ingredient(
     :return:
     """
 
-    if user.is_admin == False or user.id != get_ingredient(ingredient_id).created_by:
+    db_ingredient = get_ingredient(ingredient_id)
+
+    if user.is_admin == False or user.id != db_ingredient.created_by:
         raise UnauthorizedAccessException()
 
-    with db.connection.get_session() as session:
-        db_ingredient = (
-            session.query(Ingredient).filter(Ingredient.id == ingredient_id, Ingredient.is_deleted is False).first()
-        )
+    if db_ingredient.is_deleted:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
 
-        if not db_ingredient:
-            raise HTTPException(status_code=404, detail="Ingredient not found")
-
-        try:
-            stmt = update(Ingredient).where(Ingredient.id == ingredient_id).values({field: value})
-            session.execute(stmt)
-
-            setattr(db_ingredient, field, value)
-
+    try:
+        with db.connection.get_session() as session:
+            session.execute(
+                update(Ingredient).where(Ingredient.id == ingredient_id),
+                [
+                    {
+                        'id': db_ingredient.id,
+                        'name': db_ingredient.name,
+                        'calories': db_ingredient.calories,
+                        'carbo': db_ingredient.carbo,
+                        'fats': db_ingredient.fats,
+                        'proteins': db_ingredient.proteins,
+                        'cholesterol': db_ingredient.cholesterol,
+                        'measurement': db_ingredient.measurement,
+                    }
+                ],
+            )
             session.commit()
+            logging.info(f"Ingredient #{ingredient_id} was updated")
 
-            return db_ingredient
-
-        except IntegrityError as exc:
-            raise IngredientIntegrityViolation(exc)
+    except IntegrityError as ex:
+        raise IngredientIntegrityViolation(ex)
 
 
 def patch_ingredient(
