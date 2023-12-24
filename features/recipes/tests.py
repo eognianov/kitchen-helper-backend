@@ -12,7 +12,8 @@ from features.recipes import operations
 from features.recipes.models import RecipeCategory, RecipeInstruction, Recipe
 from features.recipes.exceptions import (
     CategoryNameViolationException,
-    CategoryNotFoundException, RecipeNotFoundException,
+    CategoryNotFoundException,
+    RecipeNotFoundException,
 )
 from fastapi.testclient import TestClient
 from api import app
@@ -123,7 +124,6 @@ class TestInstructionsOperations:
         }
 
     def test_create_recipe_without_instructions_success(self, use_test_db):
-
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -391,10 +391,9 @@ class TestInstructionsEndpoints:
         assert response.status_code == 404
         delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2, user=unittest.mock.ANY)
 
-class TestCreateRecipesOperations:
 
+class TestCreateRecipeOperations:
     def setup(self):
-
         # self.client = TestClient(app)
         self.recipe = {
             "name": "name",
@@ -412,7 +411,6 @@ class TestCreateRecipesOperations:
         }
 
     def test_create_recipe_with_all_parameters(self, use_test_db, bypass_published_filter, mocker):
-
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -435,7 +433,6 @@ class TestCreateRecipesOperations:
         assert recipe.instructions == []
 
     def test_create_recipe_with_category_id_parameter(self, use_test_db, bypass_published_filter, mocker):
-
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -447,7 +444,6 @@ class TestCreateRecipesOperations:
         assert recipe.category_id == 1
 
     def test_create_recipe_with_picture_parameter(self, use_test_db, bypass_published_filter, mocker):
-
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -459,7 +455,6 @@ class TestCreateRecipesOperations:
         assert recipe.picture == ""
 
     def test_create_recipe_with_summary_parameter(self, use_test_db, bypass_published_filter, mocker):
-
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -470,9 +465,7 @@ class TestCreateRecipesOperations:
         assert len(recipes) == 1
         assert recipe.summary == "summary"
 
-
     def test_create_recipe_with_calories_parameter(self, use_test_db, bypass_published_filter, mocker):
-
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -483,9 +476,7 @@ class TestCreateRecipesOperations:
         assert len(recipes) == 1
         assert recipe.calories == 1
 
-
     def test_create_recipe_with_carbo_parameter(self, use_test_db, bypass_published_filter, mocker):
-
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -496,10 +487,8 @@ class TestCreateRecipesOperations:
         assert len(recipes) == 1
         assert recipe.carbo == 1
 
-
     # TODO To see why recipe without name is created
     def test_create_recipe_with_empty_name(self, use_test_db, bypass_published_filter, mocker):
-
         self.recipe["name"] = ""
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
@@ -510,15 +499,12 @@ class TestCreateRecipesOperations:
         assert len(recipes) == 1
 
     def test_create_recipe_with_non_existent_category_id(self, use_test_db, bypass_published_filter, mocker):
-
         with pytest.raises(Exception):
             operations.create_recipe(**self.recipe)
 
 
 class TestGetAllRecipiesOperations:
-
     def setup(self):
-
         self.recipe = {
             "name": "name",
             "time_to_prepare": 0,
@@ -535,7 +521,6 @@ class TestGetAllRecipiesOperations:
         }
 
     def test_returns_all_published_and_not_deleted_recipes(self, use_test_db, bypass_published_filter, mocker):
-
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -545,14 +530,12 @@ class TestGetAllRecipiesOperations:
         assert len(recipes) == 1
 
     def test_returns_empty_list_when_no_published_recipes(self, use_test_db, bypass_published_filter, mocker):
-
         with db.connection.get_session() as session:
             recipes = session.query(Recipe).all()
 
         assert len(recipes) == 0
 
     def test_returns_published_recipes_when_no_deleted_recipes(self, use_test_db, bypass_published_filter, mocker):
-
         operations.create_category("Category 1", 1)
         operations.create_recipe(**self.recipe)
 
@@ -565,14 +548,12 @@ class TestGetAllRecipiesOperations:
         assert len(recipes) == 2
 
     def test_returns_empty_list_when_no_recipes(self, use_test_db, bypass_published_filter, mocker):
-
         with db.connection.get_session() as session:
             recipes = session.query(Recipe).all()
 
         assert len(recipes) == 0
 
     def test_returns_empty_list_when_all_recipes_deleted(self, use_test_db, bypass_published_filter, mocker):
-
         operations.create_category("Category 1", 1)
         operations.create_category("Category 2", 1)
         operations.create_recipe(**self.recipe)
@@ -585,8 +566,8 @@ class TestGetAllRecipiesOperations:
 
         assert len(recipes) == 0
 
-class TestGetRecipeByIdOperations:
 
+class TestGetRecipeByIdOperations:
     def setup(self):
         self.recipe = {
             "name": "name",
@@ -604,7 +585,6 @@ class TestGetRecipeByIdOperations:
         }
 
     def test_returns_recipe(self, use_test_db, bypass_published_filter, mocker):
-
         operations.create_category("Category 1", 1)
         operations.create_recipe(**self.recipe)
 
@@ -614,29 +594,24 @@ class TestGetRecipeByIdOperations:
         assert len(recipes) == 1
 
     def test_invalid_recipe_id(self):
-
         with pytest.raises(RecipeNotFoundException):
             get_recipe_by_id(3)
 
     def test_returns_none_with_unpublished_id(self, use_test_db, bypass_published_filter, mocker):
-
         with pytest.raises(RecipeNotFoundException):
             get_recipe_by_id(1)
 
     def test_raises_exception_when_no_recipe_found(self):
-
         with pytest.raises(RecipeNotFoundException):
             get_recipe_by_id(1)
 
     def test_raises_exception_with_deleted_id(self, use_test_db):
-
         with pytest.raises(RecipeNotFoundException):
             get_recipe_by_id(1)
 
+
 class TestUpdateRecipeOperation:
-
     def test_update_specified_field(self):
-
         recipe_id = 1
         field = "name"
         value = "New Recipe Name"
@@ -648,21 +623,21 @@ class TestUpdateRecipeOperation:
         self.assertEqual(updated_recipe.updated_by, updated_by)
 
     def test_update_recipe_raises_http_exception_if_recipe_not_found(self):
-
         with self.assertRaises(HTTPException) as context:
-            update_recipe(recipe_id=1, field="name",
-                          value="New Recipe Name", updated_by="John Die")
+            update_recipe(recipe_id=1, field="name", value="New Recipe Name", updated_by="John Die")
 
         self.assertEqual(context.exception.status_code, 404)
 
+
+# TODO Make test for patching the recipe
+
+
 class TestDeleteRecipeOperation:
-
     def test_delete_recipe_success(self):
-
         recipe_id = 1
         deleted_by = 1
 
-        recipe = Recipe(id=recipe_id, is_deleted=False, is_published= True)
+        recipe = Recipe(id=recipe_id, is_deleted=False, is_published=True)
 
         mocker.patch("path.to.get_recipe_by_id", return_value=recipe)
         session_mock = mocker.MagicMock()
@@ -676,19 +651,11 @@ class TestDeleteRecipeOperation:
 
         session_mock.execute.assert_called_with(
             update(Recipe),
-            [
-                {
-                    "id": recipe.id,
-                    "is_deleted": True,
-                    "deleted_on": datetime.utcnow(),
-                    "deleted_by": deleted_by
-                }
-            ],
+            [{"id": recipe.id, "is_deleted": True, "deleted_on": datetime.utcnow(), "deleted_by": deleted_by}],
         )
         session_mock.commit.assert_called_once()
 
     def test_delete_recipe_marks_as_deleted(self):
-
         recipe_id = 1
         deleted_by = 1
 
@@ -705,18 +672,14 @@ class TestDeleteRecipeOperation:
         assert recipe.is_deleted is True
 
     def test_delete_recipe_raise_exception_if_recipe_not_found(self):
-
         mocker.patch("path.to.get_recipe_by_id", side_effect=RecipeNotFoundException)
 
         with self.assertRaises(Exception):
             delete_recipe(recipe_id=1, deleted_by=1)
 
     def test_exception_no_modification(self):
-
         with patch('module.get_recipe_by_id', side_effect=RecipeNotFoundException):
-
             with patch('module.session') as mock_session:
-
                 with self.assertRaises(RecipeNotFoundException):
                     delete_recipe(recipe_id=1, deleted_by=1)
 
