@@ -234,7 +234,7 @@ def update_recipe(recipe_id: int, user: common.authentication.AuthenticatedUser 
     recipe = get_recipe_by_id(recipe_id)
 
     if user != 'admin' and user != recipe.created_by:
-        raise UnauthorizedAccessException(f"User {user} is not authorized to update Recipe #{recipe_id}")
+        raise UnauthorizedAccessException(f"User {user.id} is not authorized to update Recipe #{recipe_id}")
 
     with db.connection.get_session() as session:
         session.execute(
