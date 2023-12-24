@@ -19,12 +19,16 @@ from .exceptions import (
     RecipesCategoryNameViolationException,
     RecipesCategoryNotFoundException,
     IngredientCategoryIntegrityViolation,
-    IngredientIntegrityViolation
+    IngredientIntegrityViolation,
 )
 from .helpers import paginate_recipes
-from .input_models import CreateInstructionInputModel, PSFRecipesInputModel,\
-    PatchIngredientInputModel, PatchIngredientCategoryInputModel,\
-    IngredientInputModel
+from .input_models import (
+    CreateInstructionInputModel,
+    PSFRecipesInputModel,
+    PatchIngredientInputModel,
+    PatchIngredientCategoryInputModel,
+    IngredientInputModel,
+)
 
 from .models import RecipeCategory, Recipe, RecipeInstruction, IngredientCategory, Ingredient
 from .responses import InstructionResponse, PSFRecipesResponseModel
@@ -38,7 +42,6 @@ logging = khLogging.Logger.get_child_logger(__file__)
 
 
 def get_all_ingredients_category() -> List[Optional[IngredientCategory]]:
-
     """Get all ingredients categories
     ...
     :return: list of ingredients categories
@@ -46,11 +49,7 @@ def get_all_ingredients_category() -> List[Optional[IngredientCategory]]:
     """
 
     with db.connection.get_session() as session:
-        return (
-            session.query(IngredientCategory)
-            .filter(IngredientCategory.is_deleted is False)
-            .all()
-        )
+        return session.query(IngredientCategory).filter(IngredientCategory.is_deleted is False).all()
 
 
 def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
@@ -61,11 +60,7 @@ def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
     """
 
     with db.connection.get_session() as session:
-        category = (
-            session.query(IngredientCategory)
-            .filter(IngredientCategory.id == category_id)
-            .first()
-        )
+        category = session.query(IngredientCategory).filter(IngredientCategory.id == category_id).first()
 
         if not category:
             raise IngredientCategoryNotFoundException()
@@ -73,7 +68,7 @@ def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
 
 
 def patch_ingredient_category(
-    category_id: int, field: str, value: str, updated_by: str
+    category_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser
 ) -> Type[PatchIngredientCategoryInputModel]:
     """Patch ingredient category
     ...
@@ -83,12 +78,16 @@ def patch_ingredient_category(
 
     category = get_ingredient_category_by_id(category_id)
 
+    if user.is_admin == False or user.id != get_ingredient(ingredient_id).created_by:
+        # TODO Add exception for unauthorized user
+        pass
+
     try:
         with db.connection.get_session() as session:
             session.execute(
                 update(IngredientCategory)
                 .where(IngredientCategory.id == category_id)
-                .values({field: value, "updated_by": updated_by})
+                .values({field: value, "updated_by": user.id})
             )
             setattr(category, field, value)
             session.commit()
@@ -134,9 +133,7 @@ def create_ingredient(ingredient: IngredientInputModel):
 def get_ingredient(ingredient_id: int) -> PatchIngredientInputModel:
     with db.connection.get_session() as session:
         ingredient = (
-            session.query(Ingredient)
-            .filter(Ingredient.id == ingredient_id, Ingredient.is_deleted is False)
-            .first()
+            session.query(Ingredient).filter(Ingredient.id == ingredient_id, Ingredient.is_deleted is False).first()
         )
 
         if not ingredient:
@@ -147,30 +144,29 @@ def get_ingredient(ingredient_id: int) -> PatchIngredientInputModel:
 
 def get_all_ingredients(self):
     with db.connection.get_session() as session:
-        ingredients = (
-            session.query(Ingredient).filter(Ingredient.is_deleted is False).all()
-        )
+        ingredients = session.query(Ingredient).filter(Ingredient.is_deleted is False).all()
 
     return ingredients
 
 
-def update_ingredient(ingredient_id: int, field: str, value: str):
+def update_ingredient(ingredient_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser):
+    # TODO Call get_ingredient() to check if ingredient exists
+    # TODO Make point to update ingredient input model
+
+    if user.is_admin == False or user.id != get_ingredient(ingredient_id).created_by:
+        # TODO Add exception for unauthorized user
+        pass
+
     with db.connection.get_session() as session:
         db_ingredient = (
-            session.query(Ingredient)
-            .filter(Ingredient.id == ingredient_id, Ingredient.is_deleted is False)
-            .first()
+            session.query(Ingredient).filter(Ingredient.id == ingredient_id, Ingredient.is_deleted is False).first()
         )
 
         if not db_ingredient:
             raise HTTPException(status_code=404, detail="Ingredient not found")
 
         try:
-            stmt = (
-                update(Ingredient)
-                .where(Ingredient.id == ingredient_id)
-                .values({field: value})
-            )
+            stmt = update(Ingredient).where(Ingredient.id == ingredient_id).values({field: value})
             session.execute(stmt)
 
             setattr(db_ingredient, field, value)
@@ -182,20 +178,22 @@ def update_ingredient(ingredient_id: int, field: str, value: str):
         except IntegrityError as exc:
             raise IngredientIntegrityViolation(exc)
 
-def patch_ingredient(ingredient_id: int, field: str, value: str) -> PatchIngredientInputModel:
 
+def patch_ingredient(
+    ingredient_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser
+) -> PatchIngredientInputModel:
     db_ingredient = get_ingredient(ingredient_id)
+
+    if user.is_admin == False or user.id != get_ingredient(ingredient_id).created_by:
+        # TODO Add exception for unauthorized user
+        pass
 
     if db_ingredient.is_deleted:
         raise HTTPException(status_code=404, detail="Ingredient not found")
 
     try:
         with db.connection.get_session() as session:
-            session.execute(
-                update(Ingredient)
-                .where(Ingredient.id == ingredient_id)
-                .values({field: value})
-            )
+            session.execute(update(Ingredient).where(Ingredient.id == ingredient_id).values({field: value}))
             setattr(db_ingredient, field, value)
             session.commit()
 
@@ -205,20 +203,19 @@ def patch_ingredient(ingredient_id: int, field: str, value: str) -> PatchIngredi
         raise IngredientIntegrityViolation(ex)
 
 
-def delete_ingredient(ingredient_id: int) -> PatchIngredientInputModel:
-
+def delete_ingredient(ingredient_id: int, user: common.authentication.AuthenticatedUser):
     db_ingredient = get_ingredient(ingredient_id)
+
+    if user.is_admin == False or user.id != get_ingredient(ingredient_id).created_by:
+        # TODO Add exception for unauthorized user
+        pass
 
     if db_ingredient.is_deleted:
         raise HTTPException(status_code=404, detail="Ingredient not found")
 
     try:
         with db.connection.get_session() as session:
-            session.execute(
-                update(Ingredient)
-                .where(Ingredient.id == ingredient_id)
-                .values({"is_deleted": True})
-            )
+            session.execute(update(Ingredient).where(Ingredient.id == ingredient_id).values({"is_deleted": True}))
             db_ingredient.is_deleted = True
 
             session.commit()
@@ -254,9 +251,17 @@ def get_category_by_id(category_id: int) -> Type[RecipeCategory]:
         return category
 
 
-def update_category(category_id: int, field: str, value: str, updated_by: int) -> Type[RecipeCategory]:
+def update_category(
+    category_id: int, field: str, value: str, updated_by: int, user: common.authentication.AuthenticatedUser
+) -> Type[RecipeCategory]:
     """Update category"""
+
     category = get_category_by_id(category_id)
+
+    if user.is_admin == False or user.id != category.created_by:
+        # TODO Add exception for unauthorized user
+        pass
+
     try:
         with db.connection.get_session() as session:
             session.execute(
@@ -286,8 +291,19 @@ def create_category(category_name: str, created_by: int) -> RecipeCategory:
         raise RecipesCategoryNameViolationException(ex)
 
 
-def create_recipe(*, name: str, time_to_prepare: int, created_by: int, category_id: int = None, picture: str = None, summary: str = None,
-                  calories: float = 0, carbo: float = 0, fats: float = 0, proteins: float = 0, cholesterol: float = 0,
+def create_recipe(
+    *,
+    name: str,
+    time_to_prepare: int,
+    created_by: int,
+    category_id: int = None,
+    picture: str = None,
+    summary: str = None,
+    calories: float = 0,
+    carbo: float = 0,
+    fats: float = 0,
+    proteins: float = 0,
+    cholesterol: float = 0,
     instructions: list[CreateInstructionInputModel],
 ):
     """
