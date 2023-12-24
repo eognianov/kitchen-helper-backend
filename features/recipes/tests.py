@@ -1,22 +1,23 @@
 import unittest.mock
-
 import pytest
+from fastapi.testclient import TestClient
+from api import app
+from pytest import fixture
 
 import common.authentication
 import db.connection
-from features.recipes.input_models import CreateInstructionInputModel, PSFRecipesInputModel
 from tests.fixtures import use_test_db, admin, user
 from features.recipes import operations
 from features.recipes.models import RecipeCategory, RecipeInstruction, Recipe, IngredientCategory, Ingredient
 from features.recipes.exceptions import (
-    IngredientCategoryNameViolation, IngredientCategoryNotFoundException, IngredientNameViolationException,
-    IngredientNotFoundException, RecipesCategoryNameViolationException, RecipesCategoryNotFoundException)
-
-
-
-from fastapi.testclient import TestClient
-from api import app
-from pytest import fixture
+    IngredientCategoryNameViolation,
+    IngredientCategoryNotFoundException,
+    IngredientNameViolationException,
+    IngredientNotFoundException,
+    RecipesCategoryNameViolationException,
+    RecipesCategoryNotFoundException,
+)
+from features.recipes.input_models import CreateInstructionInputModel, PSFRecipesInputModel
 
 
 @fixture
@@ -26,7 +27,6 @@ def bypass_published_filter(mocker):
 
 
 class TestIngredientCategoryOperations:
-
     def test_create_ingredient_category_success(self, use_test_db, mocker):
         expected_name = "new_category"
         operations.create_ingredient_category(expected_name)
@@ -146,13 +146,9 @@ class TestIngredientsEndpoints:
         created_ingredient = operations.create_ingredient("new")
         patch_payload = {"field": "name", "value": "updated"}
         update_ingredient_spy = mocker.spy(operations, "update_ingredient")
-        response = cls.client.patch(
-            f"/ingredients/{created_ingredient.id}", json=patch_payload
-        )
+        response = cls.client.patch(f"/ingredients/{created_ingredient.id}", json=patch_payload)
         assert response.status_code == 200
-        update_ingredient_spy.assert_called_with(
-            ingredient_id=1, field="name", value="updated"
-        )
+        update_ingredient_spy.assert_called_with(ingredient_id=1, field="name", value="updated")
 
 
 class TestCategoryOperations:
