@@ -223,7 +223,7 @@ def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUs
         return recipe
 
 
-def update_recipe(recipe_id: int, user: common.authentication.AuthenticatedUser = Depends(AdminOrMe())) -> None:
+def update_recipe(recipe_id: int, user: common.authentication.AuthenticatedUser):
     """
     Update recipe
     :param recipe_id:
@@ -265,9 +265,7 @@ def update_recipe(recipe_id: int, user: common.authentication.AuthenticatedUser 
         logging.info(f"Recipe #{recipe_id} was updated")
 
 
-def patch_recipe(
-    recipe_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser = Depends(AdminOrMe())
-) -> Type[Recipe]:
+def patch_recipe(recipe_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser) -> Type[Recipe]:
     """
     Patch Recipe
     :param recipe_id:
