@@ -29,7 +29,7 @@ services:
       context: ./db
       dockerfile: Dockerfile
     volumes:
-      - kitchen-helper-db-volume:/var/lib/postgreslq/data
+      - kitchen-helper-db-volume:/var/lib/postgresql/data
     expose:
       - 5432
     ports:
