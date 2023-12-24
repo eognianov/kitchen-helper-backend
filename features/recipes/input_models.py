@@ -1,6 +1,6 @@
 """Recipe feature input model"""
+import enum
 from typing import Optional, Union, Any
-from .models import MeasurementUnits
 from pydantic import BaseModel, Field, field_validator
 
 import fastapi
@@ -9,6 +9,17 @@ import pydantic
 import features.recipes.helpers
 
 INSTRUCTION_CATEGORIES = ("BREAKFAST", "LUNCH", "DINNER")
+
+
+class MeasurementUnits(enum.Enum):
+    kg = enum.auto()
+    ml = enum.auto()
+    g = enum.auto()
+    l = enum.auto()
+    oz = enum.auto()
+    lb = enum.auto()
+    cup = enum.auto()
+
 
 MEASUREMENT_UNITS = [unit.value for unit in MeasurementUnits]
 
@@ -23,9 +34,7 @@ class PatchIngredientCategoryInputModel(BaseModel):
     @field_validator('field')
     @classmethod
     def validate_field(cls, field: str):
-        allowed_fields_to_edit = [
-            'NAME'
-        ]
+        allowed_fields_to_edit = ['NAME']
 
         if field.upper() not in allowed_fields_to_edit:
             raise ValueError(f'Field {field} is not allowed to be patched')
@@ -57,15 +66,7 @@ class PatchIngredientInputModel(BaseModel):
     @field_validator('field')
     @classmethod
     def validate_field(cls, field: str):
-        allowed_fields_to_edit = [
-            'NAME',
-            'MEASUREMENT',
-            'CALORIES',
-            'CARBO',
-            'FATS',
-            'PROTEINS',
-            'CHOLESTEROL'
-        ]
+        allowed_fields_to_edit = ['NAME', 'MEASUREMENT', 'CALORIES', 'CARBO', 'FATS', 'PROTEINS', 'CHOLESTEROL']
 
         if field.upper() not in allowed_fields_to_edit:
             raise ValueError(f'Field {field} is not allowed to be patched')
@@ -207,17 +208,13 @@ class PSFRecipesInputModel(pydantic.BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
         try:
-            self.order_expression = (
-                features.recipes.helpers.sort_recipes(self.sort) or []
-            )
+            self.order_expression = features.recipes.helpers.sort_recipes(self.sort) or []
         except ValueError as ve:
             raise fastapi.HTTPException(status_code=422, detail=str(ve))
 
         if self.filters:
             try:
-                self.filter_expression = (
-                    features.recipes.helpers.filter_recipes(self.filters) or []
-                )
+                self.filter_expression = features.recipes.helpers.filter_recipes(self.filters) or []
             except ValueError as ve:
                 raise fastapi.HTTPException(status_code=422, detail=str(ve))
         else:
