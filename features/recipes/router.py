@@ -14,7 +14,7 @@ from .input_models import (
     CreateCategoryInputModel,
     RecipeInputModel,
     PSFRecipesInputModel,
-    PatchRecipeInputModel
+    PatchRecipeInputModel,
 )
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel
 from .responses import RecipeResponse
@@ -289,9 +289,11 @@ def delete_recipe(recipe_id: int, user: common.authentication.authenticated_user
 
 
 @recipes_router.put('/{recipe_id}', response_model=RecipeResponse)
-def update_recipe(recipe_id: int = fastapi.Path(),
-                 update_recipe_input_model:  RecipeInputModel = fastapi.Body()):
-
+def update_recipe(
+    user: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    update_recipe_input_model: RecipeInputModel = fastapi.Body(),
+):
     """
     Update recipe
 
@@ -301,44 +303,45 @@ def update_recipe(recipe_id: int = fastapi.Path(),
     """
 
     try:
-        return features.recipes.operations.update_recipe(recipe_id=recipe_id)
+        return features.recipes.operations.update_whole_recipe(recipe_id=recipe_id, user=user.id)
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Recipe with id {recipe_id} does not exist"
+            status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=f"Recipe with id {recipe_id} does not exist"
         )
 
     except features.recipes.exceptions.InstructionNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Instruction with id {update_recipe_input_model.instruction_id} does not exist"
+            detail=f"Instruction with id {update_recipe_input_model.instruction_id} does not exist",
         )
 
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
-            detail=f"Category with id {update_recipe_input_model.category_id} does not exist"
+            detail=f"Category with id {update_recipe_input_model.category_id} does not exist",
         )
 
 
 @recipes_router.patch('/{recipe_id}', response_model=RecipeResponse)
-def patch_recipe(recipe_id: int = fastapi.Path(),
-                patch_recipe_input_model: PatchRecipeInputModel = fastapi.Body()):
-
+def patch_recipe(
+    user: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    patch_recipe_input_model: PatchRecipeInputModel = fastapi.Body(),
+):
     """
-    Update recipe
-
+    Patch recipe
+    :param user:
     :param recipe_id:
     :param patch_recipe_input_model:
     :return:
     """
 
     try:
-        return features.recipes.operations.patch_recipe(recipe_id=recipe_id,
-                                                         **patch_recipe_input_model.model_dump())
+        return features.recipes.operations.patch_recipe(
+            recipe_id=recipe_id, **patch_recipe_input_model.model_dump(), user=user.id
+        )
 
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Recipe with id {recipe_id} does not exist"
+            status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=f"Recipe with id {recipe_id} does not exist"
         )
