@@ -26,7 +26,7 @@ MEASUREMENT_UNITS = [unit.value for unit in MeasurementUnits]
 
 class PatchIngredientCategoryInputModel(BaseModel):
 
-    """Update ingredient category"""
+    """Patch ingredient category"""
 
     field: str
     value: str
@@ -105,7 +105,7 @@ class IngredientInputModel(BaseModel):
 
 
 class RecipesPatchCategoryInputModel(pydantic.BaseModel):
-    """Update recipes category"""
+    """Patch recipes category"""
 
     field: str
     value: str

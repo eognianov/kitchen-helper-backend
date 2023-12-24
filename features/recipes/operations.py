@@ -20,6 +20,7 @@ from .exceptions import (
     RecipesCategoryNotFoundException,
     IngredientCategoryIntegrityViolation,
     IngredientIntegrityViolation,
+    UnauthorizedAccessException,
 )
 from .helpers import paginate_recipes
 from .input_models import (
@@ -42,10 +43,9 @@ logging = khLogging.Logger.get_child_logger(__file__)
 
 
 def get_all_ingredients_category() -> List[Optional[IngredientCategory]]:
-    """Get all ingredients categories
-    ...
-    :return: list of ingredients categories
-    :rtype: List[IngredientCategory]
+    """
+    Get all ingredients category
+    :return:
     """
 
     with db.connection.get_session() as session:
@@ -53,10 +53,10 @@ def get_all_ingredients_category() -> List[Optional[IngredientCategory]]:
 
 
 def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
-    """Get ingredient category by id
-    ...
-    :return: ingredient category
-    :rtype: IngredientCategory
+    """
+    Get ingredient category by id
+    :param category_id:
+    :return:
     """
 
     with db.connection.get_session() as session:
@@ -70,17 +70,19 @@ def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
 def patch_ingredient_category(
     category_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser
 ) -> Type[PatchIngredientCategoryInputModel]:
-    """Patch ingredient category
-    ...
-    :return: updated ingredient category
-    :rtype: IngredientCategory
+    """
+    Patch ingredient category
+    :param category_id:
+    :param field:
+    :param value:
+    :param user:
+    :return:
     """
 
     category = get_ingredient_category_by_id(category_id)
 
-    if user.is_admin == False or user.id != get_ingredient(ingredient_id).created_by:
-        # TODO Add exception for unauthorized user
-        pass
+    if user.is_admin == False or user.id != category.created_by:
+        raise UnauthorizedAccessException()
 
     try:
         with db.connection.get_session() as session:
@@ -98,10 +100,11 @@ def patch_ingredient_category(
 
 
 def create_ingredient_category(name: str, created_by: str) -> Type[PatchIngredientCategoryInputModel]:
-    """Create ingredient category
-    ...
-    :return: created ingredient category
-    :rtype: IngredientCategory
+    """
+    Create ingredient category
+    :param name:
+    :param created_by:
+    :return:
     """
 
     try:
@@ -116,6 +119,11 @@ def create_ingredient_category(name: str, created_by: str) -> Type[PatchIngredie
 
 
 def create_ingredient(ingredient: IngredientInputModel):
+    """
+    Create ingredient
+    :param ingredient:
+    :return:
+    """
     try:
         db_ingredient = Ingredient(**ingredient.model_dump())
 
@@ -131,6 +139,11 @@ def create_ingredient(ingredient: IngredientInputModel):
 
 
 def get_ingredient(ingredient_id: int) -> PatchIngredientInputModel:
+    """
+    Get ingredient
+    :param ingredient_id:
+    :return:
+    """
     with db.connection.get_session() as session:
         ingredient = (
             session.query(Ingredient).filter(Ingredient.id == ingredient_id, Ingredient.is_deleted is False).first()
@@ -143,19 +156,31 @@ def get_ingredient(ingredient_id: int) -> PatchIngredientInputModel:
 
 
 def get_all_ingredients(self):
+    """
+    Get all ingredients
+    :param self:
+    :return:
+    """
     with db.connection.get_session() as session:
         ingredients = session.query(Ingredient).filter(Ingredient.is_deleted is False).all()
 
     return ingredients
 
 
-def update_ingredient(ingredient_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser):
-    # TODO Call get_ingredient() to check if ingredient exists
-    # TODO Make point to update ingredient input model
+def update_ingredient(
+    ingredient_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser
+) -> IngredientInputModel:
+    """
+    Update ingredient
+    :param ingredient_id:
+    :param field:
+    :param value:
+    :param user:
+    :return:
+    """
 
     if user.is_admin == False or user.id != get_ingredient(ingredient_id).created_by:
-        # TODO Add exception for unauthorized user
-        pass
+        raise UnauthorizedAccessException()
 
     with db.connection.get_session() as session:
         db_ingredient = (
@@ -182,11 +207,19 @@ def update_ingredient(ingredient_id: int, field: str, value: str, user: common.a
 def patch_ingredient(
     ingredient_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser
 ) -> PatchIngredientInputModel:
+    """
+    Patch ingredient
+    :param ingredient_id:
+    :param field:
+    :param value:
+    :param user:
+    :return:
+    """
+
     db_ingredient = get_ingredient(ingredient_id)
 
-    if user.is_admin == False or user.id != get_ingredient(ingredient_id).created_by:
-        # TODO Add exception for unauthorized user
-        pass
+    if user.is_admin == False or user.id != db_ingredient.created_by:
+        raise UnauthorizedAccessException()
 
     if db_ingredient.is_deleted:
         raise HTTPException(status_code=404, detail="Ingredient not found")
@@ -206,9 +239,8 @@ def patch_ingredient(
 def delete_ingredient(ingredient_id: int, user: common.authentication.AuthenticatedUser):
     db_ingredient = get_ingredient(ingredient_id)
 
-    if user.is_admin == False or user.id != get_ingredient(ingredient_id).created_by:
-        # TODO Add exception for unauthorized user
-        pass
+    if user.is_admin == False or user.id != db_ingredient.created_by:
+        raise UnauthorizedAccessException()
 
     if db_ingredient.is_deleted:
         raise HTTPException(status_code=404, detail="Ingredient not found")
@@ -254,19 +286,25 @@ def get_category_by_id(category_id: int) -> Type[RecipeCategory]:
 def update_category(
     category_id: int, field: str, value: str, updated_by: int, user: common.authentication.AuthenticatedUser
 ) -> Type[RecipeCategory]:
-    """Update category"""
-
+    """
+    Update category
+    :param category_id:
+    :param field:
+    :param value:
+    :param updated_by:
+    :param user:
+    :return:
+    """
     category = get_category_by_id(category_id)
 
     if user.is_admin == False or user.id != category.created_by:
-        # TODO Add exception for unauthorized user
-        pass
+        raise UnauthorizedAccessException()
 
     try:
         with db.connection.get_session() as session:
             session.execute(
                 update(RecipeCategory),
-                [{"id": category.id, f"{field}": value, "updated_by": updated_by}],
+                [{"id": category.id, f"{field}": value, "updated_by": user}],
             )
             session.commit()
             RecipeCategory.__setattr__(category, field, value)
