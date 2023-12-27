@@ -14,7 +14,6 @@ from .exceptions import (
     InstructionNotFoundException,
     InstructionNameViolationException,
     RecipeWithInstructionNotFoundException,
-    UnauthorizedAccessException,
 )
 from .helpers import paginate_recipes
 from .input_models import CreateInstructionInputModel, PSFRecipesInputModel
@@ -255,44 +254,20 @@ def update_whole_recipe(recipe_id: int, user: Optional[common.authentication.Aut
     :return:
     """
 
-    # recipe = get_recipe_by_id(recipe_id)
-    #
-    # if not recipe:
-    #     raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
-    #
-    # if recipe.created_by != user:
-    #     raise UnauthorizedAccessException("You are not allowed to edit this recipe")
-    #
-    # with db.connection.get_session() as session:
-    #     instructions = recipe_update.pop("instructions", None)
-    #     recipe = Recipe(**recipe_update)
-    #     recipe.instructions = instructions
-    #
-    #     session.commit()
-    #     logging.info(f"Recipe #{recipe_id} was updated")
-    # return recipe
-
-    recipe = get_recipe_by_id(recipe_id, user=user)
-
-    if not recipe:
-        raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
-
-    if recipe.created_by != user:
-        raise UnauthorizedAccessException("You are not allowed to edit this recipe")
-
     with db.connection.get_session() as session:
-        existing_recipe = session.query(Recipe).filter_by(id=recipe_id).first()
+        recipe = session.query(Recipe).filter_by(id=recipe_id).first()
 
-        if not existing_recipe:
+        if not recipe:
             raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
 
-        for key, value in recipe_update.items():
-            setattr(existing_recipe, key, value)
+        recipe_update = {k: v for k, v in recipe_update.items() if v is not None and not isinstance(v, list)}
+
+        session.query(Recipe).filter_by(id=recipe_id).update(recipe_update, synchronize_session=False)
 
         session.commit()
         logging.info(f"User {user} updated Recipe (#{recipe_id}). Set {recipe_update}")
 
-    return existing_recipe
+    return recipe
 
 
 def patch_recipe(recipe_id: int, user: Optional[common.authentication.AuthenticatedUser], recipe_update: dict):
@@ -305,12 +280,6 @@ def patch_recipe(recipe_id: int, user: Optional[common.authentication.Authentica
     """
 
     recipe = get_recipe_by_id(recipe_id, user=user)
-
-    if not recipe:
-        raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
-
-    if recipe.created_by != user:
-        raise UnauthorizedAccessException("You are not allowed to edit this recipe")
 
     with db.connection.get_session() as session:
         existing_recipe = session.query(Recipe).filter_by(id=recipe_id).first()
