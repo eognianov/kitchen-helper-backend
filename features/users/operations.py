@@ -336,10 +336,10 @@ def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
     confirmation_link = None
     if token_type == TokenTypes.EMAIL_CONFIRMATION:
         template_name = "confirmation-email-template.html"
-        confirmation_link = f"{config.server.host}:{config.server.port}/users/confirm-email/{token}"
+        confirmation_link = f"{config.server.host}:{config.server.port}/api/users/confirm-email/{token}"
     elif token_type == TokenTypes.PASSWORD_RESET:
         template_name = "password-reset-email.html"
-        confirmation_link = f"{config.server.host}:{config.server.port}/users/reset-password/{token}"
+        confirmation_link = f"{config.server.host}:{config.server.port}/api/users/reset-password/{token}"
 
     template = templates.get_template(template_name)
 
