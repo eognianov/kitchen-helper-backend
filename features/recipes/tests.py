@@ -408,6 +408,65 @@ class TestRecipe:
             "instructions": [],
         }
 
+    def test_update_recipe_successful(self, use_test_db, bypass_published_filter, mocker):
+        operations.create_category("Category name", 1)
+        operations.create_recipe(**self.recipe)
+
+        with db.connection.get_session() as session:
+            recipes = session.query(Recipe).all()
+            recipe = session.query(Recipe).first()
+
+        assert len(recipes) == 1
+        assert recipe.name == "name"
+        assert recipe.time_to_prepare == 0
+        assert recipe.category_id == 1
+        assert recipe.picture == ""
+        assert recipe.summary == "summary"
+        assert recipe.calories == 1
+        assert recipe.carbo == 1
+        assert recipe.fats == 1
+        assert recipe.proteins == 1
+        assert recipe.cholesterol == 1
+        assert recipe.created_by == 1
+        assert recipe.instructions == []
+
+        recipe_update = {
+            "name": "updated_name",
+            "time_to_prepare": 10,
+            "category_id": 1,
+            "picture": "",
+            "summary": "summary_1",
+            "calories": 2,
+            "carbo": 2,
+            "fats": 2,
+            "proteins": 2,
+            "cholesterol": 2,
+            "created_by": 2,
+            "is_published": True,
+            "is_deleted": False,
+            "deleted_on": None,
+            "deleted_by": None,
+            "updated_by": 2,
+            "instructions": [],
+        }
+
+        operations.update_whole_recipe(recipe_id=recipe.id, user=recipe.created_by, recipe_update=recipe_update)
+
+        with db.connection.get_session() as session:
+            updated_recipe = session.query(Recipe).filter_by(id=recipe.id).first()
+
+        assert updated_recipe.name == "updated_name"
+        assert updated_recipe.time_to_prepare == 10
+        assert updated_recipe.category_id == 1
+        assert updated_recipe.picture == ""
+        assert updated_recipe.summary == "summary_1"
+        assert updated_recipe.calories == 2
+        assert updated_recipe.carbo == 2
+        assert updated_recipe.fats == 2
+        assert updated_recipe.proteins == 2
+        assert updated_recipe.cholesterol == 2
+        assert updated_recipe.created_by == 2
+
     def test_patch_recipe_successful(self, use_test_db, bypass_published_filter, mocker):
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
@@ -439,3 +498,22 @@ class TestRecipe:
         }
 
         operations.patch_recipe(recipe_id=recipe.id, user=recipe.created_by, recipe_update=recipe_update)
+
+        with db.connection.get_session() as session:
+            updated_recipe = session.query(Recipe).filter_by(id=recipe.id).first()
+
+        # Make sure that the recipe was updated with the new values
+        assert updated_recipe.name == "updated_name"
+        assert updated_recipe.time_to_prepare == 10
+        assert updated_recipe.calories == 2
+        assert updated_recipe.fats == 2
+        assert updated_recipe.proteins == 2
+
+        # Make sure that the recipe values that must not be updated are the same
+        assert updated_recipe.category_id == 1
+        assert updated_recipe.picture == ""
+        assert updated_recipe.summary == "summary"
+        assert updated_recipe.carbo == 1
+        assert updated_recipe.cholesterol == 1
+        assert updated_recipe.created_by == 1
+        assert updated_recipe.instructions == []

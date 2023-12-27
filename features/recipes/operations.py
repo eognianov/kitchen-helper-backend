@@ -270,6 +270,7 @@ def update_whole_recipe(recipe_id: int, user: Optional[common.authentication.Aut
 
         session.commit()
         logging.info(f"Recipe #{recipe_id} was updated")
+    return recipe
 
 
 def patch_recipe(recipe_id: int, user: Optional[common.authentication.AuthenticatedUser], recipe_update: dict):
