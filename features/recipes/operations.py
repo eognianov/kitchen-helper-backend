@@ -255,7 +255,24 @@ def update_whole_recipe(recipe_id: int, user: Optional[common.authentication.Aut
     :return:
     """
 
-    recipe = get_recipe_by_id(recipe_id)
+    # recipe = get_recipe_by_id(recipe_id)
+    #
+    # if not recipe:
+    #     raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
+    #
+    # if recipe.created_by != user:
+    #     raise UnauthorizedAccessException("You are not allowed to edit this recipe")
+    #
+    # with db.connection.get_session() as session:
+    #     instructions = recipe_update.pop("instructions", None)
+    #     recipe = Recipe(**recipe_update)
+    #     recipe.instructions = instructions
+    #
+    #     session.commit()
+    #     logging.info(f"Recipe #{recipe_id} was updated")
+    # return recipe
+
+    recipe = get_recipe_by_id(recipe_id, user=user)
 
     if not recipe:
         raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
@@ -264,13 +281,18 @@ def update_whole_recipe(recipe_id: int, user: Optional[common.authentication.Aut
         raise UnauthorizedAccessException("You are not allowed to edit this recipe")
 
     with db.connection.get_session() as session:
-        instructions = recipe_update.pop("instructions", None)
-        recipe = Recipe(**recipe_update)
-        recipe.instructions = instructions
+        existing_recipe = session.query(Recipe).filter_by(id=recipe_id).first()
+
+        if not existing_recipe:
+            raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
+
+        for key, value in recipe_update.items():
+            setattr(existing_recipe, key, value)
 
         session.commit()
-        logging.info(f"Recipe #{recipe_id} was updated")
-    return recipe
+        logging.info(f"User {user} updated Recipe (#{recipe_id}). Set {recipe_update}")
+
+    return existing_recipe
 
 
 def patch_recipe(recipe_id: int, user: Optional[common.authentication.AuthenticatedUser], recipe_update: dict):
