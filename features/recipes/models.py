@@ -44,6 +44,10 @@ class Ingredient(DbBaseModel):
     is_deleted: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
     deleted_on: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True, init=False)
     deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
+    category: Mapped[IngredientCategory] = relationship(
+        "IngredientCategory", back_populates="recipes", default=None, lazy="selectin"
+    )
+    category_id: Mapped[int] = mapped_column(ForeignKey("INGREDIENT_CATEGORIES.id"), nullable=True, default=None)
 
 
 class RecipeCategory(DbBaseModel):

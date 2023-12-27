@@ -21,6 +21,7 @@ from .exceptions import (
     IngredientCategoryIntegrityViolation,
     IngredientIntegrityViolation,
     UnauthorizedAccessException,
+    IngredientNotFoundException,
 )
 from .helpers import paginate_recipes
 from .input_models import (
@@ -49,7 +50,7 @@ def get_all_ingredients_category() -> List[Optional[IngredientCategory]]:
     """
 
     with db.connection.get_session() as session:
-        return session.query(IngredientCategory).filter(IngredientCategory.is_deleted is False).all()
+        return session.query(IngredientCategory).all()
 
 
 def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
@@ -60,18 +61,18 @@ def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
     """
 
     with db.connection.get_session() as session:
-        category = session.query(IngredientCategory).filter(IngredientCategory.id == category_id).first()
+        category = session.query(IngredientCategory).where(IngredientCategory.id == category_id).first()
 
         if not category:
             raise IngredientCategoryNotFoundException()
         return category
 
 
-def patch_ingredient_category(
+def update_ingredient_category(
     category_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser
 ) -> Type[PatchIngredientCategoryInputModel]:
     """
-    Patch ingredient category
+    Update ingredient category
     :param category_id:
     :param field:
     :param value:
@@ -87,19 +88,18 @@ def patch_ingredient_category(
     try:
         with db.connection.get_session() as session:
             session.execute(
-                update(IngredientCategory)
-                .where(IngredientCategory.id == category_id)
-                .values({field: value, "updated_by": user.id})
+                update(IngredientCategory),
+                [{"id": category.id, f"{field}": value, "updated_by": user}],
             )
-            setattr(category, field, value)
             session.commit()
-
+            IngredientCategory.__setattr__(category, field, value)
+            logging.info(f"User {user} updated Ingredient Category (#{category_id}). Set {field} to {value}")
             return category
     except sqlalchemy.IntegrityError as ex:
         raise IngredientCategoryIntegrityViolation(ex)
 
 
-def create_ingredient_category(name: str, created_by: str) -> Type[PatchIngredientCategoryInputModel]:
+def create_ingredient_category(name: str, created_by: str) -> IngredientCategory:
     """
     Create ingredient category
     :param name:
@@ -113,155 +113,187 @@ def create_ingredient_category(name: str, created_by: str) -> Type[PatchIngredie
             session.add(category)
             session.commit()
             session.refresh(category)
+            logging.info(f"User {created_by} created Ingredient Category (#{category.id}).")
             return category
     except IntegrityError as ex:
         raise IngredientCategoryNameViolation(ex)
 
 
-def create_ingredient(ingredient: IngredientInputModel):
+def get_ingredient_by_id(ingredient_id: int, user: common.authentication.AuthenticatedUser = None):
+    filters = _get_published_filter_expression(user)
+
+    with db.connection.get_session() as session:
+        ingredient = (
+            session.query(Ingredient)
+            .join(Ingredient.category, isouter=True)
+            .where(Ingredient.id == ingredient_id)
+            .filter(and_(*filters))
+            .first()
+        )
+        if not ingredient:
+            raise IngredientNotFoundException
+        return ingredient
+
+
+def create_ingredient(
+    name: str,
+    calories: float,
+    carbo: float,
+    fats: float,
+    protein: float,
+    cholesterol: float,
+    measurement: str,
+    is_deleted: bool,
+    deleted_on: datetime,
+    deleted_by: int,
+    category_id: int,
+    created_by: int,
+):
     """
     Create ingredient
-    :param ingredient:
+    :param name:
+    :param calories:
+    :param carbo:
+    :param fats:
+    :param protein:
+    :param cholesterol:
+    :param measurement:
+    :param created_by:
     :return:
     """
-    try:
-        db_ingredient = Ingredient(**ingredient.model_dump())
 
-        with db.connection.get_session() as session:
-            session.add(db_ingredient)
-            session.commit()
-            session.refresh(db_ingredient)
+    category = None
+    if category_id:
+        category = get_ingredient_category_by_id(category_id)
 
-        return db_ingredient
+    ingredient = Ingredient(
+        name=name,
+        calories=calories,
+        carbo=carbo,
+        fats=fats,
+        protein=protein,
+        cholesterol=cholesterol,
+        measurement=measurement,
+        is_deleted=is_deleted,
+        deleted_on=deleted_on,
+        deleted_by=deleted_by,
+        category=category,
+        created_by=created_by,
+    )
 
-    except IntegrityError as ex:
-        raise IngredientIntegrityViolation(ex)
+    with db.connection.get_session() as session:
+        session.add(ingredient)
+        session.commit()
+        session.refresh(ingredient)
+
+    logging.info(f"User {created_by} created Ingredient (#{ingredient.id}).")
+    return ingredient
 
 
-def get_ingredient(ingredient_id: int) -> PatchIngredientInputModel:
+def get_ingredient_by_id(ingredient_id: int, user: common.authentication.AuthenticatedUser = None):
     """
     Get ingredient
     :param ingredient_id:
     :return:
     """
+
+    filters = _get_published_filter_expression(user)
+
     with db.connection.get_session() as session:
         ingredient = (
-            session.query(Ingredient).filter(Ingredient.id == ingredient_id, Ingredient.is_deleted is False).first()
+            session.query(Ingredient)
+            .join(Ingredient.category, isouter=True)
+            .where(Ingredient.id == ingredient_id)
+            .filter(and_(*filters))
+            .first()
         )
 
         if not ingredient:
-            raise HTTPException(status_code=404, detail="Ingredient not found")
+            raise IngredientNotFoundException
 
     return ingredient
 
 
-def get_all_ingredients(self):
+def get_all_ingredients(
+    paginated_input_model: PSFRecipesInputModel, user: common.authentication.AuthenticatedUser
+) -> PSFRecipesResponseModel:
     """
-    Get all ingredients
-    :param self:
+    Get all ingredients paginated, sorted, and filtered
+    :param paginated_input_model:
+    :param user:
     :return:
     """
+
+    filter_expression = paginated_input_model.filter_expression
+    order_expression = paginated_input_model.order_expression
+    published_expression = _get_published_filter_expression(user)
+    filter_expression.extend(published_expression)
+
     with db.connection.get_session() as session:
-        ingredients = session.query(Ingredient).filter(Ingredient.is_deleted is False).all()
+        filtered_ingredients = (
+            session.query(Ingredient)
+            .join(IngredientCategory, isouter=True)
+            .filter(
+                *filter_expression,
+            )
+            .order_by(*order_expression)
+        )
 
-    return ingredients
+        response = paginate_recipes(filtered_ingredients, paginated_input_model)
+    return response
 
 
-def update_ingredient(ingredient_id: int, user: common.authentication.AuthenticatedUser) -> IngredientInputModel:
+def update_ingredient(
+    ingredient_id: int, user: Optional[common.authentication.AuthenticatedUser], ingredient_update: dict
+):
     """
     Update ingredient
     :param ingredient_id:
-    :param field:
-    :param value:
     :param user:
+    :param recipe_update:
     :return:
     """
 
-    db_ingredient = get_ingredient(ingredient_id)
+    with db.connection.get_session() as session:
+        ingredient = session.query(Ingredient).filter_by(id=ingredient_id).first()
 
-    if user.is_admin == False or user.id != db_ingredient.created_by:
-        raise UnauthorizedAccessException()
+        if not ingredient:
+            raise RecipeNotFoundException(f"Ingredient #{ingredient_id} not found")
 
-    if db_ingredient.is_deleted:
-        raise HTTPException(status_code=404, detail="Ingredient not found")
+        ingredient_update = {k: v for k, v in ingredient_update.items() if v is not None and not isinstance(v, list)}
 
-    try:
-        with db.connection.get_session() as session:
-            session.execute(
-                update(Ingredient).where(Ingredient.id == ingredient_id),
-                [
-                    {
-                        'id': db_ingredient.id,
-                        'name': db_ingredient.name,
-                        'calories': db_ingredient.calories,
-                        'carbo': db_ingredient.carbo,
-                        'fats': db_ingredient.fats,
-                        'proteins': db_ingredient.proteins,
-                        'cholesterol': db_ingredient.cholesterol,
-                        'measurement': db_ingredient.measurement,
-                    }
-                ],
-            )
-            session.commit()
-            logging.info(f"Ingredient #{ingredient_id} was updated")
+        session.query(Ingredient).filter_by(id=ingredient_id).update(ingredient_update, synchronize_session=False)
 
-    except IntegrityError as ex:
-        raise IngredientIntegrityViolation(ex)
+        session.commit()
+        logging.info(f"User {user} updated Ingredient (#{ingredient_id}). Set {ingredient_update}")
+
+        return ingredient
 
 
-def patch_ingredient(
-    ingredient_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser
-) -> PatchIngredientInputModel:
+def delete_ingredient(ingredient_id: int, deleted_by: common.authentication.authenticated_user):
     """
-    Patch ingredient
+    Delete ingredient
     :param ingredient_id:
-    :param field:
-    :param value:
-    :param user:
+    :param deleted_by:
     :return:
     """
 
-    db_ingredient = get_ingredient(ingredient_id)
+    ingredient = get_ingredient_by_id(ingredient_id)
 
-    if user.is_admin == False or user.id != db_ingredient.created_by:
-        raise UnauthorizedAccessException()
-
-    if db_ingredient.is_deleted:
-        raise HTTPException(status_code=404, detail="Ingredient not found")
-
-    try:
-        with db.connection.get_session() as session:
-            session.execute(update(Ingredient).where(Ingredient.id == ingredient_id).values({field: value}))
-            setattr(db_ingredient, field, value)
-            session.commit()
-
-            return db_ingredient
-
-    except IntegrityError as ex:
-        raise IngredientIntegrityViolation(ex)
-
-
-def delete_ingredient(ingredient_id: int, user: common.authentication.AuthenticatedUser):
-    db_ingredient = get_ingredient(ingredient_id)
-
-    if user.is_admin == False or user.id != db_ingredient.created_by:
-        raise UnauthorizedAccessException()
-
-    if db_ingredient.is_deleted:
-        raise HTTPException(status_code=404, detail="Ingredient not found")
-
-    try:
-        with db.connection.get_session() as session:
-            session.execute(update(Ingredient).where(Ingredient.id == ingredient_id).values({"is_deleted": True}))
-            db_ingredient.is_deleted = True
-
-            session.commit()
-            session.refresh(db_ingredient)
-
-            return {"message": "Ingredient soft-deleted"}
-
-    except IntegrityError as ex:
-        raise IngredientIntegrityViolation(ex)
+    with db.connection.get_session() as session:
+        session.execute(
+            update(Ingredient),
+            [
+                {
+                    "id": ingredient.id,
+                    "is_deleted": True,
+                    "deleted_on": datetime.utcnow(),
+                    "deleted_by": deleted_by.id,
+                }
+            ],
+        )
+        session.commit()
+        return ingredient
 
 
 def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
@@ -273,7 +305,7 @@ def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
         return session.query(RecipeCategory).all()
 
 
-def get_category_by_id(category_id: int) -> Type[RecipeCategory]:
+def get_recipe_category_by_id(category_id: int) -> Type[RecipeCategory]:
     """
     Get category by id
 
@@ -292,7 +324,7 @@ def update_category(
     category_id: int, field: str, value: str, updated_by: int, user: common.authentication.AuthenticatedUser
 ) -> Type[RecipeCategory]:
     """
-    Update category
+    Update recipe category
     :param category_id:
     :param field:
     :param value:
@@ -300,7 +332,7 @@ def update_category(
     :param user:
     :return:
     """
-    category = get_category_by_id(category_id)
+    category = get_recipe_category_by_id(category_id)
 
     if user.is_admin == False or user.id != category.created_by:
         raise UnauthorizedAccessException()
@@ -369,7 +401,7 @@ def create_recipe(
 
     category = None
     if category_id:
-        category = get_category_by_id(category_id)
+        category = get_recipe_category_by_id(category_id)
 
     recipe = Recipe(
         name=name,
