@@ -496,7 +496,7 @@ class TestUserOperations:
         """
         user = operations.create_new_user(user=input_models.RegisterUserInputModel(**USER_DATA))
         token = operations.generate_email_password_token(user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION)
-        confirmation_link = f"{config.server.host}:{config.server.port}/users/confirm-email/{token.token}"
+        confirmation_link = f"{config.server.host}:{config.server.port}/api/users/confirm-email/{token.token}"
         html_content = operations._prepare_mail_template(
             token_type=token.token_type, token=token.token, recipient=user.email
         )
@@ -513,7 +513,7 @@ class TestUserOperations:
         """
         user = operations.create_new_user(user=input_models.RegisterUserInputModel(**USER_DATA))
         token = operations.generate_email_password_token(user=user, token_type=constants.TokenTypes.PASSWORD_RESET)
-        confirmation_link = f"{config.server.host}:{config.server.port}/users/reset-password/{token.token}"
+        confirmation_link = f"{config.server.host}:{config.server.port}/api/users/reset-password/{token.token}"
         html_content = operations._prepare_mail_template(
             token_type=token.token_type, token=token.token, recipient=user.email
         )
@@ -851,7 +851,7 @@ class TestUserEndpoints:
         """
         with patch("features.users.operations._send_mail", new_callable=AsyncMock) as mock_send_mail:
             mock_send_mail.return_value = {"status": 201}
-            response = cls.client.post("/users/signup/", json=USER_DATA)
+            response = cls.client.post("/api/users/signup/", json=USER_DATA)
 
             assert response.json()["id"] == 1
             assert response.json()["username"] == USER_DATA["username"]
@@ -876,7 +876,7 @@ class TestUserEndpoints:
         operations.create_new_user(user=input_models.RegisterUserInputModel(**USER_DATA))
         with patch("features.users.operations._send_mail", new_callable=AsyncMock) as mock_send_mail:
             mock_send_mail.return_value = {"status": 201}
-            response = cls.client.post("/users/signup/", json=USER_DATA)
+            response = cls.client.post("/api/users/signup/", json=USER_DATA)
 
         assert response.status_code == 409
         assert response.json()["detail"] == "User with this username or email already exists!"
@@ -893,7 +893,7 @@ class TestUserEndpoints:
             "features.users.operations._send_mail",
             side_effect=exceptions.FailedToSendEmailException(status_code=400, text="Bad Request"),
         ):
-            response = cls.client.post("/users/signup/", json=USER_DATA)
+            response = cls.client.post("/api/users/signup/", json=USER_DATA)
 
         assert response.status_code == 400
         assert response.json()["detail"] == "Failed to send email: Bad Request"
@@ -911,7 +911,7 @@ class TestUserEndpoints:
             "username": USER_DATA["username"],
             "password": USER_DATA["password"],
         }
-        response = cls.client.post("/users/signin/", data=payload)
+        response = cls.client.post("/api/users/signin/", data=payload)
 
         assert response.status_code == 200
         assert "access_token" in response.json()
@@ -928,7 +928,7 @@ class TestUserEndpoints:
 
         operations.create_new_user(user=input_models.RegisterUserInputModel(**USER_DATA))
         payload = {"username": "wrong username", "password": USER_DATA["password"]}
-        response = cls.client.post("/users/signin/", data=payload)
+        response = cls.client.post("/api/users/signin/", data=payload)
 
         assert response.status_code == 400
         assert response.json() == {"detail": "User does not exists"}
@@ -943,7 +943,7 @@ class TestUserEndpoints:
 
         operations.create_new_user(user=input_models.RegisterUserInputModel(**USER_DATA))
         payload = {"username": USER_DATA["username"], "password": "wrong password"}
-        response = cls.client.post("/users/signin/", data=payload)
+        response = cls.client.post("/api/users/signin/", data=payload)
 
         assert response.status_code == 403
         assert response.json() == {"detail": "Incorrect username or password"}
@@ -962,7 +962,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.get("/users/all/", headers=headers)
+        response = cls.client.get("/api/users/all/", headers=headers)
 
         assert response.status_code == 200
         assert response.json() == [
@@ -995,7 +995,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=all_users[0].id, user_role_ids=[x.id for x in all_users[0].roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.get("/users/all/", headers=headers)
+        response = cls.client.get("/api/users/all/", headers=headers)
 
         assert response.status_code == 200
         assert len(response.json()) == users
@@ -1011,7 +1011,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=user.id)
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.get(f"/users/{user.id}/", headers=headers)
+        response = cls.client.get(f"/api/users/{user.id}/", headers=headers)
 
         assert response.status_code == 200
         assert response.json() == {
@@ -1031,7 +1031,7 @@ class TestUserEndpoints:
         user = operations.create_new_user(user=input_models.RegisterUserInputModel(**USER_DATA))
         token, _ = operations.create_token(user_id=user.id)
 
-        response = cls.client.get(f"/users/{user.id}/")
+        response = cls.client.get(f"/api/users/{user.id}/")
 
         assert response.status_code == 401
 
@@ -1043,7 +1043,7 @@ class TestUserEndpoints:
         :return:
         """
         not_existing_user_id = 999
-        response = cls.client.get(f"/users/{not_existing_user_id}/")
+        response = cls.client.get(f"/api/users/{not_existing_user_id}/")
 
         assert response.status_code == 401
         assert response.json() == {"detail": "Unauthorized"}
@@ -1067,7 +1067,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.get(f"/users/{user.id}/", headers=headers)
+        response = cls.client.get(f"/api/users/{user.id}/", headers=headers)
 
         assert response.status_code == 200
         assert response.json() == {
@@ -1091,7 +1091,7 @@ class TestUserEndpoints:
         new_email = "new@test.com"
         data = {"field": "email", "value": new_email}
 
-        response = cls.client.patch(f"/users/{user.id}/", headers=headers, json=data)
+        response = cls.client.patch(f"/api/users/{user.id}/", headers=headers, json=data)
 
         assert response.status_code == 200
         assert response.json() == {'email': new_email, 'id': user.id, 'roles': user.roles, 'username': user.username}
@@ -1117,7 +1117,7 @@ class TestUserEndpoints:
         new_email = "new@test.com"
         data = {"field": "email", "value": new_email}
 
-        response = cls.client.patch(f"/users/{user.id}/", headers=headers, json=data)
+        response = cls.client.patch(f"/api/users/{user.id}/", headers=headers, json=data)
 
         assert response.status_code == 200
         assert response.json() == {'email': new_email, 'id': user.id, 'roles': user.roles, 'username': user.username}
@@ -1144,7 +1144,7 @@ class TestUserEndpoints:
         data = {"field": "email", "value": new_email}
         not_existing_user_id = 999
 
-        response = cls.client.patch(f"/users/{not_existing_user_id}/", headers=headers, json=data)
+        response = cls.client.patch(f"/api/users/{not_existing_user_id}/", headers=headers, json=data)
 
         assert response.status_code == 404
         assert response.json() == {'detail': f'User with user_id={not_existing_user_id} does not exist'}
@@ -1176,7 +1176,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.get("/roles/", headers=headers)
+        response = cls.client.get("/api/roles/", headers=headers)
 
         assert response.status_code == 200
         assert response.json() == response_roles
@@ -1209,7 +1209,7 @@ class TestUserEndpoints:
         headers = {"Authorization": f"Bearer {token}"}
         response_roles[0]["users"].append({'email': admin.email, 'id': admin.id, 'username': admin.username})
 
-        response = cls.client.get("/roles/", headers=headers, params={"include_users": True})
+        response = cls.client.get("/api/roles/", headers=headers, params={"include_users": True})
 
         assert response.status_code == 200
         assert response.json() == response_roles
@@ -1234,7 +1234,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.get(f"/roles/{role.id}", headers=headers)
+        response = cls.client.get(f"/api/roles/{role.id}", headers=headers)
 
         assert response.status_code == 200
         assert response.json() == {
@@ -1259,7 +1259,7 @@ class TestUserEndpoints:
         headers = {"Authorization": f"Bearer {token}"}
         data = {"name": "new_role"}
 
-        response = cls.client.post("/roles/", headers=headers, json=data)
+        response = cls.client.post("/api/roles/", headers=headers, json=data)
 
         assert response.status_code == 201
         assert response.json() == {'id': 2, 'name': 'new_role'}
@@ -1280,7 +1280,7 @@ class TestUserEndpoints:
         headers = {"Authorization": f"Bearer {token}"}
         data = {"name": "Admin"}
 
-        response = cls.client.post("/roles/", headers=headers, json=data)
+        response = cls.client.post("/api/roles/", headers=headers, json=data)
 
         assert response.status_code == 409
         assert response.json() == {'detail': 'Role already exist'}
@@ -1305,7 +1305,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.post(f"/users/{admin.id}/roles/{second_role.id}", headers=headers)
+        response = cls.client.post(f"/api/users/{admin.id}/roles/{second_role.id}", headers=headers)
 
         assert response.status_code == 201
 
@@ -1329,7 +1329,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.post(f"/users/{999}/roles/{second_role.id}", headers=headers)
+        response = cls.client.post(f"/api/users/{999}/roles/{second_role.id}", headers=headers)
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'User does not exist'}
@@ -1353,7 +1353,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.post(f"/users/{admin.id}/roles/{999}", headers=headers)
+        response = cls.client.post(f"/api/users/{admin.id}/roles/{999}", headers=headers)
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'Role does not exist'}
@@ -1377,7 +1377,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.post(f"/users/{admin.id}/roles/{role.id}", headers=headers)
+        response = cls.client.post(f"/api/users/{admin.id}/roles/{role.id}", headers=headers)
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'User already have this role'}
@@ -1401,7 +1401,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.delete(f"/users/{admin.id}/roles/{role.id}", headers=headers)
+        response = cls.client.delete(f"/api/users/{admin.id}/roles/{role.id}", headers=headers)
 
         assert response.status_code == 204
 
@@ -1425,7 +1425,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.delete(f"/users/{999}/roles/{second_role.id}", headers=headers)
+        response = cls.client.delete(f"/api/users/{999}/roles/{second_role.id}", headers=headers)
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'User does not exist'}
@@ -1449,7 +1449,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.delete(f"/users/{admin.id}/roles/{999}", headers=headers)
+        response = cls.client.delete(f"/api/users/{admin.id}/roles/{999}", headers=headers)
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'Role does not exist'}
@@ -1474,7 +1474,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.delete(f"/users/{user.id}/roles/{role.id}", headers=headers)
+        response = cls.client.delete(f"/api/users/{user.id}/roles/{role.id}", headers=headers)
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'No user with this role'}
@@ -1501,7 +1501,7 @@ class TestUserEndpoints:
         )
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.get(f"/users/confirm-email/{confirmation_token.token}", headers=headers)
+        response = cls.client.get(f"/api/users/confirm-email/{confirmation_token.token}", headers=headers)
 
         assert response.status_code == 200
 
@@ -1528,7 +1528,7 @@ class TestUserEndpoints:
         operations.expire_all_existing_tokens_for_user(user=admin, token_type=constants.TokenTypes.EMAIL_CONFIRMATION)
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.get(f"/users/confirm-email/{confirmation_token.token}", headers=headers)
+        response = cls.client.get(f"/api/users/confirm-email/{confirmation_token.token}", headers=headers)
 
         assert response.status_code == 400
         assert response.json() == {'detail': 'Invalid token'}
@@ -1548,7 +1548,7 @@ class TestUserEndpoints:
             token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
             data = {"email": user.email}
             headers = {"Authorization": f"Bearer {token}"}
-            response = cls.client.post("/users/request-password-reset/", headers=headers, params=data)
+            response = cls.client.post("/api/users/request-password-reset/", headers=headers, params=data)
 
         assert response.status_code == 200
 
@@ -1567,7 +1567,7 @@ class TestUserEndpoints:
             token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
             data = {"email": user.email}
             headers = {"Authorization": f"Bearer {token}"}
-            response = cls.client.post("/users/request-password-reset/", headers=headers, params=data)
+            response = cls.client.post("/api/users/request-password-reset/", headers=headers, params=data)
 
         assert response.status_code == 400
         assert response.json() == {'detail': 'Failed to send email: Bad Request'}
@@ -1585,7 +1585,7 @@ class TestUserEndpoints:
         data = {"email": "invalid_email@test.com"}
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.post("/users/request-password-reset/", headers=headers, params=data)
+        response = cls.client.post("/api/users/request-password-reset/", headers=headers, params=data)
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'User not found'}
@@ -1614,7 +1614,7 @@ class TestUserEndpoints:
         headers = {"Authorization": f"Bearer {token}"}
 
         response = cls.client.post(
-            f"/users/reset-password/{reset_token.token}/?new_password={new_password}",
+            f"/api/users/reset-password/{reset_token.token}/?new_password={new_password}",
             headers=headers,
         )
 
@@ -1645,7 +1645,7 @@ class TestUserEndpoints:
         headers = {"Authorization": f"Bearer {token}"}
 
         response = cls.client.post(
-            f"/users/reset-password/{reset_token.token}/?new_password={new_password}",
+            f"/api/users/reset-password/{reset_token.token}/?new_password={new_password}",
             headers=headers,
         )
 
@@ -1677,7 +1677,7 @@ class TestUserEndpoints:
         headers = {"Authorization": f"Bearer {token}"}
 
         response = cls.client.post(
-            f"/users/reset-password/{reset_token.token}/?new_password={new_password}",
+            f"/api/users/reset-password/{reset_token.token}/?new_password={new_password}",
             headers=headers,
         )
 
@@ -1709,7 +1709,7 @@ class TestUserEndpoints:
         headers = {"Authorization": f"Bearer {token}"}
 
         response = cls.client.post(
-            f"/users/reset-password/{reset_token.token}/?new_password={new_password}",
+            f"/api/users/reset-password/{reset_token.token}/?new_password={new_password}",
             headers=headers,
         )
 
