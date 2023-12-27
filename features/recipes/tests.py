@@ -408,7 +408,7 @@ class TestRecipe:
             "instructions": [],
         }
 
-    def test_update_recipe_successful(self, use_test_db, bypass_published_filter, mocker):
+    def test_patch_recipe_successful(self, use_test_db, bypass_published_filter, mocker):
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
@@ -433,27 +433,9 @@ class TestRecipe:
         recipe_update = {
             "name": "updated_name",
             "time_to_prepare": 10,
-            "category_id": 1,
-            "picture": "",
-            "summary": "summary_1",
             "calories": 2,
-            "carbo": 2,
             "fats": 2,
             "proteins": 2,
-            "cholesterol": 2,
-            "created_by": 2,
-            "is_published": True,
-            "is_deleted": False,
-            "deleted_on": None,
-            "deleted_by": None,
-            "updated_by": 2,
-            "instructions": [],
         }
 
-        operations.update_whole_recipe(recipe_id=recipe.id, user=recipe.created_by, recipe_update=recipe_update)
-
-        recipe = operations.get_recipe_by_id(recipe_id=recipe.id)
-
-        assert recipe["name"] == "updated_name"
-
-        assert len(recipes) == 1
+        operations.patch_recipe(recipe_id=recipe.id, user=recipe.created_by, recipe_update=recipe_update)

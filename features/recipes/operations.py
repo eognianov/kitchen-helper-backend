@@ -272,13 +272,12 @@ def update_whole_recipe(recipe_id: int, user: Optional[common.authentication.Aut
         logging.info(f"Recipe #{recipe_id} was updated")
 
 
-def patch_recipe(recipe_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser) -> Type[Recipe]:
+def patch_recipe(recipe_id: int, user: Optional[common.authentication.AuthenticatedUser], recipe_update: dict):
     """
     Patch Recipe
     :param recipe_id:
-    :param field:
-    :param value:
     :param user:
+    :param recipe_update:
     :return:
     """
 
@@ -287,15 +286,22 @@ def patch_recipe(recipe_id: int, field: str, value: str, user: common.authentica
     if not recipe:
         raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
 
-    if recipe.created_by != user.id or not user.is_admin:
+    if recipe.created_by != user:
         raise UnauthorizedAccessException("You are not allowed to edit this recipe")
 
     with db.connection.get_session() as session:
-        session.execute(update(Recipe).where(Recipe.id == recipe.id).values({f"{field}": value, "updated_by": user}))
+        existing_recipe = session.query(Recipe).filter_by(id=recipe_id).first()
+
+        if not existing_recipe:
+            raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
+
+        for key, value in recipe_update.items():
+            setattr(existing_recipe, key, value)
+
         session.commit()
-        Recipe.__setattr__(recipe, field, value)
-        logging.info(f"User {user} updated Recipe (#{recipe_id}). Set {field} to {value}")
-        return recipe
+        logging.info(f"User {user} updated Recipe (#{recipe_id}). Set {recipe_update}")
+
+    return existing_recipe
 
 
 def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe_id: int) -> None:
