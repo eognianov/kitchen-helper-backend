@@ -610,79 +610,43 @@ class TestGetRecipeByIdOperations:
             get_recipe_by_id(1)
 
 
-class TestUpdateRecipeOperation:
-    def test_update_specified_field(self):
-        recipe_id = 1
-        field = "name"
-        value = "New Recipe Name"
-        updated_by = "User1"
-
-        updated_recipe = update_recipe(recipe_id, field, value, updated_by)
-
-        self.assertEqual(updated_recipe.name, value)
-        self.assertEqual(updated_recipe.updated_by, updated_by)
-
-    def test_update_recipe_raises_http_exception_if_recipe_not_found(self):
-        with self.assertRaises(HTTPException) as context:
-            update_recipe(recipe_id=1, field="name", value="New Recipe Name", updated_by="John Die")
-
-        self.assertEqual(context.exception.status_code, 404)
-
-
-# TODO Make test for patching the recipe
-
-
 class TestDeleteRecipeOperation:
-    def test_delete_recipe_success(self):
-        recipe_id = 1
-        deleted_by = 1
+    def setup(self):
+        self.recipe = {
+            "name": "name",
+            "time_to_prepare": 0,
+            "category_id": 1,
+            "picture": "",
+            "summary": "summary",
+            "calories": 1,
+            "carbo": 1,
+            "fats": 1,
+            "proteins": 1,
+            "cholesterol": 1,
+            "created_by": 1,
+            "instructions": [],
+        }
 
-        recipe = Recipe(id=recipe_id, is_deleted=False, is_published=True)
+    def test_delete_recipe_success(self, use_test_db, bypass_published_filter, mocker):
+        operations.create_category("Category 1", 1)
+        operations.create_recipe(**self.recipe)
 
-        mocker.patch("path.to.get_recipe_by_id", return_value=recipe)
-        session_mock = mocker.MagicMock()
-        session_mock.execute.return_value = None
-        session_mock.commit.return_value = None
-        mocker.patch("path.to.db.connection.get_session", return_value=session_mock)
+        with db.connection.get_session() as session:
+            recipes = session.query(Recipe).all()
+            recipe = session.query(Recipe).first()
 
-        result = delete_recipe(recipe_id=recipe_id, deleted_by=deleted_by)
+        assert len(recipes) == 1
 
-        assert result == recipe
+        deleted_by = common.authentication.AuthenticatedUser(id=1)
 
-        session_mock.execute.assert_called_with(
-            update(Recipe),
-            [{"id": recipe.id, "is_deleted": True, "deleted_on": datetime.utcnow(), "deleted_by": deleted_by}],
-        )
-        session_mock.commit.assert_called_once()
+        operations.delete_recipe(recipe_id=recipe.id, deleted_by=deleted_by)
 
-    def test_delete_recipe_marks_as_deleted(self):
-        recipe_id = 1
-        deleted_by = 1
+        with db.connection.get_session() as session:
+            deleted_recipe = session.query(Recipe).filter_by(id=recipe.id, is_deleted=True).first()
 
-        recipe = Recipe(id=recipe_id, is_deleted=False, is_published=True)
+            assert deleted_recipe is not None
+            assert deleted_recipe.id == recipe.id
+            assert deleted_recipe.is_deleted is True
+            assert deleted_recipe.deleted_by == deleted_by.id
 
-        mocker.patch("path.to.get_recipe_by_id", return_value=recipe)
-        session_mock = mocker.MagicMock()
-        session_mock.execute.return_value = None
-        session_mock.commit.return_value = None
-        mocker.patch("path.to.db.connection.get_session", return_value=session_mock)
-
-        delete_recipe(recipe_id=recipe_id, deleted_by=deleted_by)
-
-        assert recipe.is_deleted is True
-
-    def test_delete_recipe_raise_exception_if_recipe_not_found(self):
-        mocker.patch("path.to.get_recipe_by_id", side_effect=RecipeNotFoundException)
-
-        with self.assertRaises(Exception):
-            delete_recipe(recipe_id=1, deleted_by=1)
-
-    def test_exception_no_modification(self):
-        with patch('module.get_recipe_by_id', side_effect=RecipeNotFoundException):
-            with patch('module.session') as mock_session:
-                with self.assertRaises(RecipeNotFoundException):
-                    delete_recipe(recipe_id=1, deleted_by=1)
-
-                mock_session.execute.assert_not_called()
-
-                mock_session.commit.assert_not_called()
+        recipes_after_delete = session.query(Recipe).filter_by(is_deleted=False).all()
