@@ -61,9 +61,7 @@ class RecipeResponse(pydantic.BaseModel):
             self.category = CategoryShortResponse(**self.category.__dict__)
 
         if self.instructions:
-            self.instructions = [
-                InstructionResponse(**_.__dict__) for _ in self.instructions
-            ]
+            self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]
 
 
 class PSFRecipesResponseModel(pydantic.BaseModel):
@@ -77,22 +75,49 @@ class PSFRecipesResponseModel(pydantic.BaseModel):
     total_items: int
     recipes: list[RecipeResponse]
 
-class Ingredient(pydantic.BaseModel):
+
+class IngredientResponse:
     """Ingredient response"""
+
     id: int
     name: str
-    category_id: int
-    created_by: int
-    created_on: datetime.datetime
-    updated_by: Optional[int] = None
-    updated_on: Optional[datetime.datetime] = None
+    calories: float
+    carbo: float
+    fats: float
+    protein: float
+    cholesterol: float
+    measurement: str
+    is_deleted: Optional[bool] = False
+    deleted_on: Optional[datetime.datetime] = None
+    deleted_by: Optional[int] = None
+
+    category: CategoryShortResponse = None
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+# class PSFRIngredientsResponseModel(pydantic.BaseModel):
+#     """Ingredients pagination, sorting, and filtering response"""
+#
+#     page_number: int
+#     page_size: int
+#     previous_page: str | None
+#     next_page: str | None
+#     total_pages: int
+#     total_items: int
+#     # ingredients: list[IngredientResponse]
+#     ingredients: list[IngredientResponse] | Any = None
+#
+
 
 class IngredientCategory(pydantic.BaseModel):
     """Ingredient category response"""
+
     id: int
     name: str
     created_by: int
     created_on: datetime.datetime
     updated_by: Optional[int] = None
     updated_on: Optional[datetime.datetime] = None
-    ingredients: list[Ingredient] | Any = None
+    ingredients: list[IngredientResponse] | Any = None

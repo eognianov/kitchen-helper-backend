@@ -90,7 +90,7 @@ class IngredientInputModel(BaseModel):
     calories: float = Field(default=0, ge=0)
     carbo: float = Field(default=0, ge=0)
     fats: float = Field(default=0, ge=0)
-    proteins: float = Field(default=0, ge=0)
+    protein: float = Field(default=0, ge=0)
     cholesterol: float = Field(default=0, ge=0)
 
     measurement: str = Field(max_length=100)
