@@ -15,9 +15,7 @@ CPUS = multiprocessing.cpu_count()
 config = configuration.Config()
 
 logging = khLogging.Logger('api')
-
-app = fastapi.FastAPI()
-
+app = fastapi.FastAPI(docs_url='/api/docs', redoc_url='/api/redoc', openapi_url='/api/openai.json')
 cors_config = configuration.CorsSettings()
 
 app.add_middleware(
@@ -26,12 +24,12 @@ app.add_middleware(
 )
 
 
-app.include_router(features.health.router, prefix='/health')
-app.include_router(features.users.user_router, prefix='/users')
-app.include_router(features.users.role_router, prefix='/roles')
-app.include_router(features.recipes.category_router, prefix='/categories')
-app.include_router(features.recipes.recipes_router, prefix='/recipes')
-app.include_router(features.images.router, prefix='/images')
+app.include_router(features.health.router, prefix='/api/health')
+app.include_router(features.users.user_router, prefix='/api/users')
+app.include_router(features.users.role_router, prefix='/api/roles')
+app.include_router(features.recipes.category_router, prefix='/api/categories')
+app.include_router(features.recipes.recipes_router, prefix='/api/recipes')
+app.include_router(features.images.router, prefix='/api/images')
 app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 
 if __name__ == '__main__':
