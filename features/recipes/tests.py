@@ -408,7 +408,7 @@ class TestRecipe:
             "instructions": [],
         }
 
-    def test_update(self, use_test_db, bypass_published_filter, mocker):
+    def test_update_successful(self, use_test_db, bypass_published_filter, mocker):
         operations.create_category("Category name", 1)
         operations.create_recipe(**self.recipe)
 
