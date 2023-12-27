@@ -387,3 +387,74 @@ class TestInstructionsEndpoints:
         response = self.client.delete(f"/recipes/{1}/instructions/{2}", headers=headers)
         assert response.status_code == 404
         delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2, user=unittest.mock.ANY)
+
+
+class TestRecipe:
+    def setup(self):
+        self.client = TestClient(app)
+
+        self.recipe = {
+            "name": "name",
+            "time_to_prepare": 0,
+            "category_id": 1,
+            "picture": "",
+            "summary": "summary",
+            "calories": 1,
+            "carbo": 1,
+            "fats": 1,
+            "proteins": 1,
+            "cholesterol": 1,
+            "created_by": 1,
+            "instructions": [],
+        }
+
+    def test_update_whole_recipe_success(self, use_test_db, bypass_published_filter, user):
+        operations.create_category("Category", 1)
+        operations.create_recipe(**self.recipe)
+        recipe_id = 1
+
+        original_recipe = operations.get_recipe_by_id(recipe_id=recipe_id)
+
+        recipe_update = {
+            "name": "updated_name",
+            "time_to_prepare": 10,
+            "category_id": 1,
+            "picture": "",
+            "summary": "summary_1",
+            "calories": 2,
+            "carbo": 2,
+            "fats": 2,
+            "proteins": 2,
+            "cholesterol": 2,
+            "instructions": [],
+        }
+
+        operations.update_whole_recipe(
+            recipe_id=recipe_id, user=original_recipe.created_by, recipe_update=recipe_update
+        )
+
+        updated_recipe = operations.get_recipe_by_id(recipe_id=recipe_id)
+
+        # assert original_recipe.name == 'name'
+        assert original_recipe.time_to_prepare == 0
+        assert original_recipe.category_id == 1
+        assert original_recipe.picture == ''
+        assert original_recipe.summary == 'summary'
+        assert original_recipe.calories == 1
+        assert original_recipe.carbo == 1
+        assert original_recipe.fats == 1
+        assert original_recipe.proteins == 1
+        assert original_recipe.cholesterol == 1
+        assert original_recipe.created_by == 1
+
+        # assert updated_recipe.name == 'updated_name'
+        assert updated_recipe.time_to_prepare == 10
+        assert updated_recipe.category_id == 1
+        assert updated_recipe.picture == ''
+        assert updated_recipe.summary == 'summary_1'
+        assert updated_recipe.calories == 2
+        assert updated_recipe.carbo == 2
+        assert updated_recipe.fats == 2
+        assert updated_recipe.proteins == 2
+        assert updated_recipe.cholesterol == 2
+        assert updated_recipe.created_by == 2

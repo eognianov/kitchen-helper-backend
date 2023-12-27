@@ -246,11 +246,12 @@ def update_recipe(recipe_id: int) -> None:
     logging.info(f"Recipe #{recipe_id} was updated")
 
 
-def update_whole_recipe(recipe_id: int, user: common.authentication.AuthenticatedUser):
+def update_whole_recipe(recipe_id: int, user: Optional[common.authentication.AuthenticatedUser], recipe_update: dict):
     """
     Update recipe
     :param recipe_id:
     :param user:
+    :param recipe_update:
     :return:
     """
 
@@ -259,7 +260,7 @@ def update_whole_recipe(recipe_id: int, user: common.authentication.Authenticate
     if not recipe:
         raise RecipeNotFoundException(f"Recipe #{recipe_id} not found")
 
-    if recipe.created_by != user.id or not user.is_admin:
+    if recipe.created_by != user:
         raise UnauthorizedAccessException("You are not allowed to edit this recipe")
 
     with db.connection.get_session() as session:
