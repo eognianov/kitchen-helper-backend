@@ -264,31 +264,53 @@ def update_whole_recipe(recipe_id: int, user: Optional[common.authentication.Aut
         raise UnauthorizedAccessException("You are not allowed to edit this recipe")
 
     with db.connection.get_session() as session:
-        session.execute(
-            update(Recipe)
-            .where(Recipe.id == recipe.id)
-            .values(
-                {
-                    "id": recipe.id,
-                    "name": recipe.name,
-                    "time_to_prepare": recipe.time_to_prepare,
-                    "category_id": recipe.category_id,
-                    "picture": recipe.picture,
-                    "summary": recipe.summary,
-                    "calories": recipe.calories,
-                    "carbo": recipe.carbo,
-                    "fats": recipe.fats,
-                    "proteins": recipe.proteins,
-                    "cholesterol": recipe.cholesterol,
-                    "created_by": recipe.created_by,
-                    "is_published": recipe.is_published,
-                    "is_deleted": recipe.is_deleted,
-                    "deleted_on": recipe.deleted_on,
-                    "deleted_by": recipe.deleted_by,
-                    "updated_by": recipe.updated_by,
-                }
-            )
-        )
+        # session.execute(
+        #     update(Recipe)
+        #     .where(Recipe.id == recipe.id)
+        #     .values(
+        #         {
+        #             "id": recipe.id,
+        #             "name": recipe.name,
+        #             "time_to_prepare": recipe.time_to_prepare,
+        #             "category_id": recipe.category_id,
+        #             "picture": recipe.picture,
+        #             "summary": recipe.summary,
+        #             "calories": recipe.calories,
+        #             "carbo": recipe.carbo,
+        #             "fats": recipe.fats,
+        #             "proteins": recipe.proteins,
+        #             "cholesterol": recipe.cholesterol,
+        #             "created_by": recipe.created_by,
+        #             "is_published": recipe.is_published,
+        #             "is_deleted": recipe.is_deleted,
+        #             "deleted_on": recipe.deleted_on,
+        #             "deleted_by": recipe.deleted_by,
+        #             "updated_by": recipe.updated_by,
+        #         }
+        #     )
+        # )
+
+        # recipe.name = recipe_update["name"]
+        # recipe.time_to_prepare = recipe_update["time_to_prepare"]
+        # recipe.category_id = recipe_update["category_id"]
+        # recipe.picture = recipe_update["picture"]
+        # recipe.summary = recipe_update["summary"]
+        # recipe.calories = recipe_update["calories"]
+        # recipe.carbo = recipe_update["carbo"]
+        # recipe.fats = recipe_update["fats"]
+        # recipe.proteins = recipe_update["proteins"]
+        # recipe.cholesterol = recipe_update["cholesterol"]
+        # recipe.created_by = recipe_update["created_by"]
+        # recipe.is_published = recipe_update["is_published"]
+        # recipe.is_deleted = recipe_update["is_deleted"]
+        # recipe.deleted_on = recipe_update["deleted_on"]
+        # recipe.deleted_by = recipe_update["deleted_by"]
+        # recipe.updated_by = recipe_update["updated_by"]
+
+        instructions = recipe_update.pop("instructions", None)
+        recipe = Recipe(**recipe_update)
+        recipe.instructions = instructions
+
         session.commit()
         logging.info(f"Recipe #{recipe_id} was updated")
 
