@@ -156,6 +156,11 @@ class Config(CustomBaseSettings):
     celery: CelerySettings
 
     @property
+    def running_on_dev(self) -> bool:
+        """Check if app is running on dev"""
+        return self.context == ContextOptions.DEV
+
+    @property
     def connection_string(self):
         if self.database == DbTypeOptions.POSTGRES:
             return self.postgres.connection_string
