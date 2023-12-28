@@ -76,10 +76,9 @@ class PSFRecipesResponseModel(pydantic.BaseModel):
     recipes: list[RecipeResponse]
 
 
-class IngredientResponse:
+class IngredientResponse(pydantic.BaseModel):
     """Ingredient response"""
 
-    id: int
     name: str
     calories: float
     carbo: float
@@ -92,23 +91,6 @@ class IngredientResponse:
     deleted_by: Optional[int] = None
 
     category: CategoryShortResponse = None
-
-    class Config:
-        arbitrary_types_allowed = True
-
-
-# class PSFRIngredientsResponseModel(pydantic.BaseModel):
-#     """Ingredients pagination, sorting, and filtering response"""
-#
-#     page_number: int
-#     page_size: int
-#     previous_page: str | None
-#     next_page: str | None
-#     total_pages: int
-#     total_items: int
-#     # ingredients: list[IngredientResponse]
-#     ingredients: list[IngredientResponse] | Any = None
-#
 
 
 class IngredientCategory(pydantic.BaseModel):

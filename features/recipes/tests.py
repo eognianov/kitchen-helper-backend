@@ -17,7 +17,7 @@ from features.recipes.exceptions import (
     RecipesCategoryNameViolationException,
     RecipesCategoryNotFoundException,
 )
-from features.recipes.input_models import CreateInstructionInputModel, PSFRecipesInputModel
+from features.recipes.input_models import CreateInstructionInputModel
 
 
 @fixture

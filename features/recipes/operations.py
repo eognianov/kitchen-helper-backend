@@ -214,9 +214,7 @@ def get_ingredient_by_id(ingredient_id: int, user: common.authentication.Authent
     return ingredient
 
 
-def get_all_ingredients(
-    paginated_input_model: PSFRecipesInputModel, user: common.authentication.AuthenticatedUser
-) -> PSFRecipesResponseModel:
+def get_all_ingredients(user: common.authentication.AuthenticatedUser):
     """
     Get all ingredients paginated, sorted, and filtered
     :param paginated_input_model:
@@ -224,23 +222,15 @@ def get_all_ingredients(
     :return:
     """
 
-    filter_expression = paginated_input_model.filter_expression
-    order_expression = paginated_input_model.order_expression
-    published_expression = _get_published_filter_expression(user)
-    filter_expression.extend(published_expression)
-
     with db.connection.get_session() as session:
-        filtered_ingredients = (
-            session.query(Ingredient)
-            .join(IngredientCategory, isouter=True)
-            .filter(
-                *filter_expression,
-            )
-            .order_by(*order_expression)
+        ingredients = (
+            session.query(Ingredient).join(Ingredient.category, isouter=True).filter_by(is_deleted=False).all()
         )
 
-        response = paginate_recipes(filtered_ingredients, paginated_input_model)
-    return response
+        if not ingredients:
+            raise IngredientNotFoundException
+
+        return ingredients
 
 
 def update_ingredient(
