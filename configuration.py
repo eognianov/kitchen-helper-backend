@@ -1,12 +1,14 @@
 """Configuation module"""
+import logging
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
 from pydantic import BaseModel, model_validator
-from typing import Optional, List, Dict, Union
+from typing import Optional, List
 from enum import StrEnum, auto
 from celery import Celery
 
+import khLogging
 
 _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
@@ -139,18 +141,18 @@ class RabbitmqConfiguration(BaseModel):
 class CelerySettings(BaseModel):
     """Cloudinary settings"""
 
-    broker: str
-    backend: str
-    host: str
-    port: int
-    task_serializer: str
-    result_serializer: str
-    accept_content: List[str]
-    timezone: str
-    enable_utc: bool
-    broker_connection_retry_on_startup: bool
+    broker: Optional[str] = "pyamqp://"
+    backend: Optional[str] = "rpc://"
+    host: Optional[str] = "localhost"
+    port: Optional[int] = 5672
+    task_serializer: Optional[str] = "json"
+    result_serializer: Optional[str] = "json"
+    accept_content: Optional[List[str]] = ["json"]
+    timezone: Optional[str] = "UTC"
+    enable_utc: Optional[bool] = True
+    broker_connection_retry_on_startup: Optional[bool] = True
     include_tasks: List[str]
-    beat_schedule: Dict[str, Dict[str, Union[str, int]]]
+    beat_schedule: List[str]
 
 
 class Config(CustomBaseSettings):
@@ -180,10 +182,20 @@ class Config(CustomBaseSettings):
         if self.database == DbTypeOptions.POSTGRES and not self.postgres.are_all_fields_populated:
             raise ValueError("You have selected postgres as database but did not provide its configuration")
 
-    def get_broker_url(self) -> str:
+    def get_celery_broker_url(self) -> str:
         return (
             f"{self.celery.broker}{self.rabbitmq.user}:{self.rabbitmq.password}@{self.celery.host}:{self.celery.port}//"
         )
+
+    def get_celery_beat_schedule(self):
+        beat_schedule = {}
+        for task in self.celery.beat_schedule:
+            task_path, task_schedule = task.split("/")
+            beat_schedule[task_path.split(".")[-1]] = {
+                "task": task_path,
+                "schedule": int(task_schedule),
+            }
+        return beat_schedule
 
 
 class Cloudinary(CustomBaseSettings):
@@ -199,7 +211,7 @@ config = Config()
 
 celery = Celery(
     __name__,
-    broker=config.get_broker_url(),
+    broker=config.get_celery_broker_url(),
     backend=config.celery.backend,
     task_serializer=config.celery.task_serializer,
     result_serializer=config.celery.result_serializer,
@@ -208,5 +220,5 @@ celery = Celery(
     enable_utc=config.celery.enable_utc,
     broker_connection_retry_on_startup=config.celery.broker_connection_retry_on_startup,
     include=config.celery.include_tasks,
-    beat_schedule=config.celery.beat_schedule,
+    beat_schedule=config.get_celery_beat_schedule(),
 )
