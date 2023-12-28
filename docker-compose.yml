@@ -56,7 +56,7 @@ services:
   celery-workers:
     container_name: kitchen-helper-celery-workers
     build: ./
-    command: celery -A configuration.celery worker --loglevel=info
+    command: celery -A configuration.celery worker --loglevel=info --logfile=./logs/celery-worker.log
     volumes:
       - ./:/usr/src/app
     environment:
@@ -76,7 +76,7 @@ services:
   celery-beat:
     container_name: kitchen-helper-celery-beat
     build: ./
-    command: celery -A configuration.celery beat --loglevel=info
+    command: celery -A configuration.celery beat --loglevel=info --logfile=./logs/celery-beat.log
     volumes:
       - ./:/usr/src/app
     environment:
