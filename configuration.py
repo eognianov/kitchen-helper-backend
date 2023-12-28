@@ -180,9 +180,13 @@ class Cloudinary(CustomBaseSettings):
     api_secret: str
 
 
-class AppAdmins(CustomBaseSettings):
-    admins: List[Dict[str, str]]
+class AppUsers(CustomBaseSettings):
+    users: List[Dict[str, str]]
 
 
-class AppAdminRoles(CustomBaseSettings):
-    admin_role: str
+class AppUsersRoles(CustomBaseSettings):
+    role: str
+
+
+class AppRecipeCategories(CustomBaseSettings):
+    categories: List[str]

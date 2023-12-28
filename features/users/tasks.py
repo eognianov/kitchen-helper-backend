@@ -8,55 +8,53 @@ from sqlalchemy.orm import joinedload
 from configuration import celery
 from features.users import models, input_models, exceptions
 
-logging = khLogging.Logger("celery")
-app_admins = configuration.AppAdmins()
-app_admin_role = configuration.AppAdminRoles()
+logging = khLogging.Logger("celery-users-tasks")
+app_users = configuration.AppUsers()
+app_users_role = configuration.AppUsersRoles()
 
 
-@celery.task
-def seed_admins() -> str:
+def seed_users() -> str:
     """
-    Adds admin users to the database
+    Adds users to the database
     :return:
     """
 
     with db.connection.get_session() as session:
-        for admin in app_admins.admins:
+        for user in app_users.users:
             try:
                 current = features.users.operations.create_new_user(
                     user=input_models.RegisterUserInputModel(
-                        username=admin["username"],
-                        email=admin["email"],
-                        password=admin["password"],
+                        username=user["username"],
+                        email=user["email"],
+                        password=user["password"],
                     )
                 )
                 current.is_email_confirmed = True
                 session.add(current)
                 session.commit()
                 session.refresh(current)
-                logging.info(f"Admin #{current.id} was added to the database")
+                logging.info(f"User #{current.id} was added to the database")
             except features.users.exceptions.UserAlreadyExists:
                 continue
     session.close()
-    return "Finished adding admins to the database."
+    return "Finished adding users to the database."
 
 
-@celery.task
 def seed_roles() -> str:
     """
-    Adds admin roles to the database
+    Adds role to the database
     :return:
     """
 
-    admin = features.users.operations.get_user_from_db(username=app_admins.admins[0]["username"])
-    if not admin:
-        return "No admins found to add role"
+    user = features.users.operations.get_user_from_db(username=app_users.users[0]["username"])
+    if not user:
+        return "No users found to add role"
     with db.connection.get_session() as session:
-        role_name = app_admin_role.admin_role
+        role_name = app_users_role.role
         try:
             role = features.users.operations.create_role(
                 name=role_name,
-                created_by=admin.id,
+                created_by=user.id,
             )
             logging.info(f"Role #{role.id} was added to the database")
         except features.users.exceptions.RoleAlreadyExists:
@@ -65,47 +63,46 @@ def seed_roles() -> str:
     return "Finished adding role to the database."
 
 
-@celery.task
-def add_roles_to_admins() -> str:
+def add_roles_to_users() -> str:
     """
-    Adds roles to admins
+    Adds roles to users
     :return:
     """
 
     with db.connection.get_session() as session:
-        role = session.query(models.Role).filter(models.Role.name == app_admin_role.admin_role).first()
+        role = session.query(models.Role).filter(models.Role.name == app_users_role.role).first()
         if not role:
             session.close()
-            return "No roles found to add admins."
+            return "No roles found to add users."
 
-        admin_usernames = [admin["username"] for admin in app_admins.admins]
-        admins = (
+        users_usernames = [user["username"] for user in app_users.users]
+        users = (
             session.query(models.User)
-            .filter(models.User.username.in_(admin_usernames))
+            .filter(models.User.username.in_(users_usernames))
             .filter(~models.User.roles.any(models.Role.id == role.id))
             .options(joinedload(models.User.roles))
             .all()
         )
         session.close()
 
-    if not admins:
+    if not users:
         return "No admins found to add role."
 
-    added_by = admins[0].id
-    for admin in admins:
-        features.users.operations.add_user_to_role(user_id=admin.id, role_id=role.id, added_by=added_by)
-        logging.info(f"User #{admin.id} was add to role #{role.id} by #{added_by}")
+    added_by = users[0].id
+    for user in users:
+        features.users.operations.add_user_to_role(user_id=user.id, role_id=role.id, added_by=added_by)
+        logging.info(f"User #{user.id} was add to role #{role.id} by #{added_by}")
 
-    return "Finished adding admins to role."
+    return "Finished adding users to role."
 
 
 @celery.task
 def app_seeder() -> str:
     """
-    Task for seeding admins, admin role and adding admins to admin role
+    Task for seeding users, user role and adding users to role
     :return:
     """
-    message_seed_admins = seed_admins()
+    message_seed_users = seed_users()
     message_seed_roles = seed_roles()
-    message_add_roles_to_admins = add_roles_to_admins()
-    return message_seed_admins + os.linesep + message_seed_roles + os.linesep + message_add_roles_to_admins
+    message_add_roles_to_users = add_roles_to_users()
+    return message_seed_users + os.linesep + message_seed_roles + os.linesep + message_add_roles_to_users

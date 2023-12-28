@@ -19,6 +19,7 @@ import configuration
 import khLogging
 
 from features.users.tasks import app_seeder
+from features.recipes.tasks import seed_recipe_categories
 
 
 logging = khLogging.Logger('api')
@@ -41,6 +42,7 @@ app.include_router(features.recipes.recipes_router, prefix='/recipes')
 app.include_router(features.images.router, prefix='/images')
 app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 app_seeder.delay()
+seed_recipe_categories.delay()
 
 if __name__ == '__main__':
     uvicorn.run("api:app", workers=cpus, log_config=khLogging.UVICORN_LOG_CONFIG, port=8000, host='0.0.0.0')
