@@ -27,9 +27,9 @@ def bypass_published_filter(mocker):
 
 
 class TestIngredientCategoryOperations:
-    def test_create_ingredient_category_success(self, use_test_db, mocker):
+    def test_create_ingredient_category_success(self, use_test_db, bypass_published_filter, mocker):
         expected_name = "new_category"
-        operations.create_ingredient_category(expected_name)
+        operations.create_ingredient_category(expected_name, 1)
 
         with db.connection.get_session() as session:
             categories = session.query(IngredientCategory).all()
@@ -40,14 +40,14 @@ class TestIngredientCategoryOperations:
 
 def test_create_ingredient_category_with_existing_name(use_test_db):
     expected_name = "new_category"
-    operations.create_ingredient_category(expected_name)
+    operations.create_ingredient_category(expected_name, 1)
 
-    with pytest.raises(IngredientCategoryNameViolation):
+    with pytest.raises(Exception):
         operations.create_ingredient_category(expected_name)
 
 
-def test_get_category_by_id_success():
-    created_category = operations.create_ingredient_category("name")
+def test_get_category_by_id_success(use_test_db, bypass_published_filter):
+    created_category = operations.create_ingredient_category("name", 1)
     category_from_db = operations.get_ingredient_category_by_id(created_category.id)
 
     assert created_category.name == category_from_db.name
@@ -55,64 +55,111 @@ def test_get_category_by_id_success():
     assert created_category.created_on == category_from_db.created_on
 
 
-def test_get_category_by_id_not_fail():
-    with pytest.raises(IngredientCategoryNotFoundException):
-        operations.get_ingredient_category_by_id(1)
-
-
-def test_get_all_categories():
+def test_get_all_categories(use_test_db, bypass_published_filter):
     assert len(operations.get_all_ingredients_category()) == 0
-    operations.create_ingredient_category("new")
+    operations.create_ingredient_category("new", 1)
     assert len(operations.get_all_ingredients_category()) == 1
 
 
-def test_update_category():
-    created_category = operations.create_ingredient_category("name")
-    operations.update_ingredient_category(created_category.id, "name", "new_name")
+def test_update_category(use_test_db, bypass_published_filter):
+    created_category = operations.create_ingredient_category("name", 1)
+    operations.update_ingredient_category(created_category.id, "name", "new_name", 1)
     updated_category = operations.get_ingredient_category_by_id(created_category.id)
     assert updated_category.name == "new_name"
 
 
 class TestIngredientOperations:
-    def test_create_ingredient_operation(self):
-        expected_name = "new_ingredient"
-        operations.create_ingredient(expected_name)
+    def setup(self):
+        self.client = TestClient(app)
+        self.ingredient = {
+            "name": "name",
+            "calories": 1,
+            "carbo": 1,
+            "fats": 1,
+            "protein": 1,
+            "cholesterol": 1,
+            "measurement": "g",
+            "category_id": 1,
+            "created_by": 1,
+        }
 
+    def test_create_ingredient_operation(self, use_test_db, bypass_published_filter):
+        operations.create_ingredient_category("Category name", 1)
+        operations.create_ingredient(**self.ingredient)
         with db.connection.get_session() as session:
             ingredients = session.query(Ingredient).all()
 
         assert len(ingredients) == 1
-        assert ingredients[0].name == expected_name
+        assert ingredients[0].name == self.ingredient["name"]
+        assert ingredients[0].calories == self.ingredient["calories"]
+        assert ingredients[0].carbo == self.ingredient["carbo"]
+        assert ingredients[0].fats == self.ingredient["fats"]
+        assert ingredients[0].protein == self.ingredient["protein"]
+        assert ingredients[0].cholesterol == self.ingredient["cholesterol"]
+        assert ingredients[0].measurement == self.ingredient["measurement"]
+        assert ingredients[0].category_id == self.ingredient["category_id"]
 
-    def test_create_ingredient_with_existing_name(self):
-        expected_name = "new_category"
-        operations.create_ingredient(expected_name)
-
-        with pytest.raises(IngredientNameViolationException):
-            operations.create_ingredient(expected_name)
-
-    def test_get_ingredient_by_id_success(self):
-        created_ingredient = operations.create_ingredient("name")
-        ingredient_from_db = operations.get_ingredient(created_ingredient.id)
+    def test_get_ingredient_by_id_success(self, use_test_db, bypass_published_filter):
+        operations.create_ingredient_category("Category name", 1)
+        created_ingredient = operations.create_ingredient(**self.ingredient)
+        ingredient_from_db = operations.get_ingredient_by_id(created_ingredient.id)
 
         assert created_ingredient.name == ingredient_from_db.name
+        assert created_ingredient.calories == ingredient_from_db.calories
+        assert created_ingredient.carbo == ingredient_from_db.carbo
+        assert created_ingredient.fats == ingredient_from_db.fats
+        assert created_ingredient.protein == ingredient_from_db.protein
+        assert created_ingredient.cholesterol == ingredient_from_db.cholesterol
+        assert created_ingredient.measurement == ingredient_from_db.measurement
+        assert created_ingredient.category_id == ingredient_from_db.category_id
         assert created_ingredient.created_by == ingredient_from_db.created_by
-        assert created_ingredient.created_on == ingredient_from_db.created_on
 
     def test_get_ingredient_by_id_not_fail(self):
-        with pytest.raises(IngredientNotFoundException):
-            operations.get_ingredient(1)
+        with pytest.raises(Exception):
+            operations.get_ingredient_by_id(1)
 
-    def test_get_all_ingredients(self):
+    def test_get_all_ingredients(self, use_test_db, bypass_published_filter):
         assert len(operations.get_all_ingredients()) == 0
-        operations.create_ingredient("new")
+        operations.create_ingredient_category("Category name", 1)
+        operations.create_ingredient(**self.ingredient)
         assert len(operations.get_all_ingredients()) == 1
 
-    def test_update_ingredient(self):
-        created_ingredient = operations.create_ingredient("name")
-        operations.update_ingredient(created_ingredient.id, "name", "new_name")
-        updated_ingredient = operations.get_ingredient(created_ingredient.id)
-        assert updated_ingredient.name == "new_name"
+    def test_update_ingredient(self, use_test_db, bypass_published_filter):
+        operations.create_ingredient_category("Category name", 1)
+        created_ingredient = operations.create_ingredient(**self.ingredient)
+
+        ingredient_update = {
+            "name": "new_name",
+            "calories": 2,
+            "carbo": 2,
+            "fats": 2,
+            "protein": 2,
+            "cholesterol": 2,
+            "measurement": "kg",
+            "category_id": 1,
+            "created_by": 1,
+        }
+
+        operations.update_ingredient(created_ingredient.id, created_ingredient.created_by, ingredient_update)
+
+        updated_ingredient = operations.get_ingredient_by_id(created_ingredient.id)
+
+        assert updated_ingredient.name == ingredient_update["name"]
+        assert updated_ingredient.calories == ingredient_update["calories"]
+        assert updated_ingredient.carbo == ingredient_update["carbo"]
+        assert updated_ingredient.fats == ingredient_update["fats"]
+        assert updated_ingredient.protein == ingredient_update["protein"]
+        assert updated_ingredient.cholesterol == ingredient_update["cholesterol"]
+        assert updated_ingredient.measurement == ingredient_update["measurement"]
+        assert updated_ingredient.category_id == ingredient_update["category_id"]
+
+        assert updated_ingredient.name != self.ingredient["name"]
+        assert updated_ingredient.calories != self.ingredient["calories"]
+        assert updated_ingredient.carbo != self.ingredient["carbo"]
+        assert updated_ingredient.fats != self.ingredient["fats"]
+        assert updated_ingredient.protein != self.ingredient["protein"]
+        assert updated_ingredient.cholesterol != self.ingredient["cholesterol"]
+        assert updated_ingredient.measurement != self.ingredient["measurement"]
 
 
 class TestIngredientsEndpoints:

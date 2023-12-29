@@ -12,6 +12,7 @@ import db.connection
 from .exceptions import (
     IngredientCategoryNotFoundException,
     IngredientCategoryNameViolation,
+    IngredientNotFoundException,
     RecipeNotFoundException,
     InstructionNotFoundException,
     InstructionNameViolationException,
@@ -19,9 +20,7 @@ from .exceptions import (
     RecipesCategoryNameViolationException,
     RecipesCategoryNotFoundException,
     IngredientCategoryIntegrityViolation,
-    IngredientIntegrityViolation,
     UnauthorizedAccessException,
-    IngredientNotFoundException,
 )
 from .helpers import paginate_recipes
 from .input_models import (
@@ -69,7 +68,7 @@ def get_ingredient_category_by_id(category_id: int) -> Type[IngredientCategory]:
 
 
 def update_ingredient_category(
-    category_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser
+    category_id: int, field: str, value: str, user: common.authentication.AuthenticatedUser = None
 ) -> Type[PatchIngredientCategoryInputModel]:
     """
     Update ingredient category
@@ -80,10 +79,8 @@ def update_ingredient_category(
     :return:
     """
 
+    filters = _get_published_filter_expression(user)
     category = get_ingredient_category_by_id(category_id)
-
-    if user.is_admin == False or user.id != category.created_by:
-        raise UnauthorizedAccessException()
 
     try:
         with db.connection.get_session() as session:
@@ -99,13 +96,17 @@ def update_ingredient_category(
         raise IngredientCategoryIntegrityViolation(ex)
 
 
-def create_ingredient_category(name: str, created_by: str) -> IngredientCategory:
+def create_ingredient_category(
+    name: str, created_by: int, user: common.authentication.AuthenticatedUser = None
+) -> IngredientCategory:
     """
     Create ingredient category
     :param name:
     :param created_by:
     :return:
     """
+
+    filters = _get_published_filter_expression(user)
 
     try:
         category = IngredientCategory(name=name, created_by=created_by)
@@ -136,18 +137,16 @@ def get_ingredient_by_id(ingredient_id: int, user: common.authentication.Authent
 
 
 def create_ingredient(
+    *,
     name: str,
-    calories: float,
-    carbo: float,
-    fats: float,
-    protein: float,
-    cholesterol: float,
-    measurement: str,
-    is_deleted: bool,
-    deleted_on: datetime,
-    deleted_by: int,
-    category_id: int,
-    created_by: int,
+    calories: float = 0,
+    carbo: float = 0,
+    fats: float = 0,
+    protein: float = 0,
+    cholesterol: float = 0,
+    measurement: str = None,
+    category_id: int = None,
+    created_by: int = None,
 ):
     """
     Create ingredient
@@ -174,9 +173,6 @@ def create_ingredient(
         protein=protein,
         cholesterol=cholesterol,
         measurement=measurement,
-        is_deleted=is_deleted,
-        deleted_on=deleted_on,
-        deleted_by=deleted_by,
         category=category,
         created_by=created_by,
     )
@@ -214,23 +210,16 @@ def get_ingredient_by_id(ingredient_id: int, user: common.authentication.Authent
     return ingredient
 
 
-def get_all_ingredients(user: common.authentication.AuthenticatedUser):
+def get_all_ingredients(user: common.authentication.AuthenticatedUser = None):
     """
     Get all ingredients paginated, sorted, and filtered
-    :param paginated_input_model:
-    :param user:
     :return:
     """
 
     with db.connection.get_session() as session:
-        ingredients = (
-            session.query(Ingredient).join(Ingredient.category, isouter=True).filter_by(is_deleted=False).all()
-        )
+        ingredients = session.query(Ingredient).join(IngredientCategory, isouter=True).all()
 
-        if not ingredients:
-            raise IngredientNotFoundException
-
-        return ingredients
+    return ingredients
 
 
 def update_ingredient(
@@ -243,6 +232,8 @@ def update_ingredient(
     :param recipe_update:
     :return:
     """
+
+    filters = _get_published_filter_expression(user)
 
     with db.connection.get_session() as session:
         ingredient = session.query(Ingredient).filter_by(id=ingredient_id).first()

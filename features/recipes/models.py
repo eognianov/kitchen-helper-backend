@@ -26,7 +26,7 @@ class IngredientCategory(DbBaseModel):
     )
 
     ingredients: Mapped[list["Ingredient"]] = relationship(
-        "Ingredient", back_populates="ingredient", init=False, lazy="selectin"
+        "Ingredient", back_populates="category", init=False, lazy="selectin"
     )
 
 
@@ -45,9 +45,15 @@ class Ingredient(DbBaseModel):
     deleted_on: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True, init=False)
     deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
     category: Mapped[IngredientCategory] = relationship(
-        "IngredientCategory", back_populates="recipes", default=None, lazy="selectin"
+        "IngredientCategory", back_populates="ingredients", default=None, lazy="selectin"
     )
     category_id: Mapped[int] = mapped_column(ForeignKey("INGREDIENT_CATEGORIES.id"), nullable=True, default=None)
+    created_by: Mapped[int] = mapped_column(ForeignKey("Users.id"), default=None)
+    created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
+    updated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
+    updated_on: Mapped[datetime.datetime] = mapped_column(
+        DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp(), init=False
+    )
 
 
 class RecipeCategory(DbBaseModel):

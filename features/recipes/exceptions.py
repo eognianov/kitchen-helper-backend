@@ -1,27 +1,23 @@
 """Recipes and Ingredients feature exceptions"""
 
 
-class IngredientCategoryNotFoundException:
+class IngredientCategoryNotFoundException(Exception):
     pass
 
 
-class IngredientCategoryIntegrityViolation:
+class IngredientCategoryIntegrityViolation(Exception):
     pass
 
 
-class IngredientCategoryNameViolation:
+class IngredientCategoryNameViolation(Exception):
     pass
 
 
-class IngredientIntegrityViolation:
+class IngredientNotFoundException(Exception):
     pass
 
 
-class IngredientNotFoundException:
-    pass
-
-
-class IngredientNameViolationException:
+class IngredientNameViolationException(Exception):
     pass
 
 
