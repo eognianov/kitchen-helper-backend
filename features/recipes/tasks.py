@@ -14,7 +14,6 @@ DEFAULT_PROMPT = """ Генерирай ми обобщение на рецеп�
   Ще подам съставките инструкциите на нов ред във формат ##текст##категория###време###сложност###. """
 
 
-
 def get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
     with db.connection.get_session() as session:
         ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
@@ -22,9 +21,10 @@ def get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
         all_filtered_recipes = (
             session.query(Recipe)
             .filter(
-                and_(Recipe.is_deleted.is_(False),
-                         or_(Recipe.created_on >= ten_minutes_ago,
-                             Recipe.updated_on >= ten_minutes_ago))
+                and_(
+                    Recipe.is_deleted.is_(False),
+                    or_(Recipe.created_on >= ten_minutes_ago, Recipe.updated_on >= ten_minutes_ago),
+                )
             )
             .all()
         )
@@ -42,17 +42,18 @@ def generate_recipe_summary():
         prompt += recipe.name + '\n'
 
         for instruction in recipe.instructions:
-            prompt += (f'##{instruction.instruction}'
-                       f'##{instruction.category}'
-                       f'##{instruction.time_to_prepare}'
-                       f'##{instruction.complexity}')
+            prompt += (
+                f'##{instruction.instruction}'
+                f'##{instruction.category}'
+                f'##{instruction.time_to_prepare}'
+                f'##{instruction.complexity}'
+            )
 
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "user",
-                 "content": prompt},
-            ]
+                {"role": "user", "content": prompt},
+            ],
         )
         generated_summary = completion['choices'][0]['text']
 
