@@ -168,3 +168,6 @@ class Cloudinary(CustomBaseSettings):
     cloud_name: str
     api_key: str
     api_secret: str
+
+class OpenAi(CustomBaseSettings):
+    chatgpt_api_key: str

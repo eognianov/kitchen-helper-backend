@@ -204,7 +204,8 @@ def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUs
         recipe = (
             session.query(Recipe)
             .join(Recipe.category, isouter=True)
-            .where(Recipe.id == recipe_id)
+            .where(Recipe.id
+                   == recipe_id)
             .filter(and_(*filters))
             .first()
         )
