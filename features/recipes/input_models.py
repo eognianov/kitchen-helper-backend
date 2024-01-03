@@ -6,7 +6,25 @@ import pydantic
 
 import features.recipes.helpers
 
-INSTRUCTION_CATEGORIES = ("BREAKFAST", "LUNCH", "DINNER")
+INSTRUCTION_CATEGORIES = (
+    'WASH AND CHOP',
+    'PREHEAT OVEN',
+    'SAUTE',
+    'BOIL',
+    'ROAST',
+    'GRILL',
+    'STEAM',
+    'BAKE',
+    'FRY',
+    'BLEND',
+    'STIR',
+    'WHISK',
+    'FOLD',
+    'KNEAD',
+    'SEASONING',
+    'PLATING',
+    'PRESENTATION',
+)
 
 
 class PatchCategoryInputModel(pydantic.BaseModel):
@@ -113,17 +131,13 @@ class PSFRecipesInputModel(pydantic.BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
         try:
-            self.order_expression = (
-                features.recipes.helpers.sort_recipes(self.sort) or []
-            )
+            self.order_expression = features.recipes.helpers.sort_recipes(self.sort) or []
         except ValueError as ve:
             raise fastapi.HTTPException(status_code=422, detail=str(ve))
 
         if self.filters:
             try:
-                self.filter_expression = (
-                    features.recipes.helpers.filter_recipes(self.filters) or []
-                )
+                self.filter_expression = features.recipes.helpers.filter_recipes(self.filters) or []
             except ValueError as ve:
                 raise fastapi.HTTPException(status_code=422, detail=str(ve))
         else:
