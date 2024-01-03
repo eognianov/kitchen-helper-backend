@@ -34,8 +34,12 @@ app.include_router(features.recipes.category_router, prefix='/api/categories')
 app.include_router(features.recipes.recipes_router, prefix='/api/recipes')
 app.include_router(features.images.router, prefix='/api/images')
 app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
-app_seeder.delay()
-seed_recipe_categories.delay()
+
+
+@app.on_event("startup")
+def startup_event():
+    app_seeder.apply_async(link=seed_recipe_categories.si())
+
 
 if __name__ == '__main__':
     uvicorn.run(
