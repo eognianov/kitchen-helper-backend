@@ -5,6 +5,7 @@ import fastapi
 import pydantic
 
 import features.recipes.helpers
+from features.recipes import models
 
 INSTRUCTION_CATEGORIES = (
     'WASH AND CHOP',
@@ -142,3 +143,59 @@ class PSFRecipesInputModel(pydantic.BaseModel):
                 raise fastapi.HTTPException(status_code=422, detail=str(ve))
         else:
             self.filter_expression = []
+
+
+class IngredientInput(pydantic.BaseModel):
+    name: str
+    calories: float
+    carbo: float
+    fats: float
+    protein: float
+    cholesterol: float
+    measurement: str
+    category: str
+
+    @staticmethod
+    def __positive_field_validator(value, field_name):
+        if value < 0:
+            raise ValueError(f"{field_name} must be a positive")
+        return value
+
+    @pydantic.field_validator("calories", mode="after")
+    @classmethod
+    def validate_positive_calories(cls, value):
+        return cls.__positive_field_validator(value, "calories")
+
+    @pydantic.field_validator("carbo", mode="after")
+    @classmethod
+    def validate_positive_carbo(cls, value):
+        return cls.__positive_field_validator(value, "carbo")
+
+    @pydantic.field_validator("fats", mode="after")
+    @classmethod
+    def validate_positive_fats(cls, value):
+        return cls.__positive_field_validator(value, "fats")
+
+    @pydantic.field_validator("protein", mode="after")
+    @classmethod
+    def validate_positive_protein(cls, value):
+        return cls.__positive_field_validator(value, "protein")
+
+    @pydantic.field_validator("cholesterol", mode="after")
+    @classmethod
+    def validate_positive_cholesterol(cls, value):
+        return cls.__positive_field_validator(value, "cholesterol")
+
+    @pydantic.field_validator("measurement")
+    @classmethod
+    def validate_measurement(cls, value):
+        if value not in [e.value for e in models.IngredientMeasurementEnum]:
+            raise ValueError(f"{value} is not a valid measurement")
+        return value
+
+    @pydantic.field_validator("category")
+    @classmethod
+    def validate_category(cls, value):
+        if value not in [e.value for e in models.IngredientCategoryEnum]:
+            raise ValueError(f"{value} is not a valid category")
+        return value

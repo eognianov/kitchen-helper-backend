@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, Float, func, ForeignKey, DateTime, Boolean, Numeric, Enum
 import datetime
 from typing import Optional
+from enum import Enum as PythonEnum
 
 
 class RecipeCategory(DbBaseModel):
@@ -73,28 +74,47 @@ class RecipeInstruction(DbBaseModel):
     recipe: Mapped[Recipe] = relationship('Recipe', back_populates='instructions', init=False, lazy='selectin')
 
 
+class IngredientMeasurementEnum(PythonEnum):
+    # Metric units
+    KG = 'kg'
+    GRAM = 'gram'
+    LITER = 'liter'
+    MILLILITER = 'milliliter'
+    TEASPOON = 'teaspoon'
+    TABLESPOON = 'tablespoon'
+    CUP = 'cup'
+    PINCH = 'pinch'
+    PIECE = 'piece'
+
+    # Imperial units
+    OUNCE = 'ounce'
+    POUND = 'pound'
+    FLUID_OUNCE = 'fluid_ounce'
+    GALLON = 'gallon'
+    QUART = 'quart'
+    PINT = 'pint'
+
+
+class IngredientCategoryEnum(PythonEnum):
+    PANTRY_ESSENTIALS = 'Pantry Essentials'
+    VEGETABLES_AND_GREENS = 'Vegetables & Greens'
+    FRUITS = 'Fruits'
+    MEAT_AND_POULTRY = 'Meat & Poultry'
+    SEAFOOD = 'Seafood'
+    DAIRY = 'Dairy'
+    SPICES_AND_SEASONINGS = 'Spices & Seasonings'
+    GRAINS_AND_PASTA = 'Grains & Pasta'
+    CONDIMENTS = 'Condiments'
+    BAKING_INGREDIENTS = 'Baking Ingredients'
+    BEVERAGES = 'Beverages'
+    NUTS_AND_SEEDS = 'Nuts & Seeds'
+    SWEETENERS = 'Sweeteners'
+    SNACKS = 'Snacks'
+    MISCELLANEOUS = 'Miscellaneous'
+
+
 class Ingredient(DbBaseModel):
     __tablename__ = "INGREDIENTS"
-
-    class MeasurementEnum(Enum):
-        # Metric units
-        KG = 'kg'
-        GRAM = 'gram'
-        LITER = 'liter'
-        MILLILITER = 'milliliter'
-        TEASPOON = 'teaspoon'
-        TABLESPOON = 'tablespoon'
-        CUP = 'cup'
-        PINCH = 'pinch'
-        PIECE = 'piece'
-
-        # Imperial units
-        OUNCE = 'ounce'
-        POUND = 'pound'
-        FLUID_OUNCE = 'fluid_ounce'
-        GALLON = 'gallon'
-        QUART = 'quart'
-        PINT = 'pint'
 
     id: Mapped[int] = mapped_column(Integer, init=False, autoincrement=True, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
@@ -103,7 +123,8 @@ class Ingredient(DbBaseModel):
     fats: Mapped[float] = mapped_column(Numeric(8, 2), nullable=False)
     protein: Mapped[float] = mapped_column(Numeric(8, 2), nullable=False)
     cholesterol: Mapped[float] = mapped_column(Numeric(8, 2), nullable=False)
-    measurement: Mapped[MeasurementEnum] = mapped_column(Enum(MeasurementEnum), nullable=False)
+    measurement: Mapped[IngredientMeasurementEnum] = mapped_column(Enum(IngredientMeasurementEnum), nullable=False)
+    category: Mapped[IngredientCategoryEnum] = mapped_column(Enum(IngredientCategoryEnum), nullable=False)
     created_by: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp())
     updated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True)
@@ -111,5 +132,5 @@ class Ingredient(DbBaseModel):
         DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp()
     )
     is_deleted: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
-    deleted_on: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True)
-    deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True)
+    deleted_on: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True, init=False)
+    deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, init=False)
