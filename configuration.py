@@ -4,7 +4,7 @@ import logging
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
 from pydantic import BaseModel, model_validator
-from typing import Optional, List
+from typing import Optional, List, Dict
 from enum import StrEnum, auto
 from celery import Celery
 
@@ -197,6 +197,11 @@ class Config(CustomBaseSettings):
             }
         return beat_schedule
 
+    def get_broker_url(self) -> str:
+        return (
+            f"{self.celery.broker}{self.rabbitmq.user}:{self.rabbitmq.password}@{self.celery.host}:{self.celery.port}//"
+        )
+
 
 class Cloudinary(CustomBaseSettings):
     """Cloudinary settings"""
@@ -204,6 +209,18 @@ class Cloudinary(CustomBaseSettings):
     cloud_name: str
     api_key: str
     api_secret: str
+
+
+class AppUsers(CustomBaseSettings):
+    users: List[Dict[str, str]]
+
+
+class AppUsersRoles(CustomBaseSettings):
+    role: str
+
+
+class AppRecipeCategories(CustomBaseSettings):
+    categories: List[str]
 
 
 """ Celery configuration"""

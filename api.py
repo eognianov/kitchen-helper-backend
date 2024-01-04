@@ -10,9 +10,12 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 import configuration
 import khLogging
+from features.users.tasks import app_seeder
+from features.recipes.tasks import seed_recipe_categories
 
 CPUS = multiprocessing.cpu_count()
 config = configuration.Config()
+
 
 logging = khLogging.Logger('api')
 app = fastapi.FastAPI(docs_url='/api/docs', redoc_url='/api/redoc', openapi_url='/api/openai.json')
@@ -31,6 +34,12 @@ app.include_router(features.recipes.category_router, prefix='/api/categories')
 app.include_router(features.recipes.recipes_router, prefix='/api/recipes')
 app.include_router(features.images.router, prefix='/api/images')
 app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
+
+
+@app.on_event("startup")
+def startup_event():
+    app_seeder.apply_async(link=seed_recipe_categories.si())
+
 
 if __name__ == '__main__':
     uvicorn.run(
