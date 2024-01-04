@@ -301,15 +301,18 @@ async def confirm_email(token: str):
 
 
 @user_router.post("/request-password-reset")
-async def request_password_reset(email: str):
+async def request_password_reset(username: str, email: str):
     """
     Request password reset
 
+    :param username:
     :param email:
     :return:
     """
     try:
-        db_user = get_user_from_db(email=email)
+        db_user = get_user_from_db(username=username)
+        if db_user.email != email:
+            raise HTTPException(status_code=fastapi.status.HTTP_400_BAD_REQUEST)
         token = features.users.operations.generate_email_password_token(
             user=db_user, token_type=TokenTypes.PASSWORD_RESET
         )

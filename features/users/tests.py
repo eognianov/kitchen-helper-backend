@@ -1546,7 +1546,7 @@ class TestUserEndpoints:
 
             user = operations.create_new_user(user=input_models.RegisterUserInputModel(**USER_DATA))
             token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
-            data = {"email": user.email}
+            data = {"username": user.username, "email": user.email}
             headers = {"Authorization": f"Bearer {token}"}
             response = cls.client.post("/api/users/request-password-reset/", headers=headers, params=data)
 
@@ -1565,7 +1565,7 @@ class TestUserEndpoints:
 
             user = operations.create_new_user(user=input_models.RegisterUserInputModel(**USER_DATA))
             token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
-            data = {"email": user.email}
+            data = {"username": user.username, "email": user.email}
             headers = {"Authorization": f"Bearer {token}"}
             response = cls.client.post("/api/users/request-password-reset/", headers=headers, params=data)
 
@@ -1582,13 +1582,13 @@ class TestUserEndpoints:
         """
         user = operations.create_new_user(user=input_models.RegisterUserInputModel(**USER_DATA))
         token, _ = operations.create_token(user_id=user.id, user_role_ids=[x.id for x in user.roles])
-        data = {"email": "invalid_email@test.com"}
+        data = {"username": user.username, "email": "invalid_email@test.com"}
         headers = {"Authorization": f"Bearer {token}"}
 
         response = cls.client.post("/api/users/request-password-reset/", headers=headers, params=data)
 
-        assert response.status_code == 404
-        assert response.json() == {'detail': 'User not found'}
+        assert response.status_code == 400
+        assert response.json() == {'detail': 'Bad Request'}
 
     @classmethod
     def test_reset_password_endpoint_expected_success(cls, use_test_db):
