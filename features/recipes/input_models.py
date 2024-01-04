@@ -161,6 +161,12 @@ class IngredientInput(pydantic.BaseModel):
             raise ValueError(f"{field_name} must be a positive")
         return value
 
+    @pydantic.field_validator("name", mode="after")
+    @classmethod
+    def name_len_validator(cls, value):
+        if len(value) < 3 or len(value) > 100:
+            raise ValueError("Name must be between 3 and 100 characters")
+
     @pydantic.field_validator("calories", mode="after")
     @classmethod
     def validate_positive_calories(cls, value):
