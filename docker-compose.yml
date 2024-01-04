@@ -19,6 +19,8 @@ services:
       - postgres__database=kitchen-helper
       - rabbitmq__user=${RABBITMQ_USER}
       - rabbitmq__password=${RABBITMQ_PASSWORD}
+      - CELERY_BROKER_URL=${CELERY_BROKER}${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:${CELERY_PORT}//
+      - CELERY_RESULT_BACKEND=${CELERY_BACKEND}
     depends_on:
       - db
       - rabbitmq
@@ -50,6 +52,40 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
     volumes:
       - kitchen-helper-rabbitmq-volume:/var/lib/rabbitmq
+
+  celery-workers:
+    container_name: kitchen-helper-celery-workers
+    build: ./
+    command: celery -A configuration.celery worker --loglevel=info --logfile=./logs/celery-worker.log
+    volumes:
+      - ./:/usr/src/app
+    environment:
+      - postgres__host=db
+      - postgres__port=5432
+      - postgres__user=${POSTGRES_USER}
+      - postgres__password=${POSTGRES_PASSWORD}
+      - postgres__database=kitchen-helper
+      - rabbitmq__user=${RABBITMQ_USER}
+      - rabbitmq__password=${RABBITMQ_PASSWORD}
+      - CELERY_BROKER_URL=${CELERY_BROKER}${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:${CELERY_PORT}//
+      - CELERY_RESULT_BACKEND=${CELERY_BACKEND}
+    depends_on:
+      - db
+      - rabbitmq
+
+  celery-beat:
+    container_name: kitchen-helper-celery-beat
+    build: ./
+    command: celery -A configuration.celery beat --loglevel=info --logfile=./logs/celery-beat.log
+    volumes:
+      - ./:/usr/src/app
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER}${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:${CELERY_PORT}//
+      - CELERY_RESULT_BACKEND=${CELERY_BACKEND}
+    depends_on:
+      - db
+      - rabbitmq
+
 volumes:
   kitchen-helper-db-volume:
     driver: local
