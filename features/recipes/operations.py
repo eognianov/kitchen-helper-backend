@@ -483,3 +483,28 @@ def delete_ingredient(pk: int, user_id: int):
         session.commit()
         session.refresh(ingredient)
         session.close()
+
+
+def update_ingredient(ingredient_id: int, field: str, value: str | float, updated_by: int):
+    """
+    Update Ingredient
+
+    :param ingredient_id:
+    :param field:
+    :param value:
+    :param updated_by:
+    :return:
+    """
+
+    db_ingredient = get_ingredient_from_db(pk=ingredient_id)
+    with db.connection.get_session() as session:
+        session.execute(
+            update(Ingredient),
+            [{"id": ingredient_id, f"{field}": str(value), "updated_by": updated_by}],
+        )
+        session.commit()
+        session.add(db_ingredient)
+        session.refresh(db_ingredient)
+
+        logging.info(f"Ingredient #{db_ingredient.id} updated. {updated_by} set {field}={value}")
+        return db_ingredient

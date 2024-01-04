@@ -205,3 +205,43 @@ class IngredientInput(pydantic.BaseModel):
         if value not in [e.value for e in models.IngredientCategoryEnum]:
             raise ValueError(f"{value} is not a valid category")
         return value
+
+
+class UpdateIngredientInputModel(pydantic.BaseModel):
+    """Update Ingredient Input Model"""
+
+    field: str
+    value: str | float
+
+    @pydantic.field_validator('field')
+    @classmethod
+    def validate_field(cls, field: str):
+        allowed_fields_to_edit = [
+            'NAME',
+            'CALORIES',
+            'CARBO',
+            'FATS',
+            'PROTEIN',
+            'CHOLESTEROL',
+            'MEASUREMENT',
+            'CATEGORY',
+        ]
+
+        if field.upper() not in allowed_fields_to_edit:
+            raise ValueError(f"You are not allowed to edit {field} column")
+
+        return field
+
+    @pydantic.field_validator('value')
+    @classmethod
+    def validate_value(cls, value: str | float):
+        try:
+            float(value)
+        except ValueError:
+            enum_values = [e.value for e in models.IngredientMeasurementEnum]
+            enum_values.extend(e.value for e in models.IngredientCategoryEnum)
+            if value not in enum_values:
+                raise ValueError(f"{value} is not valid")
+        if float(value) < 0:
+            raise ValueError("Value must be a positive number")
+        return value
