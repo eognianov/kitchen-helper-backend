@@ -14,11 +14,19 @@ from .exceptions import (
     InstructionNotFoundException,
     InstructionNameViolationException,
     RecipeWithInstructionNotFoundException,
+    IngredientDoesNotExistException,
 )
 from .helpers import paginate_recipes
-from .input_models import CreateInstructionInputModel, PSFRecipesInputModel
-from .models import RecipeCategory, Recipe, RecipeInstruction
-from .responses import InstructionResponse, PSFRecipesResponseModel
+from .input_models import CreateInstructionInputModel, PSFRecipesInputModel, IngredientInput
+from .models import (
+    RecipeCategory,
+    Recipe,
+    RecipeInstruction,
+    Ingredient,
+    IngredientCategoryEnum,
+    IngredientMeasurementEnum,
+)
+from .responses import InstructionResponse, PSFRecipesResponseModel, IngredientResponse
 
 import configuration
 import khLogging
@@ -365,3 +373,113 @@ def delete_recipe(*, recipe_id: int, deleted_by: common.authentication.authentic
         )
         session.commit()
         return recipe
+
+
+def get_ingredient_from_db(*, pk: int = None, name: str = None):
+    """
+    Get ingredient from database
+
+    :param pk:
+    :param name:
+    :return:
+    """
+    with db.connection.get_session() as session:
+        query = session.query(Ingredient)
+        filters = []
+
+        if pk:
+            filters.append(Ingredient.id == pk)
+        elif name:
+            filters.append(Ingredient.name == name)
+
+        if filters:
+            query = query.filter(*filters, Ingredient.is_deleted == False)
+
+        ingredient = query.first()
+        if not ingredient:
+            raise IngredientDoesNotExistException()
+
+    return ingredient
+
+
+def get_all_ingredients_from_db():
+    """
+    Get all ingredients from database
+    :return:
+    """
+    with db.connection.get_session() as session:
+        all_ingredients = session.query(Ingredient).filter(Ingredient.is_deleted == False).all()
+        session.close()
+    return all_ingredients
+
+
+def get_ingredient_responses(ingredients) -> list[IngredientResponse]:
+    """
+    Make ingredients from database to responses
+    :param ingredients:
+    :return:
+    """
+    if not isinstance(ingredients, list):
+        ingredients = [ingredients]
+    ingredient_responses = [
+        IngredientResponse(
+            id=ingredient.id,
+            name=ingredient.name,
+            calories=ingredient.calories,
+            carbo=ingredient.carbo,
+            fats=ingredient.fats,
+            protein=ingredient.protein,
+            cholesterol=ingredient.cholesterol,
+            measurement=ingredient.measurement.value,
+            category=ingredient.category.value,
+        )
+        for ingredient in ingredients
+    ]
+    return ingredient_responses
+
+
+def create_ingredient(ingredient: IngredientInput, created_by: int):
+    """
+    Create a new ingredient
+    :param ingredient:
+    :param created_by:
+    :return:
+    """
+    new_ingredient = Ingredient(
+        name=ingredient.name,
+        calories=ingredient.calories,
+        carbo=ingredient.carbo,
+        fats=ingredient.fats,
+        protein=ingredient.protein,
+        cholesterol=ingredient.cholesterol,
+        measurement=IngredientMeasurementEnum(ingredient.measurement),
+        category=IngredientCategoryEnum(ingredient.category),
+        created_by=created_by,
+    )
+
+    with db.connection.get_session() as session:
+        session.add(new_ingredient)
+        session.commit()
+        session.refresh(new_ingredient)
+
+    return new_ingredient
+
+
+def delete_ingredient(pk: int, user_id: int):
+    """
+    Delete ingredient
+    :param pk:
+    :param user_id:
+    :return:
+    """
+    ingredient = get_ingredient_from_db(pk=pk)
+    if not ingredient:
+        raise IngredientDoesNotExistException()
+    with db.connection.get_session() as session:
+        ingredient.is_deleted = True
+        ingredient.deleted_by = user_id
+        ingredient.deleted_on = datetime.utcnow()
+        session.add(ingredient)
+        session.commit()
+        session.refresh(ingredient)
+        session.close()

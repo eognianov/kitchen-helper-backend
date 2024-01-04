@@ -126,10 +126,10 @@ class Ingredient(DbBaseModel):
     measurement: Mapped[IngredientMeasurementEnum] = mapped_column(Enum(IngredientMeasurementEnum), nullable=False)
     category: Mapped[IngredientCategoryEnum] = mapped_column(Enum(IngredientCategoryEnum), nullable=False)
     created_by: Mapped[int] = mapped_column(ForeignKey("Users.id"))
-    created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp())
-    updated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True)
+    created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
+    updated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, init=False)
     updated_on: Mapped[datetime.datetime] = mapped_column(
-        DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp()
+        DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp(), init=False
     )
     is_deleted: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
     deleted_on: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True, init=False)

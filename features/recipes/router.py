@@ -3,24 +3,27 @@
 import fastapi
 
 import common.authentication
+import db.connection
 import features.recipes.exceptions
 import features.recipes.exceptions
 import features.recipes.operations
 import features.recipes.responses
 from features.recipes.responses import Category
-from features.recipes.responses import InstructionResponse, PSFRecipesResponseModel
+from features.recipes.responses import InstructionResponse, PSFRecipesResponseModel, IngredientResponse
 from .input_models import (
     PatchCategoryInputModel,
     CreateCategoryInputModel,
     CreateRecipeInputModel,
     PSFRecipesInputModel,
 )
-from .input_models import PatchInstructionInputModel, CreateInstructionInputModel
+from .input_models import PatchInstructionInputModel, CreateInstructionInputModel, IngredientInput
 from .responses import RecipeResponse
+from .models import Ingredient
 from typing import Annotated, Optional
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
+ingredient_router = fastapi.APIRouter()
 
 
 def _common_parameters(
@@ -285,3 +288,47 @@ def delete_recipe(recipe_id: int, user: common.authentication.authenticated_user
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
             detail=f"Recipe with {recipe_id=} does not exist",
         )
+
+
+@ingredient_router.post("/", status_code=fastapi.status.HTTP_201_CREATED)
+def create_ingredient(
+    ingredient_input_model: IngredientInput,
+    created_by: common.authentication.authenticated_user,
+):
+    """
+    Create ingredient
+    :param ingredient_input_model:
+    :param created_by:
+    :return:
+    """
+    new_ingredient = features.recipes.operations.create_ingredient(
+        ingredient=ingredient_input_model, created_by=created_by.id
+    )
+    return features.recipes.operations.get_ingredient_responses(new_ingredient)
+
+
+@ingredient_router.get("/", response_model=list[IngredientResponse])
+def get_all_ingredients():
+    """
+    Get all ingredients
+
+    :return:
+    """
+    all_ingredients = features.recipes.operations.get_all_ingredients_from_db()
+    return features.recipes.operations.get_ingredient_responses(all_ingredients)
+
+
+@ingredient_router.delete("/{ingredient_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT)
+def delete_recipe(ingredient_id: int, user: common.authentication.authenticated_user):
+    """
+    Delete ingredient
+
+    :param ingredient_id:
+    :param user:
+    :return:
+    """
+
+    try:
+        features.recipes.operations.delete_ingredient(ingredient_id, user.id)
+    except features.recipes.exceptions.IngredientDoesNotExistException:
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND)

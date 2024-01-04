@@ -61,9 +61,7 @@ class RecipeResponse(pydantic.BaseModel):
             self.category = CategoryShortResponse(**self.category.__dict__)
 
         if self.instructions:
-            self.instructions = [
-                InstructionResponse(**_.__dict__) for _ in self.instructions
-            ]
+            self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]
 
 
 class PSFRecipesResponseModel(pydantic.BaseModel):
@@ -76,3 +74,15 @@ class PSFRecipesResponseModel(pydantic.BaseModel):
     total_pages: int
     total_items: int
     recipes: list[RecipeResponse]
+
+
+class IngredientResponse(pydantic.BaseModel):
+    id: int
+    name: str
+    calories: float
+    carbo: float
+    fats: float
+    protein: float
+    cholesterol: float
+    measurement: str
+    category: str
