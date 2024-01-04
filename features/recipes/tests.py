@@ -133,13 +133,13 @@ class TestInstructionsOperations:
     def test_create_recipe_with_instructions_success(self, use_test_db, bypass_published_filter):
         instruction = {
             "instruction": "instruction",
-            "category": "Lunch",
+            "category": "Boil",
             "time": 10,
             "complexity": 5,
         }
         instruction2 = {
             "instruction": "instruction",
-            "category": "Lunch",
+            "category": "Boil",
             "time": 10,
             "complexity": 4,
         }
@@ -157,7 +157,7 @@ class TestInstructionsOperations:
         assert len(recipe.instructions) == 2
         assert recipes[0].time_to_prepare == 20
         assert recipes[0].complexity == 4.5
-        assert recipes[0].instructions[0].category == "Lunch"
+        assert recipes[0].instructions[0].category == "Boil"
 
     def test_create_instruction_for_recipe_success(self, use_test_db, bypass_published_filter, user):
         operations.create_category("Category name", 1)
@@ -165,7 +165,7 @@ class TestInstructionsOperations:
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -189,7 +189,7 @@ class TestInstructionsOperations:
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -210,7 +210,7 @@ class TestInstructionsOperations:
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -242,13 +242,13 @@ class TestInstructionsOperations:
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
         new_instruction2 = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -286,7 +286,7 @@ class TestInstructionsEndpoints:
         }
         self.new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
