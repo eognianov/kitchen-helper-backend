@@ -81,6 +81,6 @@ def admin(user: authenticated_user):
     :param user:
     :return:
     """
-    if common.constants.ADMIN_ROLE_ID in user.roles:
+    if user.is_admin:
         return user
     raise fastapi.HTTPException(status_code=fastapi.status.HTTP_403_FORBIDDEN)

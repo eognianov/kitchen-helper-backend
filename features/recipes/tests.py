@@ -68,7 +68,7 @@ class TestCategoriesEndpoints:
     @classmethod
     def test_get_all_categories_empty(cls, use_test_db, mocker):
         get_all_categories_spy = mocker.spy(operations, "get_all_recipe_categories")
-        response = cls.client.get("/categories/")
+        response = cls.client.get("/api/categories/")
         assert response.status_code == 200
         assert get_all_categories_spy.call_count == 1
 
@@ -76,7 +76,7 @@ class TestCategoriesEndpoints:
     def test_get_all_categories(cls, use_test_db, mocker):
         created_category = operations.create_category("new", 1)
         get_all_categories_spy = mocker.spy(operations, "get_all_recipe_categories")
-        response = cls.client.get("/categories/")
+        response = cls.client.get("/api/categories/")
         assert response.status_code == 200
         assert len(response.json()) == 1
         assert get_all_categories_spy.call_count == 1
@@ -85,7 +85,7 @@ class TestCategoriesEndpoints:
     def test_get_category_by_id(cls, use_test_db, mocker):
         created_category = operations.create_category("new", 1)
         get_category_spy = mocker.spy(operations, "get_category_by_id")
-        response = cls.client.get(f"/categories/{created_category.id}")
+        response = cls.client.get(f"/api/categories/{created_category.id}")
         assert response.status_code == 200
         get_category_spy.assert_called_with(created_category.id)
 
@@ -95,7 +95,7 @@ class TestCategoriesEndpoints:
         patch_payload = {"field": "name", "value": "updated"}
         update_category_spy = mocker.spy(operations, "update_category")
         response = cls.client.patch(
-            f"/categories/{created_category.id}",
+            f"/api/categories/{created_category.id}",
             json=patch_payload,
             headers={"Authorization": "Bearer token"},
         )
@@ -133,13 +133,13 @@ class TestInstructionsOperations:
     def test_create_recipe_with_instructions_success(self, use_test_db, bypass_published_filter):
         instruction = {
             "instruction": "instruction",
-            "category": "Lunch",
+            "category": "Boil",
             "time": 10,
             "complexity": 5,
         }
         instruction2 = {
             "instruction": "instruction",
-            "category": "Lunch",
+            "category": "Boil",
             "time": 10,
             "complexity": 4,
         }
@@ -157,7 +157,7 @@ class TestInstructionsOperations:
         assert len(recipe.instructions) == 2
         assert recipes[0].time_to_prepare == 20
         assert recipes[0].complexity == 4.5
-        assert recipes[0].instructions[0].category == "Lunch"
+        assert recipes[0].instructions[0].category == "Boil"
 
     def test_create_instruction_for_recipe_success(self, use_test_db, bypass_published_filter, user):
         operations.create_category("Category name", 1)
@@ -165,7 +165,7 @@ class TestInstructionsOperations:
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -189,7 +189,7 @@ class TestInstructionsOperations:
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -210,7 +210,7 @@ class TestInstructionsOperations:
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -242,13 +242,13 @@ class TestInstructionsOperations:
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
         new_instruction2 = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -286,7 +286,7 @@ class TestInstructionsEndpoints:
         }
         self.new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -302,7 +302,7 @@ class TestInstructionsEndpoints:
 
         update_instruction_spy = mocker.spy(operations, "update_instruction")
         response = self.client.patch(
-            f"/recipes/{created_recipe.id}/instructions/{created_instruction.id}",
+            f"/api/recipes/{created_recipe.id}/instructions/{created_instruction.id}",
             json=patch_payload,
             headers={'Authorization': 'Bearer token'},
         )
@@ -321,7 +321,7 @@ class TestInstructionsEndpoints:
         patch_payload = {"field": "test", "value": "updated"}
 
         response = self.client.patch(
-            f"/recipes/{created_recipe.id}/instructions/{created_instruction.id}",
+            f"/api/recipes/{created_recipe.id}/instructions/{created_instruction.id}",
             json=patch_payload,
             headers={'Authorization': 'Bearer token'},
         )
@@ -338,7 +338,7 @@ class TestInstructionsEndpoints:
 
         delete_instruction_spy = mocker.spy(operations, "delete_instruction")
         response = self.client.delete(
-            f"/recipes/{created_recipe.id}/instructions/{created_instruction.id}", headers=headers
+            f"/api/recipes/{created_recipe.id}/instructions/{created_instruction.id}", headers=headers
         )
         assert response.status_code == 204
         delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=1, user=unittest.mock.ANY)
@@ -352,7 +352,7 @@ class TestInstructionsEndpoints:
 
         delete_instruction_spy = mocker.spy(operations, "delete_instruction")
         headers = {"Authorization": "Bearer token"}
-        response = self.client.delete(f"/recipes/{2}/instructions/{created_instruction.id}", headers=headers)
+        response = self.client.delete(f"/api/recipes/{2}/instructions/{created_instruction.id}", headers=headers)
         assert response.status_code == 404
         delete_instruction_spy.assert_called_with(recipe_id=2, instruction_id=1, user=unittest.mock.ANY)
 
@@ -367,7 +367,7 @@ class TestInstructionsEndpoints:
 
         delete_instruction_spy = mocker.spy(operations, "delete_instruction")
         headers = {"Authorization": "Bearer token"}
-        response = self.client.delete(f"/recipes/{created_recipe.id}/instructions/{2}", headers=headers)
+        response = self.client.delete(f"/api/recipes/{created_recipe.id}/instructions/{2}", headers=headers)
         assert response.status_code == 404
         delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2, user=unittest.mock.ANY)
 
@@ -384,6 +384,6 @@ class TestInstructionsEndpoints:
 
         delete_instruction_spy = mocker.spy(operations, "delete_instruction")
         headers = {"Authorization": "Bearer token"}
-        response = self.client.delete(f"/recipes/{1}/instructions/{2}", headers=headers)
+        response = self.client.delete(f"/api/recipes/{1}/instructions/{2}", headers=headers)
         assert response.status_code == 404
         delete_instruction_spy.assert_called_with(recipe_id=1, instruction_id=2, user=unittest.mock.ANY)
