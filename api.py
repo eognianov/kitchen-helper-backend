@@ -32,6 +32,7 @@ app.include_router(features.users.user_router, prefix='/api/users')
 app.include_router(features.users.role_router, prefix='/api/roles')
 app.include_router(features.recipes.category_router, prefix='/api/categories')
 app.include_router(features.recipes.recipes_router, prefix='/api/recipes')
+app.include_router(features.recipes.ingredient_router, prefix='/api/ingredients')
 app.include_router(features.images.router, prefix='/api/images')
 app.mount('/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 

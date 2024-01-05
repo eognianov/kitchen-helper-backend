@@ -5,6 +5,7 @@ import fastapi
 import pydantic
 
 import features.recipes.helpers
+from features.recipes import constants
 
 INSTRUCTION_CATEGORIES = (
     'WASH AND CHOP',
@@ -142,3 +143,82 @@ class PSFRecipesInputModel(pydantic.BaseModel):
                 raise fastapi.HTTPException(status_code=422, detail=str(ve))
         else:
             self.filter_expression = []
+
+
+class IngredientInput(pydantic.BaseModel):
+    name: str = pydantic.Field(max_length=100, min_length=3)
+    calories: float = pydantic.Field(ge=0)
+    carbo: float = pydantic.Field(ge=0)
+    fats: float = pydantic.Field(ge=0)
+    protein: float = pydantic.Field(ge=0)
+    cholesterol: float = pydantic.Field(ge=0)
+    measurement: str
+    category: str
+
+    @pydantic.field_validator("measurement")
+    @classmethod
+    def validate_measurement(cls, value):
+        if value.upper() not in constants.INGREDIENT_MEASUREMENT_UNITS:
+            raise ValueError(f"{value} is not a valid measurement")
+        return value
+
+    @pydantic.field_validator("category")
+    @classmethod
+    def validate_category(cls, value):
+        if value.upper() not in constants.INGREDIENT_CATEGORIES:
+            raise ValueError(f"{value} is not a valid category")
+        return value
+
+
+class UpdateIngredientInputModel(pydantic.BaseModel):
+    """Update Ingredient Input Model"""
+
+    field: str
+    value: str
+
+    @pydantic.model_validator(mode="after")
+    def validate_field(self):
+        allowed_fields = {
+            'NAME': lambda value: self.__validate_name(value),
+            'CALORIES': lambda value: self.__validate_numeric(value),
+            'CARBO': lambda value: self.__validate_numeric(value),
+            'FATS': lambda value: self.__validate_numeric(value),
+            'PROTEIN': lambda value: self.__validate_numeric(value),
+            'CHOLESTEROL': lambda value: self.__validate_numeric(value),
+            'MEASUREMENT': lambda value: self.__validate_measurement(value),
+            'CATEGORY': lambda value: self.__validate_category(value),
+        }
+
+        if self.field.upper() not in allowed_fields:
+            raise ValueError(f"You are not allowed to edit {self.field} field")
+
+        allowed_fields[self.field.upper()](self.value)
+        return self
+
+    @staticmethod
+    def __validate_name(value):
+        if not (3 <= len(value) <= 100):
+            raise ValueError("Name must be between 3 and 100 characters")
+        return value
+
+    @staticmethod
+    def __validate_numeric(value):
+        try:
+            float(value)
+            if float(value) < 0:
+                raise ValueError
+        except ValueError:
+            raise ValueError("Value must be a positive number")
+        return value
+
+    @staticmethod
+    def __validate_measurement(value):
+        if value.upper() not in constants.INGREDIENT_MEASUREMENT_UNITS:
+            raise ValueError(f"{value} is not a valid measurement")
+        return value
+
+    @staticmethod
+    def __validate_category(value):
+        if value.upper() not in constants.INGREDIENT_CATEGORIES:
+            raise ValueError(f"{value} is not a valid category")
+        return value

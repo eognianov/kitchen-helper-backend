@@ -1,5 +1,4 @@
 """Configuation module"""
-import logging
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib
@@ -8,7 +7,6 @@ from typing import Optional, List, Dict
 from enum import StrEnum, auto
 from celery import Celery
 
-import khLogging
 
 _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
