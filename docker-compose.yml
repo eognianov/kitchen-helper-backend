@@ -80,6 +80,7 @@ services:
     volumes:
       - ./:/usr/src/app
     environment:
+      - database=sqlite
       - CELERY_BROKER_URL=${CELERY_BROKER}${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:${CELERY_PORT}//
       - CELERY_RESULT_BACKEND=${CELERY_BACKEND}
     depends_on:

@@ -222,3 +222,32 @@ class UpdateIngredientInputModel(pydantic.BaseModel):
         if value.upper() not in constants.INGREDIENT_CATEGORIES:
             raise ValueError(f"{value} is not a valid category")
         return value
+
+
+class PatchRecipeInputModel(pydantic.BaseModel):
+    """Update category"""
+
+    field: str
+    value: str
+
+    @pydantic.field_validator("field")
+    @classmethod
+    def validate_field(cls, field: str):
+        allowed_fields_to_edit = [
+            "NAME",
+            'PICTURE',
+            'SUMMARY',
+            'CALORIES',
+            'CARBO',
+            'FATS',
+            'PROTEINS',
+            'CHOLESTEROL',
+            'TIME_TO_PREPARE',
+            'CATEGORY_ID',
+            'IS_PUBLISHED',
+        ]
+
+        if field.upper() not in allowed_fields_to_edit:
+            raise ValueError(f"You are not allowed to edit {field} column")
+
+        return field

@@ -24,6 +24,8 @@ from .models import (
     RecipeInstruction,
     Ingredient,
 )
+
+from .input_models import PatchRecipeInputModel
 from .responses import InstructionResponse, PSFRecipesResponseModel
 
 import configuration
@@ -485,3 +487,28 @@ def update_ingredient(ingredient_id: int, field: str, value: str | float, update
 
         logging.info(f"Ingredient #{db_ingredient.id} updated. {updated_by} set {field}={value}")
         return db_ingredient
+
+
+def patch_recipe(
+    *, recipe_id: int, patch_input_model: PatchRecipeInputModel, patched_by: common.authentication.AuthenticatedUser
+):
+    """
+    Patch recipe
+
+    :param recipe_id:
+    :param patch_input_model:
+    :param patched_by:
+    :return:
+    """
+
+    recipe = get_recipe_by_id(recipe_id, patched_by)
+    with db.connection.get_session() as session:
+        values = {patch_input_model.field: patch_input_model.value, 'updated_by': patched_by.id}
+        if patch_input_model.field.upper() == 'IS_PUBLISHED':
+            values['published_on'] = datetime.utcnow()
+        session.execute(update(Recipe).where(Recipe.id == recipe.id).values(values))
+        session.commit()
+        session.add(recipe)
+        session.refresh(recipe)
+
+    return recipe
