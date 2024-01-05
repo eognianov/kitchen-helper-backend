@@ -10,7 +10,7 @@ import common.constants
 
 import configuration
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/signin", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/signin", auto_error=False)
 
 jwt_config = configuration.JwtToken()
 
