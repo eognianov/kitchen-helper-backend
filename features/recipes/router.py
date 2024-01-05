@@ -318,7 +318,7 @@ def get_all_ingredients():
 
 
 @ingredient_router.delete("/{ingredient_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT)
-def delete_recipe(ingredient_id: int, user: common.authentication.authenticated_user):
+def delete_ingredient(ingredient_id: int, user: common.authentication.authenticated_user):
     """
     Delete ingredient
 
