@@ -34,6 +34,18 @@ class InstructionResponse(pydantic.BaseModel):
     recipe_id: int
 
 
+class IngredientResponse(pydantic.BaseModel):
+    id: int
+    name: str
+    calories: float
+    carbo: float
+    fats: float
+    protein: float
+    cholesterol: float
+    measurement: str
+    category: str
+
+
 class RecipeResponse(pydantic.BaseModel):
     """Recipe response"""
 
@@ -55,6 +67,7 @@ class RecipeResponse(pydantic.BaseModel):
 
     category: CategoryShortResponse | Any = None
     instructions: list[InstructionResponse] | Any = None
+    ingredients: list[IngredientResponse] | Any = None
 
     def model_post_init(self, __context: Any):
         if self.category:
@@ -74,15 +87,3 @@ class PSFRecipesResponseModel(pydantic.BaseModel):
     total_pages: int
     total_items: int
     recipes: list[RecipeResponse]
-
-
-class IngredientResponse(pydantic.BaseModel):
-    id: int
-    name: str
-    calories: float
-    carbo: float
-    fats: float
-    protein: float
-    cholesterol: float
-    measurement: str
-    category: str

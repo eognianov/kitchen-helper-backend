@@ -56,6 +56,14 @@ class Recipe(DbBaseModel):
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
     deleted_on: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True, default=None)
     deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
+    ingredients = relationship(
+        "Ingredient",
+        secondary="recipe_ingredients",
+        back_populates="recipes",
+        lazy="selectin",
+        primaryjoin="Recipe.id == RecipeIngredient.recipe_id",
+        secondaryjoin="Ingredient.id == RecipeIngredient.ingredient_id",
+    )
 
 
 class RecipeInstruction(DbBaseModel):
@@ -94,3 +102,19 @@ class Ingredient(DbBaseModel):
     is_deleted: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
     deleted_on: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True, init=False)
     deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, init=False)
+    recipes = relationship(
+        "Recipe",
+        secondary="recipe_ingredients",
+        back_populates="ingredients",
+        lazy="selectin",
+        primaryjoin="Ingredient.id == RecipeIngredient.ingredient_id",
+        secondaryjoin="Recipe.id == RecipeIngredient.recipe_id",
+    )
+
+
+class RecipeIngredient(DbBaseModel):
+    __tablename__ = 'recipe_ingredients'
+
+    recipe_id: Mapped[int] = mapped_column(Integer, ForeignKey('RECIPES.id'), primary_key=True)
+    ingredient_id: Mapped[int] = mapped_column(Integer, ForeignKey('INGREDIENTS.id'), primary_key=True)
+    quantity: Mapped[float] = mapped_column(Numeric(8, 2), nullable=False)
