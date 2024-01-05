@@ -419,18 +419,18 @@ def create_or_get_ingredient(ingredient: IngredientInput, created_by: int):
     :return:
     """
     try:
-        ingredient = get_ingredient_from_db(name=ingredient.name.lower().capitalize())
+        ingredient = get_ingredient_from_db(name=ingredient.name.lower())
         return ingredient
     except IngredientDoesNotExistException:
         new_ingredient = Ingredient(
-            name=ingredient.name.lower().capitalize(),
+            name=ingredient.name.lower(),
             calories=ingredient.calories,
             carbo=ingredient.carbo,
             fats=ingredient.fats,
             protein=ingredient.protein,
             cholesterol=ingredient.cholesterol,
             measurement=ingredient.measurement.lower(),
-            category=ingredient.category.lower().capitalize(),
+            category=ingredient.category.lower(),
             created_by=created_by,
         )
 
