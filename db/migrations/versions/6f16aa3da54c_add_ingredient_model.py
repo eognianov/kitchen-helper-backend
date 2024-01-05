@@ -1,8 +1,8 @@
 """add ingredient model
 
-Revision ID: 931f4b8673d8
+Revision ID: 6f16aa3da54c
 Revises: 221bb1f84e86
-Create Date: 2024-01-04 12:16:29.536137
+Create Date: 2024-01-05 10:20:42.559858
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '931f4b8673d8'
+revision: str = '6f16aa3da54c'
 down_revision: Union[str, None] = '221bb1f84e86'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -29,50 +29,8 @@ def upgrade() -> None:
         sa.Column('fats', sa.Numeric(precision=8, scale=2), nullable=False),
         sa.Column('protein', sa.Numeric(precision=8, scale=2), nullable=False),
         sa.Column('cholesterol', sa.Numeric(precision=8, scale=2), nullable=False),
-        sa.Column(
-            'measurement',
-            sa.Enum(
-                'KG',
-                'GRAM',
-                'LITER',
-                'MILLILITER',
-                'TEASPOON',
-                'TABLESPOON',
-                'CUP',
-                'PINCH',
-                'PIECE',
-                'OUNCE',
-                'POUND',
-                'FLUID_OUNCE',
-                'GALLON',
-                'QUART',
-                'PINT',
-                name='ingredientmeasurementenum',
-            ),
-            nullable=False,
-        ),
-        sa.Column(
-            'category',
-            sa.Enum(
-                'PANTRY_ESSENTIALS',
-                'VEGETABLES_AND_GREENS',
-                'FRUITS',
-                'MEAT_AND_POULTRY',
-                'SEAFOOD',
-                'DAIRY',
-                'SPICES_AND_SEASONINGS',
-                'GRAINS_AND_PASTA',
-                'CONDIMENTS',
-                'BAKING_INGREDIENTS',
-                'BEVERAGES',
-                'NUTS_AND_SEEDS',
-                'SWEETENERS',
-                'SNACKS',
-                'MISCELLANEOUS',
-                name='ingredientcategoryenum',
-            ),
-            nullable=False,
-        ),
+        sa.Column('measurement', sa.String(length=25), nullable=False),
+        sa.Column('category', sa.String(length=50), nullable=False),
         sa.Column('created_by', sa.Integer(), nullable=False),
         sa.Column('created_on', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
         sa.Column('updated_by', sa.Integer(), nullable=True),

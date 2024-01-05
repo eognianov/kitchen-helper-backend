@@ -23,10 +23,8 @@ from .models import (
     Recipe,
     RecipeInstruction,
     Ingredient,
-    IngredientCategoryEnum,
-    IngredientMeasurementEnum,
 )
-from .responses import InstructionResponse, PSFRecipesResponseModel, IngredientResponse
+from .responses import InstructionResponse, PSFRecipesResponseModel
 
 import configuration
 import khLogging
@@ -413,56 +411,35 @@ def get_all_ingredients_from_db():
     return all_ingredients
 
 
-def get_ingredient_responses(ingredients) -> list[IngredientResponse]:
-    """
-    Make ingredients from database to responses
-    :param ingredients:
-    :return:
-    """
-    if not isinstance(ingredients, list):
-        ingredients = [ingredients]
-    ingredient_responses = [
-        IngredientResponse(
-            id=ingredient.id,
-            name=ingredient.name,
-            calories=ingredient.calories,
-            carbo=ingredient.carbo,
-            fats=ingredient.fats,
-            protein=ingredient.protein,
-            cholesterol=ingredient.cholesterol,
-            measurement=ingredient.measurement.value,
-            category=ingredient.category.value,
-        )
-        for ingredient in ingredients
-    ]
-    return ingredient_responses
-
-
-def create_ingredient(ingredient: IngredientInput, created_by: int):
+def create_or_get_ingredient(ingredient: IngredientInput, created_by: int):
     """
     Create a new ingredient
     :param ingredient:
     :param created_by:
     :return:
     """
-    new_ingredient = Ingredient(
-        name=ingredient.name,
-        calories=ingredient.calories,
-        carbo=ingredient.carbo,
-        fats=ingredient.fats,
-        protein=ingredient.protein,
-        cholesterol=ingredient.cholesterol,
-        measurement=IngredientMeasurementEnum(ingredient.measurement),
-        category=IngredientCategoryEnum(ingredient.category),
-        created_by=created_by,
-    )
+    try:
+        ingredient = get_ingredient_from_db(name=ingredient.name)
+        return ingredient
+    except IngredientDoesNotExistException:
+        new_ingredient = Ingredient(
+            name=ingredient.name,
+            calories=ingredient.calories,
+            carbo=ingredient.carbo,
+            fats=ingredient.fats,
+            protein=ingredient.protein,
+            cholesterol=ingredient.cholesterol,
+            measurement=ingredient.measurement,
+            category=ingredient.category,
+            created_by=created_by,
+        )
 
-    with db.connection.get_session() as session:
-        session.add(new_ingredient)
-        session.commit()
-        session.refresh(new_ingredient)
+        with db.connection.get_session() as session:
+            session.add(new_ingredient)
+            session.commit()
+            session.refresh(new_ingredient)
 
-    return new_ingredient
+        return new_ingredient
 
 
 def delete_ingredient(pk: int, user_id: int):

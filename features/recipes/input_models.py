@@ -5,7 +5,7 @@ import fastapi
 import pydantic
 
 import features.recipes.helpers
-from features.recipes import models
+from features.recipes import constants
 
 INSTRUCTION_CATEGORIES = (
     'WASH AND CHOP',
@@ -146,63 +146,26 @@ class PSFRecipesInputModel(pydantic.BaseModel):
 
 
 class IngredientInput(pydantic.BaseModel):
-    name: str
-    calories: float
-    carbo: float
-    fats: float
-    protein: float
-    cholesterol: float
+    name: str = pydantic.Field(max_length=100, min_length=3)
+    calories: float = pydantic.Field(ge=0)
+    carbo: float = pydantic.Field(ge=0)
+    fats: float = pydantic.Field(ge=0)
+    protein: float = pydantic.Field(ge=0)
+    cholesterol: float = pydantic.Field(ge=0)
     measurement: str
     category: str
-
-    @staticmethod
-    def __positive_field_validator(value, field_name):
-        if value < 0:
-            raise ValueError(f"{field_name} must be a positive")
-        return value
-
-    @pydantic.field_validator("name", mode="after")
-    @classmethod
-    def name_len_validator(cls, value):
-        if len(value) < 3 or len(value) > 100:
-            raise ValueError("Name must be between 3 and 100 characters")
-
-    @pydantic.field_validator("calories", mode="after")
-    @classmethod
-    def validate_positive_calories(cls, value):
-        return cls.__positive_field_validator(value, "calories")
-
-    @pydantic.field_validator("carbo", mode="after")
-    @classmethod
-    def validate_positive_carbo(cls, value):
-        return cls.__positive_field_validator(value, "carbo")
-
-    @pydantic.field_validator("fats", mode="after")
-    @classmethod
-    def validate_positive_fats(cls, value):
-        return cls.__positive_field_validator(value, "fats")
-
-    @pydantic.field_validator("protein", mode="after")
-    @classmethod
-    def validate_positive_protein(cls, value):
-        return cls.__positive_field_validator(value, "protein")
-
-    @pydantic.field_validator("cholesterol", mode="after")
-    @classmethod
-    def validate_positive_cholesterol(cls, value):
-        return cls.__positive_field_validator(value, "cholesterol")
 
     @pydantic.field_validator("measurement")
     @classmethod
     def validate_measurement(cls, value):
-        if value not in [e.value for e in models.IngredientMeasurementEnum]:
+        if value.upper() not in constants.INGREDIENT_MEASUREMENT_UNITS:
             raise ValueError(f"{value} is not a valid measurement")
         return value
 
     @pydantic.field_validator("category")
     @classmethod
     def validate_category(cls, value):
-        if value not in [e.value for e in models.IngredientCategoryEnum]:
+        if value.upper() not in constants.INGREDIENT_CATEGORIES:
             raise ValueError(f"{value} is not a valid category")
         return value
 
@@ -211,37 +174,51 @@ class UpdateIngredientInputModel(pydantic.BaseModel):
     """Update Ingredient Input Model"""
 
     field: str
-    value: str | float
+    value: str
 
-    @pydantic.field_validator('field')
-    @classmethod
-    def validate_field(cls, field: str):
-        allowed_fields_to_edit = [
-            'NAME',
-            'CALORIES',
-            'CARBO',
-            'FATS',
-            'PROTEIN',
-            'CHOLESTEROL',
-            'MEASUREMENT',
-            'CATEGORY',
-        ]
+    @pydantic.model_validator(mode="after")
+    def validate_field(self):
+        allowed_fields = {
+            'NAME': lambda value: self.__validate_name(value),
+            'CALORIES': lambda value: self.__validate_numeric(value),
+            'CARBO': lambda value: self.__validate_numeric(value),
+            'FATS': lambda value: self.__validate_numeric(value),
+            'PROTEIN': lambda value: self.__validate_numeric(value),
+            'CHOLESTEROL': lambda value: self.__validate_numeric(value),
+            'MEASUREMENT': lambda value: self.__validate_measurement(value),
+            'CATEGORY': lambda value: self.__validate_category(value),
+        }
 
-        if field.upper() not in allowed_fields_to_edit:
-            raise ValueError(f"You are not allowed to edit {field} column")
+        if self.field.upper() not in allowed_fields:
+            raise ValueError(f"You are not allowed to edit {self.field} field")
 
-        return field
+        allowed_fields[self.field.upper()](self.value)
+        return self
 
-    @pydantic.field_validator('value')
-    @classmethod
-    def validate_value(cls, value: str | float):
+    @staticmethod
+    def __validate_name(value):
+        if not (3 <= len(value) <= 100):
+            raise ValueError("Name must be between 3 and 100 characters")
+        return value
+
+    @staticmethod
+    def __validate_numeric(value):
         try:
             float(value)
+            if float(value) < 0:
+                raise ValueError
         except ValueError:
-            enum_values = [e.value for e in models.IngredientMeasurementEnum]
-            enum_values.extend(e.value for e in models.IngredientCategoryEnum)
-            if value not in enum_values:
-                raise ValueError(f"{value} is not valid")
-        if float(value) < 0:
             raise ValueError("Value must be a positive number")
+        return value
+
+    @staticmethod
+    def __validate_measurement(value):
+        if value.upper() not in constants.INGREDIENT_MEASUREMENT_UNITS:
+            raise ValueError(f"{value} is not a valid measurement")
+        return value
+
+    @staticmethod
+    def __validate_category(value):
+        if value.upper() not in constants.INGREDIENT_CATEGORIES:
+            raise ValueError(f"{value} is not a valid category")
         return value
