@@ -506,6 +506,8 @@ def patch_recipe(
         values = {patch_input_model.field: patch_input_model.value, 'updated_by': patched_by.id}
         if patch_input_model.field.upper() == 'IS_PUBLISHED':
             values['published_on'] = datetime.utcnow()
+            values['published_by'] = patched_by.id
+            values[patch_input_model.field] = bool(patch_input_model.value)
         session.execute(update(Recipe).where(Recipe.id == recipe.id).values(values))
         session.commit()
         session.add(recipe)
