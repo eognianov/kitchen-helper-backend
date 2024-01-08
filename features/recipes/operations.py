@@ -26,7 +26,7 @@ from .models import (
 )
 
 from .input_models import PatchRecipeInputModel
-from .responses import InstructionResponse, PSFRecipesResponseModel
+from .responses import PSFRecipesResponseModel
 
 import configuration
 import khLogging
@@ -222,7 +222,6 @@ def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUs
 def create_instructions(
     instructions_request: list[CreateInstructionInputModel],
     recipe_id: int,
-    created_by: common.authentication.AuthenticatedUser,
 ) -> None:
     """
     Create instructions
