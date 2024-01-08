@@ -228,7 +228,7 @@ class PatchRecipeInputModel(pydantic.BaseModel):
     """Update category"""
 
     field: str
-    value: str
+    value: str | int | bool
 
     @pydantic.field_validator("field")
     @classmethod
@@ -296,3 +296,21 @@ class PatchRecipeInputModel(pydantic.BaseModel):
         validator_functions = validators.get(self.field.upper(), [])
         for validator in validator_functions:
             validator(field=self.field, value=self.value)
+
+    def model_post_init(self, __context: Any) -> None:
+        """
+        Parse the value after init
+        :param __context:
+        :return:
+        """
+
+        def _parse_bool(value: str) -> bool:
+            if value.isdigit():
+                return bool(value)
+            elif value.isalpha() and value.casefold() in ['true', 'false']:
+                return eval(value.capitalize())
+            return False
+
+        parsers = {'PICTURE': int, 'TIME_TO_PREPARE': int, 'CATEGORY_ID': int, 'IS_PUBLISHED': _parse_bool}
+
+        self.value = parsers.get(self.field.upper(), lambda x: x)(self.value)
