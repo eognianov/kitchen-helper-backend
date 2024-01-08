@@ -15,6 +15,7 @@ from .input_models import (
     CreateRecipeInputModel,
     PSFRecipesInputModel,
     UpdateIngredientInputModel,
+    PatchRecipeInputModel,
 )
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel, IngredientInput
 from .responses import RecipeResponse
@@ -168,6 +169,33 @@ def create_recipe(
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Category with id {create_recipe_input_model.category_id} does not exist",
+        )
+
+
+@recipes_router.patch('/{recipe_id}', response_model=RecipeResponse)
+def patch_recipe(
+    patched_by: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    patch_input_model: PatchRecipeInputModel = fastapi.Body(),
+):
+    """
+    Patch recipe
+
+    :param recipe_id:
+    :param patch_input_model:
+    :param patched_by:
+    :return:
+    """
+
+    try:
+        return features.recipes.operations.patch_recipe(
+            recipe_id=recipe_id, patch_input_model=patch_input_model, patched_by=patched_by
+        )
+
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with id {recipe_id} does not exist",
         )
 
 
