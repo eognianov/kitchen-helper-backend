@@ -118,6 +118,7 @@ class TestInstructionsOperations:
             "cholesterol": 1,
             "created_by": 1,
             "instructions": [],
+            "ingredients": [],
         }
 
     def test_create_recipe_without_instructions_success(self, use_test_db):
@@ -283,6 +284,7 @@ class TestInstructionsEndpoints:
             "cholesterol": 1,
             "created_by": 1,
             "instructions": [],
+            "ingredients": [],
         }
         self.new_instruction = {
             "instruction": "instruction",
