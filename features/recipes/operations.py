@@ -1,9 +1,10 @@
 """Recipes feature business logic"""
 from datetime import datetime
-from typing import Type, Optional
+from typing import Type, Optional, List
 
 import sqlalchemy.exc
 from sqlalchemy import update, and_, or_
+from sqlalchemy.orm import joinedload
 
 import common.authentication
 import db.connection
