@@ -169,6 +169,11 @@ def create_recipe(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Category with id {create_recipe_input_model.category_id} does not exist",
         )
+    except features.recipes.exceptions.IngredientDoesNotExistException as e:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=e.text,
+        )
 
 
 @recipes_router.patch("/{recipe_id}/instructions/{instruction_id}", response_model=InstructionResponse)
@@ -289,6 +294,68 @@ def delete_recipe(recipe_id: int, user: common.authentication.authenticated_user
         )
 
 
+@recipes_router.post("/{recipe_id}/ingredients{ingredient_id}", status_code=fastapi.status.HTTP_201_CREATED)
+def add_ingredient_to_recipe(
+    user: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    ingredient_id: int = fastapi.Path(),
+    quantity: float = fastapi.Body(),
+):
+    """
+    Add ingredient to recipe
+    :param user:
+    :param recipe_id:
+    :param ingredient_id:
+    :param quantity:
+    :return:
+    """
+    try:
+        recipe = features.recipes.operations.get_recipe_by_id(recipe_id, user)
+        ingredient = features.recipes.operations.get_ingredient_from_db(pk=ingredient_id)
+        features.recipes.operations.add_ingredient_to_recipe(recipe.id, ingredient.id, quantity)
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Recipe with id {recipe_id} does not exist",
+        )
+    except features.recipes.exceptions.IngredientDoesNotExistException as e:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=e.text,
+        )
+
+
+@recipes_router.delete("/{recipe_id}/ingredients{ingredient_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT)
+def remove_ingredient_from_recipe(
+    user: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    ingredient_id: int = fastapi.Path(),
+    quantity: int = fastapi.Body(),
+):
+    """
+    Remove ingredient from recipe
+    :param user:
+    :param recipe_id:
+    :param ingredient_id:
+    :param quantity:
+    :return:
+    """
+    try:
+        recipe = features.recipes.operations.get_recipe_by_id(recipe_id, user)
+        ingredient = features.recipes.operations.get_ingredient_from_db(pk=ingredient_id)
+        features.recipes.operations.add_ingredient_to_recipe(recipe.id, ingredient.id, quantity)
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Recipe with id {recipe_id} does not exist",
+        )
+    except features.recipes.exceptions.IngredientDoesNotExistException as e:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=e.text,
+        )
+
+
 @ingredient_router.post("/", status_code=fastapi.status.HTTP_201_CREATED, response_model=IngredientResponse)
 def create_ingredient(
     ingredient_input_model: IngredientInput,
@@ -329,8 +396,8 @@ def delete_ingredient(ingredient_id: int, user: common.authentication.authentica
 
     try:
         features.recipes.operations.delete_ingredient(ingredient_id, user.id)
-    except features.recipes.exceptions.IngredientDoesNotExistException:
-        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND)
+    except features.recipes.exceptions.IngredientDoesNotExistException as e:
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=e.text)
 
 
 @ingredient_router.patch("/{ingredient_id}", response_model=IngredientResponse)
@@ -353,5 +420,5 @@ def patch_ingredient(
             ingredient_id, update_ingredient_input_model.field, update_ingredient_input_model.value, updated_by=user.id
         )
         return ingredient
-    except features.recipes.exceptions.IngredientDoesNotExistException:
-        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND)
+    except features.recipes.exceptions.IngredientDoesNotExistException as e:
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=e.text)

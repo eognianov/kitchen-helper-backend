@@ -67,29 +67,9 @@ class CreateInstructionInputModel(pydantic.BaseModel):
         return field.capitalize()
 
 
-class IngredientInput(pydantic.BaseModel):
-    name: str = pydantic.Field(max_length=100, min_length=3)
-    calories: float = pydantic.Field(ge=0)
-    carbo: float = pydantic.Field(ge=0)
-    fats: float = pydantic.Field(ge=0)
-    protein: float = pydantic.Field(ge=0)
-    cholesterol: float = pydantic.Field(ge=0)
-    measurement: str
-    category: str
-
-    @pydantic.field_validator("measurement")
-    @classmethod
-    def validate_measurement(cls, value):
-        if value.upper() not in constants.INGREDIENT_MEASUREMENT_UNITS:
-            raise ValueError(f"{value} is not a valid measurement")
-        return value
-
-    @pydantic.field_validator("category")
-    @classmethod
-    def validate_category(cls, value):
-        if value.upper() not in constants.INGREDIENT_CATEGORIES:
-            raise ValueError(f"{value} is not a valid category")
-        return value
+class RecipeIngredientInputModel(pydantic.BaseModel):
+    ingredient_id: int = pydantic.Field(gt=0)
+    quantity: int = pydantic.Field(gt=0)
 
 
 class CreateRecipeInputModel(pydantic.BaseModel):
@@ -106,7 +86,7 @@ class CreateRecipeInputModel(pydantic.BaseModel):
     time_to_prepare: int = pydantic.Field(gt=0)
     category_id: Optional[int] = None
     instructions: Optional[list[CreateInstructionInputModel]] = None
-    ingredients: Optional[list[IngredientInput]] = None
+    ingredients: Optional[list[RecipeIngredientInputModel]] = None
 
 
 class PatchInstructionInputModel(pydantic.BaseModel):
@@ -169,6 +149,31 @@ class PSFRecipesInputModel(pydantic.BaseModel):
                 raise fastapi.HTTPException(status_code=422, detail=str(ve))
         else:
             self.filter_expression = []
+
+
+class IngredientInput(pydantic.BaseModel):
+    name: str = pydantic.Field(max_length=100, min_length=3)
+    calories: float = pydantic.Field(ge=0)
+    carbo: float = pydantic.Field(ge=0)
+    fats: float = pydantic.Field(ge=0)
+    protein: float = pydantic.Field(ge=0)
+    cholesterol: float = pydantic.Field(ge=0)
+    measurement: str
+    category: str
+
+    @pydantic.field_validator("measurement")
+    @classmethod
+    def validate_measurement(cls, value):
+        if value.upper() not in constants.INGREDIENT_MEASUREMENT_UNITS:
+            raise ValueError(f"{value} is not a valid measurement")
+        return value
+
+    @pydantic.field_validator("category")
+    @classmethod
+    def validate_category(cls, value):
+        if value.upper() not in constants.INGREDIENT_CATEGORIES:
+            raise ValueError(f"{value} is not a valid category")
+        return value
 
 
 class UpdateIngredientInputModel(pydantic.BaseModel):
