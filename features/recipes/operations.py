@@ -147,7 +147,7 @@ def create_recipe(
         session.refresh(recipe)
 
         if instructions:
-            create_instructions(instructions, recipe.id, created_by)
+            create_instructions(instructions, recipe.id)
             session.refresh(recipe)
     logging.info(f"User {created_by} create Recipe (#{recipe.id}).")
     return recipe
