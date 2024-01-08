@@ -82,6 +82,8 @@ class RecipeInstruction(DbBaseModel):
 
 
 class Ingredient(DbBaseModel):
+    """Ingredient DB model"""
+
     __tablename__ = "INGREDIENTS"
 
     id: Mapped[int] = mapped_column(Integer, init=False, autoincrement=True, primary_key=True)
@@ -113,6 +115,8 @@ class Ingredient(DbBaseModel):
 
 
 class RecipeIngredient(DbBaseModel):
+    """RecipeIngredient DB model"""
+
     __tablename__ = 'recipe_ingredients'
 
     recipe_id: Mapped[int] = mapped_column(Integer, ForeignKey('RECIPES.id'), primary_key=True)

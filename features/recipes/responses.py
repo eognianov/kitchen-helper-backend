@@ -35,6 +35,8 @@ class InstructionResponse(pydantic.BaseModel):
 
 
 class IngredientResponse(pydantic.BaseModel):
+    """Ingredient response"""
+
     id: int
     name: str
     calories: float

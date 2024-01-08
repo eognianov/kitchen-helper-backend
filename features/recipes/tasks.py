@@ -12,6 +12,10 @@ logging = khLogging.Logger("celery-recipes-tasks")
 
 @celery.task
 def seed_recipe_categories():
+    """
+    Celery task used to seed the recipe categories
+    :return:
+    """
     categories = [cat for cat in configuration.AppRecipeCategories().categories]
     user = get_user_from_db(username=configuration.AppUsers().users[0]["username"])
     if not user:
@@ -32,6 +36,10 @@ def seed_recipe_categories():
 
 @celery.task
 def calculate_nutrients():
+    """
+    Celery task to calculate the nutrients for the recipes
+    :return:
+    """
     with db.connection.get_session() as session:
         recipes = session.query(Recipe).all()
         if not recipes:

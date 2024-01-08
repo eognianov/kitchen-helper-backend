@@ -451,12 +451,22 @@ def create_or_get_ingredient(ingredient: IngredientInput, created_by: int):
 
 
 def _delete_entry_from_recipe_ingredients(ingredient_id: int):
+    """
+    Delete relation recipe ingredient from database
+    :param ingredient_id:
+    :return:
+    """
     with db.connection.get_session() as session:
         session.query(RecipeIngredient).filter_by(ingredient_id=ingredient_id).delete()
         session.commit()
 
 
 def _remove_ingredient_from_all_recipes(ingredient_id: int):
+    """
+    Remove deleted ingredient from all recipes
+    :param ingredient_id:
+    :return:
+    """
     with db.connection.get_session() as session:
         ingredient = session.query(Ingredient).get(ingredient_id)
 
@@ -469,7 +479,7 @@ def _remove_ingredient_from_all_recipes(ingredient_id: int):
 
 def delete_ingredient(pk: int, user_id: int):
     """
-    Delete ingredient
+    Delete ingredient and remove the relations with recipes
     :param pk:
     :param user_id:
     :return:
