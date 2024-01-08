@@ -221,34 +221,6 @@ def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUs
         return recipe
 
 
-def update_recipe(recipe_id: int, created_by: common.authentication.AuthenticatedUser) -> None:
-    """
-    Update recipe after adding or editing instructions
-    :param created_by:
-    :param recipe_id:
-    :return:
-    """
-
-    with db.connection.get_session() as session:
-        recipe = get_recipe_by_id(recipe_id=recipe_id, user=created_by)
-
-        total_complexity = sum([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions])
-        complexity_len = len([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions])
-        time_to_prepare = sum([InstructionResponse(**x.__dict__).time for x in recipe.instructions])
-
-        if complexity_len == 0:
-            recipe.complexity = 0
-        else:
-            recipe.complexity = round(total_complexity / complexity_len, 1)
-
-        recipe.time_to_prepare = time_to_prepare
-
-        session.add(recipe)
-        session.commit()
-        session.refresh(recipe)
-    logging.info(f"Recipe #{recipe_id} was updated")
-
-
 def create_instructions(
     instructions_request: list[CreateInstructionInputModel],
     recipe_id: int,
@@ -268,7 +240,6 @@ def create_instructions(
             session.add(new_instruction)
             session.commit()
     logging.info(f"Recipe #{recipe_id} was updated with {len(instructions_request)} instructions")
-    update_recipe(recipe_id=recipe_id, created_by=created_by)
 
 
 def get_instruction_by_id(instruction_id: int):
@@ -303,8 +274,6 @@ def update_instruction(
             session.execute(update(RecipeInstruction), [{"id": instruction.id, f"{field}": value}])
             session.commit()
             RecipeInstruction.__setattr__(instruction, field, value)
-
-            update_recipe(recipe_id=recipe.id, created_by=user)
             logging.info(f"Instruction #({instruction_id}) was updated. Set {field} = {value}")
             return instruction
 
@@ -334,8 +303,6 @@ def create_instruction(recipe_id: int, instruction_request, user: common.authent
         session.add(instruction)
         session.commit()
         session.refresh(instruction)
-
-        update_recipe(recipe_id=recipe.id, created_by=user)
     return instruction
 
 
@@ -350,7 +317,6 @@ def delete_instruction(recipe_id: int, instruction_id: int, user: Optional[commo
         session.delete(instruction)
         session.commit()
         logging.info(f"Instruction #{instruction_id} was deleted from Recipe #{recipe_id}")
-        update_recipe(recipe_id=recipe.id, created_by=user)
 
 
 def delete_recipe(*, recipe_id: int, deleted_by: common.authentication.authenticated_user):
