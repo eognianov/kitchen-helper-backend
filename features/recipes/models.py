@@ -56,6 +56,14 @@ class Recipe(DbBaseModel):
     deleted_on: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True, default=None)
     deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
 
+    @hybrid_property
+    def complexity(self) -> float:
+        return round(sum(_.complexity for _ in self.instructions) / len(self.instructions), 1)
+
+    @hybrid_property
+    def time_to_prepare(self) -> int:
+        return sum(_.time for _ in self.instructions)
+
 
 class RecipeInstruction(DbBaseModel):
     """Recipe instruction"""
