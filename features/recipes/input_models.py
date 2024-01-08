@@ -78,7 +78,6 @@ class CreateRecipeInputModel(pydantic.BaseModel):
     fats: Optional[float] = pydantic.Field(default=0, ge=0)
     proteins: Optional[float] = pydantic.Field(default=0, ge=0)
     cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
-    time_to_prepare: int = pydantic.Field(gt=0)
     category_id: Optional[int] = None
     instructions: Optional[list[CreateInstructionInputModel]] = None
 

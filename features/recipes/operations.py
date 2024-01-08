@@ -95,7 +95,6 @@ def create_category(category_name: str, created_by: int) -> RecipeCategory:
 def create_recipe(
     *,
     name: str,
-    time_to_prepare: int,
     created_by: common.authentication.AuthenticatedUser,
     category_id: int = None,
     picture: str = None,
@@ -131,7 +130,6 @@ def create_recipe(
 
     recipe = Recipe(
         name=name,
-        time_to_prepare=time_to_prepare,
         category=category,
         picture=picture,
         summary=summary,

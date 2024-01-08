@@ -107,7 +107,6 @@ class TestInstructionsOperations:
     def setup(self):
         self.recipe = {
             "name": "name",
-            "time_to_prepare": 0,
             "category_id": 1,
             "picture": "",
             "summary": "summary",
@@ -271,7 +270,6 @@ class TestInstructionsEndpoints:
         self.client = TestClient(app)
         self.recipe = {
             "name": "name",
-            "time_to_prepare": 0,
             "category_id": 1,
             "picture": "",
             "summary": "summary",
