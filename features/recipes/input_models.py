@@ -237,11 +237,6 @@ class PatchRecipeInputModel(pydantic.BaseModel):
             "NAME",
             'PICTURE',
             'SUMMARY',
-            'CALORIES',
-            'CARBO',
-            'FATS',
-            'PROTEINS',
-            'CHOLESTEROL',
             'TIME_TO_PREPARE',
             'CATEGORY_ID',
             'IS_PUBLISHED',
@@ -251,3 +246,53 @@ class PatchRecipeInputModel(pydantic.BaseModel):
             raise ValueError(f"You are not allowed to edit {field} column")
 
         return field
+
+    @pydantic.model_validator(mode='after')
+    def validate_model(self):
+        def __validate_string_length(*, field: str, value: str, max_length: int, min_length: int = 3):
+            """Validate string length"""
+            if not (min_length <= len(value) <= max_length):
+                raise ValueError(f'The length of {field} must be in the range [{min_length}, {max_length}]!')
+
+        def __validate_integer_size(*, field: str, value: str, min_value: int = 0, max_value: int | None = None):
+            """Validate integer"""
+            try:
+                parsed_value = int(value)
+            except ValueError:
+                raise ValueError(f'You must provide valid integer for {field}')
+            is_valid = parsed_value >= min_value
+            if max_value:
+                is_valid = is_valid and parsed_value <= max_value
+            if not is_valid:
+                raise ValueError(f"{field} value must be > {min_value} {f'and < {max_value}' if max_value else ''}!")
+
+        def __validate_bool(*, field: str, value: str):
+            try:
+                bool(value)
+            except:
+                raise ValueError(f"{field} value must be a valid boolean")
+
+        def _validate_name(*, field: str, value: str):
+            return __validate_string_length(field=field, value=value, max_length=255)
+
+        def _validate_positive_integer(*, field: str, value: str):
+            return __validate_integer_size(field=field, value=value, min_value=1)
+
+        def _validate_summary(*, field: str, value: str):
+            return __validate_string_length(field=field, value=value, min_length=3, max_length=1000)
+
+        def validate_is_published(*, field: str, value: str):
+            return __validate_bool(field=field, value=value)
+
+        validators = {
+            'NAME': [_validate_name],
+            'PICTURE': [_validate_positive_integer],
+            'SUMMARY': [_validate_summary],
+            'TIME_TO_PREPARE': [_validate_positive_integer],
+            'CATEGORY_ID': [_validate_positive_integer],
+            'IS_PUBLISHED': [validate_is_published],
+        }
+
+        validator_functions = validators.get(self.field.upper(), [])
+        for validator in validator_functions:
+            validator(field=self.field, value=self.value)
