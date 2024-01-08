@@ -297,6 +297,8 @@ class PatchRecipeInputModel(pydantic.BaseModel):
         for validator in validator_functions:
             validator(field=self.field, value=self.value)
 
+        return self
+
     def model_post_init(self, __context: Any) -> None:
         """
         Parse the value after init

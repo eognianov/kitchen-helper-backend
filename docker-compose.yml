@@ -12,6 +12,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - database=postgres
       - postgres__host=db
       - postgres__port=5432
       - postgres__user=${POSTGRES_USER}
