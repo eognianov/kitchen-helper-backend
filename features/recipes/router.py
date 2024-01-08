@@ -163,7 +163,7 @@ def create_recipe(
     :return:
     """
     try:
-        return features.recipes.operations.create_recipe(**create_recipe_input_model.__dict__, created_by=created_by.id)
+        return features.recipes.operations.create_recipe(**create_recipe_input_model.__dict__, created_by=created_by)
 
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
