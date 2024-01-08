@@ -302,7 +302,7 @@ def update_instruction(
             session.commit()
             RecipeInstruction.__setattr__(instruction, field, value)
 
-            update_recipe(recipe_id=recipe.id)
+            update_recipe(recipe_id=recipe.id, created_by=user)
             logging.info(f"Instruction #({instruction_id}) was updated. Set {field} = {value}")
             return instruction
 
@@ -333,7 +333,7 @@ def create_instruction(recipe_id: int, instruction_request, user: common.authent
         session.commit()
         session.refresh(instruction)
 
-        update_recipe(recipe_id=recipe.id)
+        update_recipe(recipe_id=recipe.id, created_by=user)
     return instruction
 
 
@@ -348,7 +348,7 @@ def delete_instruction(recipe_id: int, instruction_id: int, user: Optional[commo
         session.delete(instruction)
         session.commit()
         logging.info(f"Instruction #{instruction_id} was deleted from Recipe #{recipe_id}")
-        update_recipe(recipe_id=recipe.id)
+        update_recipe(recipe_id=recipe.id, created_by=user)
 
 
 def delete_recipe(*, recipe_id: int, deleted_by: common.authentication.authenticated_user):
