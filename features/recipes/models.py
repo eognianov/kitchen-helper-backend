@@ -1,5 +1,6 @@
 from features import DbBaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import String, Integer, Float, func, ForeignKey, DateTime, Boolean, Numeric
 import datetime
 from typing import Optional
@@ -28,7 +29,6 @@ class Recipe(DbBaseModel):
 
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True, init=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    time_to_prepare: Mapped[int] = mapped_column(Integer)
     created_by: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
     updated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
@@ -46,7 +46,6 @@ class Recipe(DbBaseModel):
     fats: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     proteins: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     cholesterol: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
-    complexity: Mapped[float] = mapped_column(Float, nullable=True, default=0)
     instructions: Mapped[list["RecipeInstruction"]] = relationship(
         "RecipeInstruction", back_populates="recipe", init=False, lazy='selectin'
     )
