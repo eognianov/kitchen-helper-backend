@@ -107,15 +107,10 @@ class TestInstructionsOperations:
     def setup(self):
         self.recipe = {
             "name": "name",
-            "time_to_prepare": 0,
+            "serves": 1,
             "category_id": 1,
             "picture": "",
             "summary": "summary",
-            "calories": 1,
-            "carbo": 1,
-            "fats": 1,
-            "proteins": 1,
-            "cholesterol": 1,
             "instructions": [],
         }
 
