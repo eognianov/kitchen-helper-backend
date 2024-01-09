@@ -266,15 +266,10 @@ class TestInstructionsEndpoints:
         self.client = TestClient(app)
         self.recipe = {
             "name": "name",
-            "time_to_prepare": 0,
             "category_id": 1,
             "picture": "",
+            "serves": 4,
             "summary": "summary",
-            "calories": 1,
-            "carbo": 1,
-            "fats": 1,
-            "proteins": 1,
-            "cholesterol": 1,
             "instructions": [],
         }
         self.new_instruction = {
