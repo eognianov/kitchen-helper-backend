@@ -71,14 +71,15 @@ class CreateRecipeInputModel(pydantic.BaseModel):
     """Create recipe"""
 
     name: str = pydantic.Field(max_length=255)
-    picture: Optional[str] = pydantic.Field(max_length=255)
+    picture: Optional[int] = pydantic.Field(gt=0)
+    serves: Optional[int] = pydantic.Field(gt=0)
     summary: Optional[str] = pydantic.Field(max_length=1000)
-    calories: Optional[float] = pydantic.Field(default=0, ge=0)
-    carbo: Optional[float] = pydantic.Field(default=0, ge=0)
-    fats: Optional[float] = pydantic.Field(default=0, ge=0)
-    proteins: Optional[float] = pydantic.Field(default=0, ge=0)
-    cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
-    time_to_prepare: int = pydantic.Field(gt=0)
+    # calories: Optional[float] = pydantic.Field(default=0, ge=0)
+    # carbo: Optional[float] = pydantic.Field(default=0, ge=0)
+    # fats: Optional[float] = pydantic.Field(default=0, ge=0)
+    # proteins: Optional[float] = pydantic.Field(default=0, ge=0)
+    # cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
+    # time_to_prepare: int = pydantic.Field(gt=0)
     category_id: Optional[int] = None
     instructions: Optional[list[CreateInstructionInputModel]] = None
 
