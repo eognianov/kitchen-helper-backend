@@ -15,6 +15,7 @@ from .input_models import (
     CreateRecipeInputModel,
     PSFRecipesInputModel,
     UpdateIngredientInputModel,
+    PatchRecipeInputModel,
     RecipeIngredientInputModel,
 )
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel, IngredientInput
@@ -163,7 +164,7 @@ def create_recipe(
     :return:
     """
     try:
-        return features.recipes.operations.create_recipe(**create_recipe_input_model.__dict__, created_by=created_by.id)
+        return features.recipes.operations.create_recipe(**create_recipe_input_model.__dict__, created_by=created_by)
 
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
@@ -174,6 +175,33 @@ def create_recipe(
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=e.text,
+        )
+
+
+@recipes_router.patch('/{recipe_id}', response_model=RecipeResponse)
+def patch_recipe(
+    patched_by: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    patch_input_model: PatchRecipeInputModel = fastapi.Body(),
+):
+    """
+    Patch recipe
+
+    :param recipe_id:
+    :param patch_input_model:
+    :param patched_by:
+    :return:
+    """
+
+    try:
+        return features.recipes.operations.patch_recipe(
+            recipe_id=recipe_id, patch_input_model=patch_input_model, patched_by=patched_by
+        )
+
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with id {recipe_id} does not exist",
         )
 
 

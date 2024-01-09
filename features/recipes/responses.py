@@ -66,6 +66,9 @@ class RecipeResponse(pydantic.BaseModel):
     created_on: datetime.datetime
     updated_by: Optional[int]
     updated_on: datetime.datetime
+    is_published: bool = False
+    published_on: Optional[datetime.datetime]
+    published_by: Optional[int]
 
     category: CategoryShortResponse | Any = None
     instructions: list[InstructionResponse] | Any = None
