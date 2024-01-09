@@ -3,13 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Email Confirmation</title>
+    <style>
+        body {
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #666;
+        }
+        p {
+            color: #666;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #FBB040;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <p>Hello, {{ recipient_name }}</p>
-    <p>Thank you for registering!</p>
-    <br>
-    <p>Please confirm your email by clicking the link below:</p>
-    <a href="{{ token_confirmation_link }}">{{ token_confirmation_link }}</a>
+    <div class="container">
+        <h1>Welcome to Kitchen Helper</h1>
+        <p>Hello {{ recipient_name }},</p>
+        <p>Thank you for registering with our service. Please click the button below to confirm your email address:</p>
+        <a href="{{ token_confirmation_link }}" class="button" style="color: #FFFFFF">Confirm Email</a>
+        <p>If you didn't sign up for our service, you can ignore this email.</p>
+        <p>Best regards,<br>Kitchen Helper</p>
+    </div>
 </body>
 </html>
