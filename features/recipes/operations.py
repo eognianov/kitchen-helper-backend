@@ -524,7 +524,9 @@ def update_ingredient(ingredient_id: int, field: str, value: str | float, update
         return db_ingredient
 
 
-def add_ingredient_to_recipe(recipe_id: int, ingredient_id: int, quantity: float):
+def add_ingredient_to_recipe(
+    recipe_id: int, ingredient_id: int, quantity: float, user: common.authentication.AuthenticatedUser
+):
     """
     Add ingredient to recipe
     :param recipe_id:
@@ -534,37 +536,55 @@ def add_ingredient_to_recipe(recipe_id: int, ingredient_id: int, quantity: float
     """
     with db.connection.get_session() as session:
         db_ingredient = get_ingredient_from_db(pk=ingredient_id)
+        db_recipe = get_recipe_by_id(recipe_id=recipe_id)
 
         recipe_ingredient = RecipeIngredient(recipe_id=recipe_id, ingredient_id=db_ingredient.id, quantity=quantity)
 
+        db_recipe.updated_by = user.id
+        db_recipe.updated_on = datetime.utcnow()
+
         session.add(recipe_ingredient)
+        session.commit()
+        session.add(db_recipe)
         session.commit()
 
 
-def add_ingredients_to_recipe(ingredients: list[RecipeIngredientInputModel], recipe_id: int):
+def add_ingredients_to_recipe(
+    ingredients: list[RecipeIngredientInputModel], recipe_id: int, user: common.authentication.authenticated_user
+):
     """
     Add ingredients to recipe
     :param ingredients:
     :param recipe_id:
+    :param user:
     :return:
     """
     for ingredient in ingredients:
-        add_ingredient_to_recipe(recipe_id, ingredient.ingredient_id, ingredient.quantity)
+        add_ingredient_to_recipe(recipe_id, ingredient.ingredient_id, ingredient.quantity, user=user)
 
 
-def remove_ingredient_from_recipe(recipe_id: int, ingredient_id: int):
+def remove_ingredient_from_recipe(
+    recipe: Recipe, ingredient: Ingredient, user: common.authentication.authenticated_user
+):
     """
     Remove ingredient from recipe
-    :param recipe_id:
-    :param ingredient_id:
+    :param recipe:
+    :param ingredient:
+    :param user:
     :return:
     """
     with db.connection.get_session() as session:
         recipe_ingredient = (
             session.query(RecipeIngredient)
-            .filter(RecipeIngredient.recipe_id == recipe_id, RecipeIngredient.ingredient_id == ingredient_id)
+            .filter(RecipeIngredient.recipe_id == recipe.id, RecipeIngredient.ingredient_id == ingredient.id)
             .first()
         )
+
         if not recipe_ingredient:
             raise RecipeIngredientDoesNotExistException()
-        session.delete(recipe_ingredient)
+
+        recipe.ingredients.remove(ingredient)
+        recipe.updated_by = user.id
+        recipe.updated_on = datetime.utcnow()
+        session.add(recipe)
+        session.refresh(recipe)

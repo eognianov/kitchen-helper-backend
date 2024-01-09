@@ -15,6 +15,7 @@ from .input_models import (
     CreateRecipeInputModel,
     PSFRecipesInputModel,
     UpdateIngredientInputModel,
+    RecipeIngredientInputModel,
 )
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel, IngredientInput
 from .responses import RecipeResponse
@@ -294,25 +295,23 @@ def delete_recipe(recipe_id: int, user: common.authentication.authenticated_user
         )
 
 
-@recipes_router.post("/{recipe_id}/ingredients{ingredient_id}", status_code=fastapi.status.HTTP_201_CREATED)
+@recipes_router.post("/{recipe_id}/ingredients/", status_code=fastapi.status.HTTP_201_CREATED)
 def add_ingredient_to_recipe(
     user: common.authentication.authenticated_user,
     recipe_id: int = fastapi.Path(),
-    ingredient_id: int = fastapi.Path(),
-    quantity: float = fastapi.Body(),
+    input_ingredient: RecipeIngredientInputModel = fastapi.Body(),
 ):
     """
     Add ingredient to recipe
     :param user:
     :param recipe_id:
-    :param ingredient_id:
-    :param quantity:
+    :param input_ingredient:
     :return:
     """
     try:
         recipe = features.recipes.operations.get_recipe_by_id(recipe_id, user)
-        ingredient = features.recipes.operations.get_ingredient_from_db(pk=ingredient_id)
-        features.recipes.operations.add_ingredient_to_recipe(recipe.id, ingredient.id, quantity)
+        ingredient = features.recipes.operations.get_ingredient_from_db(pk=input_ingredient.ingredient_id)
+        features.recipes.operations.add_ingredient_to_recipe(recipe.id, ingredient.id, input_ingredient.quantity, user)
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
@@ -325,25 +324,23 @@ def add_ingredient_to_recipe(
         )
 
 
-@recipes_router.delete("/{recipe_id}/ingredients{ingredient_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT)
+@recipes_router.delete("/{recipe_id}/ingredients/{ingredient_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT)
 def remove_ingredient_from_recipe(
     user: common.authentication.authenticated_user,
     recipe_id: int = fastapi.Path(),
     ingredient_id: int = fastapi.Path(),
-    quantity: int = fastapi.Body(),
 ):
     """
     Remove ingredient from recipe
     :param user:
     :param recipe_id:
     :param ingredient_id:
-    :param quantity:
     :return:
     """
     try:
-        recipe = features.recipes.operations.get_recipe_by_id(recipe_id, user)
+        recipe = features.recipes.operations.get_recipe_by_id(recipe_id=recipe_id, user=user)
         ingredient = features.recipes.operations.get_ingredient_from_db(pk=ingredient_id)
-        features.recipes.operations.add_ingredient_to_recipe(recipe.id, ingredient.id, quantity)
+        features.recipes.operations.remove_ingredient_from_recipe(recipe=recipe, ingredient=ingredient, user=user)
     except features.recipes.exceptions.RecipeNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
@@ -353,6 +350,11 @@ def remove_ingredient_from_recipe(
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=e.text,
+        )
+    except features.recipes.exceptions.RecipeIngredientDoesNotExistException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Recipe {recipe_id} does not have ingredient {ingredient_id}",
         )
 
 

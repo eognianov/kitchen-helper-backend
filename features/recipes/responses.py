@@ -78,6 +78,9 @@ class RecipeResponse(pydantic.BaseModel):
         if self.instructions:
             self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]
 
+        if self.ingredients:
+            self.ingredients = [IngredientResponse(**_.__dict__) for _ in self.ingredients]
+
 
 class PSFRecipesResponseModel(pydantic.BaseModel):
     """Recipe pagination, sorting, and filtering response"""
