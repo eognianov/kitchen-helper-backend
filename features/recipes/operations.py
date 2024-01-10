@@ -125,7 +125,6 @@ def create_recipe(
         picture=picture,
         summary=summary,
         serves=serves,
-        time_to_prepare=0,
         created_by=created_by.id,
     )
     if instructions:
