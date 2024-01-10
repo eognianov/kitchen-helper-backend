@@ -56,7 +56,7 @@ class CreateInstructionInputModel(pydantic.BaseModel):
 
     instruction: str = pydantic.Field(max_length=300)
     category: str = pydantic.Field(max_length=100)
-    time: int = pydantic.Field(ge=1, lt=100)
+    time: int = pydantic.Field(ge=1)
     complexity: float = pydantic.Field(ge=1, le=5)
 
     @pydantic.field_validator("category", mode="after")

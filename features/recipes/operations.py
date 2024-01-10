@@ -110,7 +110,6 @@ def create_recipe(
     Create recipe
 
     :param name:
-    :param time_to_prepare:
     :param category_id:
     :param picture:
     :param summary:
@@ -140,15 +139,14 @@ def create_recipe(
         cholesterol=cholesterol,
         created_by=created_by.id,
     )
+    if instructions:
+        recipe.instructions = [RecipeInstruction(**instruction.model_dump()) for instruction in instructions]
 
     with db.connection.get_session() as session:
         session.add(recipe)
         session.commit()
         session.refresh(recipe)
 
-        if instructions:
-            create_instructions(instructions, recipe.id)
-            session.refresh(recipe)
     logging.info(f"User {created_by} create Recipe (#{recipe.id}).")
     return recipe
 
@@ -219,26 +217,6 @@ def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUs
         return recipe
 
 
-def create_instructions(
-    instructions_request: list[CreateInstructionInputModel],
-    recipe_id: int,
-) -> None:
-    """
-    Create instructions
-    :param instructions_request:
-    :param recipe_id:
-    :return:
-    """
-
-    with db.connection.get_session() as session:
-        for instruction in instructions_request:
-            new_instruction = RecipeInstruction(**instruction.model_dump())
-            new_instruction.recipe_id = recipe_id
-            session.add(new_instruction)
-            session.commit()
-    logging.info(f"Recipe #{recipe_id} was updated with {len(instructions_request)} instructions")
-
-
 def get_instruction_by_id(instruction_id: int):
     """Get instruction by id"""
 
@@ -258,6 +236,7 @@ def update_instruction(
     :param instruction_id:
     :param field:
     :param value:
+    :param user:
     """
 
     instruction = get_instruction_by_id(instruction_id)
