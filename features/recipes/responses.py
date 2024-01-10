@@ -47,8 +47,8 @@ class RecipeResponse(pydantic.BaseModel):
     fats: Optional[float]
     proteins: Optional[float]
     cholesterol: Optional[float]
-    time_to_prepare: int
-    complexity: int = 0
+    time_to_prepare: int = 0
+    complexity: float = 0
     created_by: int = 0
     created_on: datetime.datetime
     updated_by: Optional[int]

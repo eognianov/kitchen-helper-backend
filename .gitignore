@@ -233,3 +233,4 @@ fabric.properties
 .env.dev
 .env.prod
 media
+logs

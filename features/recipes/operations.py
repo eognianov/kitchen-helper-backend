@@ -17,7 +17,7 @@ from .exceptions import (
     IngredientDoesNotExistException,
 )
 from .helpers import paginate_recipes
-from .input_models import CreateInstructionInputModel, PSFRecipesInputModel, IngredientInput
+from .input_models import CreateInstructionInputModel, PSFRecipesInputModel, IngredientInput, RecipeInputModel
 from .models import (
     RecipeCategory,
     Recipe,
@@ -26,7 +26,7 @@ from .models import (
 )
 
 from .input_models import PatchRecipeInputModel
-from .responses import InstructionResponse, PSFRecipesResponseModel
+from .responses import PSFRecipesResponseModel
 
 import configuration
 import khLogging
@@ -125,18 +125,16 @@ def create_recipe(
         picture=picture,
         summary=summary,
         serves=serves,
-        time_to_prepare=0,
         created_by=created_by.id,
     )
+    if instructions:
+        recipe.instructions = [RecipeInstruction(**instruction.model_dump()) for instruction in instructions]
 
     with db.connection.get_session() as session:
         session.add(recipe)
         session.commit()
         session.refresh(recipe)
 
-        if instructions:
-            create_instructions(instructions, recipe.id, created_by)
-            session.refresh(recipe)
     logging.info(f"User {created_by} create Recipe (#{recipe.id}).")
     return recipe
 
@@ -207,56 +205,6 @@ def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUs
         return recipe
 
 
-def update_recipe(recipe_id: int, created_by: common.authentication.AuthenticatedUser) -> None:
-    """
-    Update recipe after adding or editing instructions
-    :param created_by:
-    :param recipe_id:
-    :return:
-    """
-
-    with db.connection.get_session() as session:
-        recipe = get_recipe_by_id(recipe_id=recipe_id, user=created_by)
-
-        total_complexity = sum([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions])
-        complexity_len = len([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions])
-        time_to_prepare = sum([InstructionResponse(**x.__dict__).time for x in recipe.instructions])
-
-        if complexity_len == 0:
-            recipe.complexity = 0
-        else:
-            recipe.complexity = round(total_complexity / complexity_len, 1)
-
-        recipe.time_to_prepare = time_to_prepare
-
-        session.add(recipe)
-        session.commit()
-        session.refresh(recipe)
-    logging.info(f"Recipe #{recipe_id} was updated")
-
-
-def create_instructions(
-    instructions_request: list[CreateInstructionInputModel],
-    recipe_id: int,
-    created_by: common.authentication.AuthenticatedUser,
-) -> None:
-    """
-    Create instructions
-    :param instructions_request:
-    :param recipe_id:
-    :return:
-    """
-
-    with db.connection.get_session() as session:
-        for instruction in instructions_request:
-            new_instruction = RecipeInstruction(**instruction.model_dump())
-            new_instruction.recipe_id = recipe_id
-            session.add(new_instruction)
-            session.commit()
-    logging.info(f"Recipe #{recipe_id} was updated with {len(instructions_request)} instructions")
-    update_recipe(recipe_id=recipe_id, created_by=created_by)
-
-
 def get_instruction_by_id(instruction_id: int):
     """Get instruction by id"""
 
@@ -276,6 +224,7 @@ def update_instruction(
     :param instruction_id:
     :param field:
     :param value:
+    :param user:
     """
 
     instruction = get_instruction_by_id(instruction_id)
@@ -289,8 +238,6 @@ def update_instruction(
             session.execute(update(RecipeInstruction), [{"id": instruction.id, f"{field}": value}])
             session.commit()
             RecipeInstruction.__setattr__(instruction, field, value)
-
-            update_recipe(recipe_id=recipe.id, created_by=user)
             logging.info(f"Instruction #({instruction_id}) was updated. Set {field} = {value}")
             return instruction
 
@@ -320,8 +267,6 @@ def create_instruction(recipe_id: int, instruction_request, user: common.authent
         session.add(instruction)
         session.commit()
         session.refresh(instruction)
-
-        update_recipe(recipe_id=recipe.id, created_by=user)
     return instruction
 
 
@@ -336,7 +281,6 @@ def delete_instruction(recipe_id: int, instruction_id: int, user: Optional[commo
         session.delete(instruction)
         session.commit()
         logging.info(f"Instruction #{instruction_id} was deleted from Recipe #{recipe_id}")
-        update_recipe(recipe_id=recipe.id, created_by=user)
 
 
 def delete_recipe(*, recipe_id: int, deleted_by: common.authentication.authenticated_user):
@@ -503,4 +447,31 @@ def patch_recipe(
         session.add(recipe)
         session.refresh(recipe)
 
+    return recipe
+
+
+def update_recipe(
+    *, recipe_id: int, update_recipe_input_model: RecipeInputModel, updated_by: common.authentication.AuthenticatedUser
+):
+    """
+    Update recipe
+
+    :param recipe_id:
+    :param update_recipe_input_model:
+    :param updated_by:
+    :return:
+    """
+
+    recipe = get_recipe_by_id(recipe_id, user=updated_by)
+    for field, value in iter(update_recipe_input_model):
+        if field.casefold() in ['instructions']:
+            value = [RecipeInstruction(**instruction.model_dump()) for instruction in value]
+        Recipe.__setattr__(recipe, field, value)
+
+    recipe.updated_by = updated_by.id
+
+    with db.connection.get_session() as session:
+        session.add(recipe)
+        session.commit()
+        session.refresh(recipe)
     return recipe

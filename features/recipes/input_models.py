@@ -56,7 +56,7 @@ class CreateInstructionInputModel(pydantic.BaseModel):
 
     instruction: str = pydantic.Field(max_length=300)
     category: str = pydantic.Field(max_length=100)
-    time: int = pydantic.Field(ge=1, lt=100)
+    time: int = pydantic.Field(ge=1)
     complexity: float = pydantic.Field(ge=1, le=5)
 
     @pydantic.field_validator("category", mode="after")
@@ -67,12 +67,12 @@ class CreateInstructionInputModel(pydantic.BaseModel):
         return field.capitalize()
 
 
-class CreateRecipeInputModel(pydantic.BaseModel):
+class RecipeInputModel(pydantic.BaseModel):
     """Create recipe"""
 
     name: str = pydantic.Field(max_length=255)
-    picture: Optional[int] = pydantic.Field(gt=0)
-    serves: Optional[int] = pydantic.Field(gt=0)
+    picture: Optional[int] = pydantic.Field(gt=0, default=None)
+    serves: Optional[int] = pydantic.Field(gt=0, default=1)
     summary: Optional[str] = pydantic.Field(max_length=1000)
     category_id: Optional[int] = None
     instructions: Optional[list[CreateInstructionInputModel]] = None

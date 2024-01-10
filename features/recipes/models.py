@@ -1,5 +1,6 @@
 from features import DbBaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import String, Integer, Float, func, ForeignKey, DateTime, Boolean, Numeric
 import datetime
 from typing import Optional
@@ -28,7 +29,6 @@ class Recipe(DbBaseModel):
 
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True, init=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    time_to_prepare: Mapped[int] = mapped_column(Integer)
     created_by: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
     updated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
@@ -39,7 +39,7 @@ class Recipe(DbBaseModel):
         "RecipeCategory", back_populates="recipes", default=None, lazy="selectin"
     )
     category_id: Mapped[int] = mapped_column(ForeignKey("RECIPE_CATEGORIES.id"), nullable=True, default=None)
-    picture: Mapped[int] = mapped_column(ForeignKey("IMAGES.id"), default=None)
+    picture: Mapped[int] = mapped_column(ForeignKey("IMAGES.id"), default=None, nullable=True)
     summary: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True, default=None)
     serves: Mapped[int] = mapped_column(Integer, default=0)
     calories: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
@@ -47,7 +47,6 @@ class Recipe(DbBaseModel):
     fats: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     proteins: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     cholesterol: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
-    complexity: Mapped[float] = mapped_column(Float, nullable=True, default=0)
     instructions: Mapped[list["RecipeInstruction"]] = relationship(
         "RecipeInstruction", back_populates="recipe", init=False, lazy='selectin'
     )
@@ -57,6 +56,16 @@ class Recipe(DbBaseModel):
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
     deleted_on: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True, default=None)
     deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
+
+    @hybrid_property
+    def complexity(self) -> float:
+        if not self.instructions:
+            return 0
+        return round(sum(_.complexity for _ in self.instructions) / len(self.instructions), 1)
+
+    @hybrid_property
+    def time_to_prepare(self) -> int:
+        return sum(_.time for _ in self.instructions)
 
 
 class RecipeInstruction(DbBaseModel):
@@ -70,7 +79,7 @@ class RecipeInstruction(DbBaseModel):
     time: Mapped[int] = mapped_column(Integer)
     complexity: Mapped[float] = mapped_column(Float)
 
-    recipe_id: Mapped[int] = mapped_column(ForeignKey('RECIPES.id'), nullable=False, init=False)
+    recipe_id: Mapped[int] = mapped_column(ForeignKey('RECIPES.id'), nullable=True, init=False)
     recipe: Mapped[Recipe] = relationship('Recipe', back_populates='instructions', init=False, lazy='selectin')
 
 
