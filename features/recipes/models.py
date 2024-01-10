@@ -77,7 +77,7 @@ class RecipeInstruction(DbBaseModel):
     time: Mapped[int] = mapped_column(Integer)
     complexity: Mapped[float] = mapped_column(Float)
 
-    recipe_id: Mapped[int] = mapped_column(ForeignKey('RECIPES.id'), nullable=False, init=False)
+    recipe_id: Mapped[int] = mapped_column(ForeignKey('RECIPES.id'), nullable=True, init=False)
     recipe: Mapped[Recipe] = relationship('Recipe', back_populates='instructions', init=False, lazy='selectin')
 
 
