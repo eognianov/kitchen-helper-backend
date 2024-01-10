@@ -69,7 +69,7 @@ class CreateInstructionInputModel(pydantic.BaseModel):
 
 class RecipeIngredientInputModel(pydantic.BaseModel):
     ingredient_id: int = pydantic.Field(gt=0)
-    quantity: int = pydantic.Field(gt=0)
+    quantity: float = pydantic.Field(gt=0)
 
 
 class CreateRecipeInputModel(pydantic.BaseModel):
