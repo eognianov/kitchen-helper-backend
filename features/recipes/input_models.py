@@ -67,7 +67,7 @@ class CreateInstructionInputModel(pydantic.BaseModel):
         return field.capitalize()
 
 
-class CreateRecipeInputModel(pydantic.BaseModel):
+class RecipeInputModel(pydantic.BaseModel):
     """Create recipe"""
 
     name: str = pydantic.Field(max_length=255)

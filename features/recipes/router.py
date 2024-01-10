@@ -12,7 +12,7 @@ from features.recipes.responses import InstructionResponse, PSFRecipesResponseMo
 from .input_models import (
     PatchCategoryInputModel,
     CreateCategoryInputModel,
-    CreateRecipeInputModel,
+    RecipeInputModel,
     PSFRecipesInputModel,
     UpdateIngredientInputModel,
     PatchRecipeInputModel,
@@ -152,7 +152,7 @@ def get_recipe(user: common.authentication.optional_user, recipe_id: int = fasta
 
 @recipes_router.post("/", response_model=RecipeResponse)
 def create_recipe(
-    create_recipe_input_model: CreateRecipeInputModel,
+    create_recipe_input_model: RecipeInputModel,
     created_by: common.authentication.authenticated_user,
 ):
     """
