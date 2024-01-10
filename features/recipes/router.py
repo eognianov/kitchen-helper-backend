@@ -199,6 +199,31 @@ def patch_recipe(
         )
 
 
+@recipes_router.put('/{recipe_id}', response_model=RecipeResponse)
+def update_recipe(
+    updated_by: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    new_recipe: RecipeInputModel = fastapi.Body(),
+):
+    """
+    Update recipe
+    :param updated_by:
+    :param recipe_id:
+    :param new_recipe:
+    :return:
+    """
+
+    try:
+        return features.recipes.operations.update_recipe(
+            recipe_id=recipe_id, update_recipe_input_model=new_recipe, updated_by=updated_by
+        )
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail=f"Recipe with id {recipe_id} does not exist",
+        )
+
+
 @recipes_router.patch("/{recipe_id}/instructions/{instruction_id}", response_model=InstructionResponse)
 def update_instructions(
     user: common.authentication.authenticated_user,

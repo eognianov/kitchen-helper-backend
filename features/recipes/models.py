@@ -39,7 +39,7 @@ class Recipe(DbBaseModel):
         "RecipeCategory", back_populates="recipes", default=None, lazy="selectin"
     )
     category_id: Mapped[int] = mapped_column(ForeignKey("RECIPE_CATEGORIES.id"), nullable=True, default=None)
-    picture: Mapped[int] = mapped_column(ForeignKey("IMAGES.id"), default=None)
+    picture: Mapped[int] = mapped_column(ForeignKey("IMAGES.id"), default=None, nullable=True)
     summary: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True, default=None)
     serves: Mapped[int] = mapped_column(Integer, default=0)
     calories: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
@@ -59,6 +59,8 @@ class Recipe(DbBaseModel):
 
     @hybrid_property
     def complexity(self) -> float:
+        if not self.instructions:
+            return 0
         return round(sum(_.complexity for _ in self.instructions) / len(self.instructions), 1)
 
     @hybrid_property

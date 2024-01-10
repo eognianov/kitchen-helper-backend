@@ -17,7 +17,7 @@ from .exceptions import (
     IngredientDoesNotExistException,
 )
 from .helpers import paginate_recipes
-from .input_models import CreateInstructionInputModel, PSFRecipesInputModel, IngredientInput
+from .input_models import CreateInstructionInputModel, PSFRecipesInputModel, IngredientInput, RecipeInputModel
 from .models import (
     RecipeCategory,
     Recipe,
@@ -447,4 +447,31 @@ def patch_recipe(
         session.add(recipe)
         session.refresh(recipe)
 
+    return recipe
+
+
+def update_recipe(
+    *, recipe_id: int, update_recipe_input_model: RecipeInputModel, updated_by: common.authentication.AuthenticatedUser
+):
+    """
+    Update recipe
+
+    :param recipe_id:
+    :param update_recipe_input_model:
+    :param updated_by:
+    :return:
+    """
+
+    recipe = get_recipe_by_id(recipe_id, user=updated_by)
+    for field, value in iter(update_recipe_input_model):
+        if field.casefold() in ['instructions']:
+            value = [RecipeInstruction(**instruction.model_dump()) for instruction in value]
+        Recipe.__setattr__(recipe, field, value)
+
+    recipe.updated_by = updated_by.id
+
+    with db.connection.get_session() as session:
+        session.add(recipe)
+        session.commit()
+        session.refresh(recipe)
     return recipe
