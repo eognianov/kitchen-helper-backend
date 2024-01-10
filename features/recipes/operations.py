@@ -616,8 +616,9 @@ def remove_ingredient_from_recipe(
         if not recipe_ingredient:
             raise RecipeIngredientDoesNotExistException()
 
-        recipe.ingredients.remove(ingredient)
+        _delete_entry_from_recipe_ingredients(ingredient_id=ingredient.id)
         recipe.updated_by = user.id
         recipe.updated_on = datetime.utcnow()
         session.add(recipe)
+        session.commit()
         session.refresh(recipe)
