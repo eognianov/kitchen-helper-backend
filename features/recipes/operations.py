@@ -97,13 +97,9 @@ def create_recipe(
     name: str,
     created_by: common.authentication.AuthenticatedUser,
     category_id: int = None,
-    picture: str = None,
+    picture: int = None,
     summary: str = None,
-    calories: float = 0,
-    carbo: float = 0,
-    fats: float = 0,
-    proteins: float = 0,
-    cholesterol: float = 0,
+    serves: int,
     instructions: list[CreateInstructionInputModel],
 ):
     """
@@ -113,11 +109,7 @@ def create_recipe(
     :param category_id:
     :param picture:
     :param summary:
-    :param calories:
-    :param carbo:
-    :param fats:
-    :param proteins:
-    :param cholesterol:
+    :param serves:
     :param created_by:
     :param instructions:
     :return:
@@ -132,11 +124,8 @@ def create_recipe(
         category=category,
         picture=picture,
         summary=summary,
-        calories=calories,
-        carbo=carbo,
-        fats=fats,
-        proteins=proteins,
-        cholesterol=cholesterol,
+        serves=serves,
+        time_to_prepare=0,
         created_by=created_by.id,
     )
     if instructions:

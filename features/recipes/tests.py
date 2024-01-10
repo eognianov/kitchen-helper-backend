@@ -107,14 +107,10 @@ class TestInstructionsOperations:
     def setup(self):
         self.recipe = {
             "name": "name",
+            "serves": 1,
             "category_id": 1,
             "picture": "",
             "summary": "summary",
-            "calories": 1,
-            "carbo": 1,
-            "fats": 1,
-            "proteins": 1,
-            "cholesterol": 1,
             "instructions": [],
         }
 
@@ -272,12 +268,8 @@ class TestInstructionsEndpoints:
             "name": "name",
             "category_id": 1,
             "picture": "",
+            "serves": 4,
             "summary": "summary",
-            "calories": 1,
-            "carbo": 1,
-            "fats": 1,
-            "proteins": 1,
-            "cholesterol": 1,
             "instructions": [],
         }
         self.new_instruction = {
