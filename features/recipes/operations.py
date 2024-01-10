@@ -95,31 +95,21 @@ def create_category(category_name: str, created_by: int) -> RecipeCategory:
 def create_recipe(
     *,
     name: str,
-    time_to_prepare: int,
     created_by: common.authentication.AuthenticatedUser,
     category_id: int = None,
-    picture: str = None,
+    picture: int = None,
     summary: str = None,
-    calories: float = 0,
-    carbo: float = 0,
-    fats: float = 0,
-    proteins: float = 0,
-    cholesterol: float = 0,
+    serves: int,
     instructions: list[CreateInstructionInputModel],
 ):
     """
     Create recipe
 
     :param name:
-    :param time_to_prepare:
     :param category_id:
     :param picture:
     :param summary:
-    :param calories:
-    :param carbo:
-    :param fats:
-    :param proteins:
-    :param cholesterol:
+    :param serves:
     :param created_by:
     :param instructions:
     :return:
@@ -131,15 +121,11 @@ def create_recipe(
 
     recipe = Recipe(
         name=name,
-        time_to_prepare=time_to_prepare,
         category=category,
         picture=picture,
         summary=summary,
-        calories=calories,
-        carbo=carbo,
-        fats=fats,
-        proteins=proteins,
-        cholesterol=cholesterol,
+        serves=serves,
+        time_to_prepare=0,
         created_by=created_by.id,
     )
 

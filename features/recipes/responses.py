@@ -39,8 +39,9 @@ class RecipeResponse(pydantic.BaseModel):
 
     id: int
     name: str = pydantic.Field(max_length=255)
-    picture: Optional[str]
+    picture: Optional[int]
     summary: Optional[str]
+    serves: Optional[int]
     calories: Optional[float]
     carbo: Optional[float]
     fats: Optional[float]
