@@ -146,6 +146,9 @@ def create_recipe(
         session.commit()
         session.refresh(recipe)
 
+    if ingredients:
+        add_ingredients_to_recipe(ingredients, recipe.id, created_by)
+
     logging.info(f"User {created_by} create Recipe (#{recipe.id}).")
     return recipe
 
