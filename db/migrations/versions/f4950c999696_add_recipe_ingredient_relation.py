@@ -1,8 +1,8 @@
 """add recipe ingredient relation
 
-Revision ID: 0aa4778d47d1
-Revises: 6f16aa3da54c
-Create Date: 2024-01-05 16:42:43.644415
+Revision ID: f4950c999696
+Revises: 53eaad816d48
+Create Date: 2024-01-11 19:59:12.725943
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0aa4778d47d1'
-down_revision: Union[str, None] = '37d1ebc63a4e'
+revision: str = 'f4950c999696'
+down_revision: Union[str, None] = '53eaad816d48'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

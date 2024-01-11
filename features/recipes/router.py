@@ -469,7 +469,7 @@ def delete_ingredient(ingredient_id: int, user: common.authentication.authentica
     """
 
     try:
-        features.recipes.operations.delete_ingredient(ingredient_id, user.id)
+        features.recipes.operations.delete_ingredient(ingredient_id, user)
     except features.recipes.exceptions.IngredientDoesNotExistException as e:
         raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=e.text)
 

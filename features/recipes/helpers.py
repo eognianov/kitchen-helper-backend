@@ -171,9 +171,3 @@ def sort_recipes(sort: str) -> list:
         order_expression.append(ordering)
 
     return order_expression
-
-
-def get_recipe_ingredients(recipe_id: int) -> list:
-    with db.connection.get_session() as session:
-        recipe_ingredients = session.query(RecipeIngredient).filter(RecipeIngredient.recipe_id == recipe_id).all()
-        return recipe_ingredients

@@ -83,7 +83,7 @@ class RecipeResponse(pydantic.BaseModel):
 
     category: CategoryShortResponse | Any = None
     instructions: list[InstructionResponse] | Any = None
-    ingredients: list[IngredientResponse] | Any = None
+    ingredients: list[RecipeIngredientResponse] | Any = None
 
     def model_post_init(self, __context: Any):
         if self.category:
@@ -93,25 +93,15 @@ class RecipeResponse(pydantic.BaseModel):
             self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]
 
         if self.ingredients:
-            ingredients = []
-            recipe_ingredients = helpers.get_recipe_ingredients(self.id)
-            for ingredient in self.ingredients:
-                matched_recipe_ingredient = next(
-                    (ri for ri in recipe_ingredients if ri.ingredient_id == ingredient.id), None
+            self.ingredients = [
+                RecipeIngredientResponse(
+                    id=ingredient_mapping.ingredient.id,
+                    name=ingredient_mapping.ingredient.name,
+                    quantity=ingredient_mapping.quantity,
+                    measurement=ingredient_mapping.ingredient.measurement,
                 )
-                if matched_recipe_ingredient:
-                    self.calories += round(float(matched_recipe_ingredient.quantity * ingredient.calories), 2)
-                    self.carbo += round(float(matched_recipe_ingredient.quantity * ingredient.carbo), 2)
-                    self.fats += round(float(matched_recipe_ingredient.quantity * ingredient.fats), 2)
-                    self.proteins += round(float(matched_recipe_ingredient.quantity * ingredient.protein), 2)
-                    self.cholesterol += round(float(matched_recipe_ingredient.quantity * ingredient.cholesterol), 2)
-                    ingredients.append(
-                        RecipeIngredientResponse(
-                            **ingredient.__dict__,
-                            quantity=matched_recipe_ingredient.quantity,
-                        )
-                    )
-            self.ingredients = ingredients
+                for ingredient_mapping in self.ingredients
+            ]
 
 
 class PSFRecipesResponseModel(pydantic.BaseModel):
