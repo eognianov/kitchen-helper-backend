@@ -56,7 +56,7 @@ class CreateInstructionInputModel(pydantic.BaseModel):
 
     instruction: str = pydantic.Field(max_length=300)
     category: str = pydantic.Field(max_length=100)
-    time: int = pydantic.Field(ge=1, lt=100)
+    time: int = pydantic.Field(ge=1)
     complexity: float = pydantic.Field(ge=1, le=5)
 
     @pydantic.field_validator("category", mode="after")
@@ -72,18 +72,13 @@ class RecipeIngredientInputModel(pydantic.BaseModel):
     quantity: float = pydantic.Field(gt=0)
 
 
-class CreateRecipeInputModel(pydantic.BaseModel):
+class RecipeInputModel(pydantic.BaseModel):
     """Create recipe"""
 
     name: str = pydantic.Field(max_length=255)
-    picture: Optional[str] = pydantic.Field(max_length=255)
+    picture: Optional[int] = pydantic.Field(gt=0, default=None)
+    serves: Optional[int] = pydantic.Field(gt=0, default=1)
     summary: Optional[str] = pydantic.Field(max_length=1000)
-    calories: Optional[float] = pydantic.Field(default=0, ge=0)
-    carbo: Optional[float] = pydantic.Field(default=0, ge=0)
-    fats: Optional[float] = pydantic.Field(default=0, ge=0)
-    proteins: Optional[float] = pydantic.Field(default=0, ge=0)
-    cholesterol: Optional[float] = pydantic.Field(default=0, ge=0)
-    time_to_prepare: int = pydantic.Field(gt=0)
     category_id: Optional[int] = None
     instructions: Optional[list[CreateInstructionInputModel]] = None
     ingredients: Optional[list[RecipeIngredientInputModel]] = None

@@ -28,7 +28,14 @@ async def startup_shutdown_lifespan(app: fastapi.FastAPI):
     :param app:
     :return:
     """
-    app_seeder.apply_async(link=seed_recipe_categories.si())
+    try:
+        app_seeder.apply_async(link=seed_recipe_categories.si())
+    except Exception:
+        error_message = "Seed task is not able to run!"
+        if config.running_on_dev:
+            logging.warning(error_message)
+        else:
+            logging.exception(error_message)
     yield
 
 

@@ -2,6 +2,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from features import DbBaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import String, Integer, Float, func, ForeignKey, DateTime, Boolean, Numeric
 import datetime
 from typing import Optional
@@ -30,7 +31,6 @@ class Recipe(DbBaseModel):
 
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True, init=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    time_to_prepare: Mapped[int] = mapped_column(Integer)
     created_by: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     created_on: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.current_timestamp(), init=False)
     updated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
@@ -41,9 +41,9 @@ class Recipe(DbBaseModel):
         "RecipeCategory", back_populates="recipes", default=None, lazy="selectin"
     )
     category_id: Mapped[int] = mapped_column(ForeignKey("RECIPE_CATEGORIES.id"), nullable=True, default=None)
-    picture: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, default=None)
+    picture: Mapped[int] = mapped_column(ForeignKey("IMAGES.id"), default=None, nullable=True)
     summary: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True, default=None)
-    complexity: Mapped[float] = mapped_column(Float, nullable=True, default=0)
+    serves: Mapped[int] = mapped_column(Integer, default=0)
     instructions: Mapped[list["RecipeInstruction"]] = relationship(
         "RecipeInstruction", back_populates="recipe", init=False, lazy='selectin'
     )
@@ -55,7 +55,7 @@ class Recipe(DbBaseModel):
     deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
     ingredients = relationship(
         "Ingredient",
-        secondary="recipe_ingredients",
+        secondary="RECIPE_INGREDIENTS_MAPPING",
         back_populates="recipes",
         lazy="selectin",
         primaryjoin="Recipe.id == RecipeIngredient.recipe_id",
@@ -82,6 +82,16 @@ class Recipe(DbBaseModel):
     def cholesterol(self) -> float:
         return sum(i.cholesterol * ri.quantity for i, ri in self.ingredients) if self.ingredients else 0
 
+    @hybrid_property
+    def complexity(self) -> float:
+        if not self.instructions:
+            return 0
+        return round(sum(_.complexity for _ in self.instructions) / len(self.instructions), 1)
+
+    @hybrid_property
+    def time_to_prepare(self) -> int:
+        return sum(_.time for _ in self.instructions)
+
 
 class RecipeInstruction(DbBaseModel):
     """Recipe instruction"""
@@ -94,7 +104,7 @@ class RecipeInstruction(DbBaseModel):
     time: Mapped[int] = mapped_column(Integer)
     complexity: Mapped[float] = mapped_column(Float)
 
-    recipe_id: Mapped[int] = mapped_column(ForeignKey('RECIPES.id'), nullable=False, init=False)
+    recipe_id: Mapped[int] = mapped_column(ForeignKey('RECIPES.id'), nullable=True, init=False)
     recipe: Mapped[Recipe] = relationship('Recipe', back_populates='instructions', init=False, lazy='selectin')
 
 
@@ -123,7 +133,7 @@ class Ingredient(DbBaseModel):
     deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, init=False)
     recipes = relationship(
         "Recipe",
-        secondary="recipe_ingredients",
+        secondary="RECIPE_INGREDIENTS_MAPPING",
         back_populates="ingredients",
         lazy="selectin",
         primaryjoin="Ingredient.id == RecipeIngredient.ingredient_id",
@@ -134,7 +144,7 @@ class Ingredient(DbBaseModel):
 class RecipeIngredient(DbBaseModel):
     """RecipeIngredient DB model"""
 
-    __tablename__ = 'recipe_ingredients'
+    __tablename__ = 'RECIPE_INGREDIENTS_MAPPING'
 
     recipe_id: Mapped[int] = mapped_column(Integer, ForeignKey('RECIPES.id'), primary_key=True)
     ingredient_id: Mapped[int] = mapped_column(Integer, ForeignKey('INGREDIENTS.id'), primary_key=True)
