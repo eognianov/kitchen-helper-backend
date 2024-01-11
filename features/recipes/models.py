@@ -1,3 +1,5 @@
+from sqlalchemy.ext.hybrid import hybrid_property
+
 from features import DbBaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, Float, func, ForeignKey, DateTime, Boolean, Numeric
@@ -41,11 +43,6 @@ class Recipe(DbBaseModel):
     category_id: Mapped[int] = mapped_column(ForeignKey("RECIPE_CATEGORIES.id"), nullable=True, default=None)
     picture: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, default=None)
     summary: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True, default=None)
-    calories: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
-    carbo: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
-    fats: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
-    proteins: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
-    cholesterol: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     complexity: Mapped[float] = mapped_column(Float, nullable=True, default=0)
     instructions: Mapped[list["RecipeInstruction"]] = relationship(
         "RecipeInstruction", back_populates="recipe", init=False, lazy='selectin'
@@ -64,6 +61,26 @@ class Recipe(DbBaseModel):
         primaryjoin="Recipe.id == RecipeIngredient.recipe_id",
         secondaryjoin="Ingredient.id == RecipeIngredient.ingredient_id",
     )
+
+    @hybrid_property
+    def calories(self) -> float:
+        return sum(i.calories * i.recipe_ingredients.quantity for i in self.ingredients) if self.ingredients else 0
+
+    @hybrid_property
+    def carbo(self) -> float:
+        return sum(i.carbo * ri.quantity for i, ri in self.ingredients) if self.ingredients else 0
+
+    @hybrid_property
+    def fats(self) -> float:
+        return sum(i.fats * ri.quantity for i, ri in self.ingredients) if self.ingredients else 0
+
+    @hybrid_property
+    def proteins(self) -> float:
+        return sum(i.proteins * ri.quantity for i, ri in self.ingredients) if self.ingredients else 0
+
+    @hybrid_property
+    def cholesterol(self) -> float:
+        return sum(i.cholesterol * ri.quantity for i, ri in self.ingredients) if self.ingredients else 0
 
 
 class RecipeInstruction(DbBaseModel):

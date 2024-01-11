@@ -32,3 +32,7 @@ class IngredientDoesNotExistException(Exception):
 
 class RecipeIngredientDoesNotExistException(Exception):
     ...
+
+
+class IngredientAlreadyInRecipe(Exception):
+    ...

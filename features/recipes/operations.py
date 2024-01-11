@@ -16,6 +16,7 @@ from .exceptions import (
     RecipeWithInstructionNotFoundException,
     IngredientDoesNotExistException,
     RecipeIngredientDoesNotExistException,
+    IngredientAlreadyInRecipe,
 )
 from .helpers import paginate_recipes
 from .input_models import CreateInstructionInputModel, PSFRecipesInputModel, IngredientInput, RecipeIngredientInputModel
@@ -565,11 +566,15 @@ def add_ingredient_to_recipe(
     :param recipe_id:
     :param ingredient_id:
     :param quantity:
+    :param user:
     :return:
     """
     with db.connection.get_session() as session:
         db_ingredient = get_ingredient_from_db(pk=ingredient_id)
         db_recipe = get_recipe_by_id(recipe_id=recipe_id)
+
+        if db_ingredient in db_recipe.ingredients:
+            raise IngredientAlreadyInRecipe()
 
         recipe_ingredient = RecipeIngredient(recipe_id=recipe_id, ingredient_id=db_ingredient.id, quantity=quantity)
 

@@ -4,8 +4,9 @@ from datetime import datetime, timedelta
 from fastapi import Query
 from sqlalchemy import desc, asc
 
+import db.connection
 from features.recipes.input_models import PSFRecipesInputModel
-from features.recipes.models import RecipeCategory, Recipe
+from features.recipes.models import RecipeCategory, Recipe, RecipeIngredient
 from features.recipes.responses import RecipeResponse, PSFRecipesResponseModel
 
 
@@ -31,10 +32,12 @@ def paginate_recipes(filtered_recipes: Query, paginated_input_model: PSFRecipesI
 
     sort = f'&sort={paginated_input_model.sort}' if paginated_input_model.sort else ''
     filters = f'&filters={paginated_input_model.filters}' if paginated_input_model.filters else ''
-    previous_page = f"recipes/?page={current_page - 1}&size={page_size}{sort}{filters}" \
-        if current_page - 1 > 0 else None
-    next_page = f"recipes/?page={current_page + 1}&page_size={page_size}{sort}{filters}" \
-        if current_page < total_pages else None
+    previous_page = (
+        f"recipes/?page={current_page - 1}&size={page_size}{sort}{filters}" if current_page - 1 > 0 else None
+    )
+    next_page = (
+        f"recipes/?page={current_page + 1}&page_size={page_size}{sort}{filters}" if current_page < total_pages else None
+    )
 
     response = PSFRecipesResponseModel(
         page_number=current_page,
@@ -86,8 +89,7 @@ def filter_recipes(filters: str) -> list:
         if filter_name == 'time_to_prepare':
             conditions = conditions.split('-')
             try:
-                filter_expression.append(
-                    Recipe.time_to_prepare.between(int(conditions[0]), int(conditions[1])))
+                filter_expression.append(Recipe.time_to_prepare.between(int(conditions[0]), int(conditions[1])))
             except (ValueError, IndexError):
                 raise ValueError(f"Invalid range for {filter_name}.")
 
@@ -131,8 +133,17 @@ def sort_recipes(sort: str) -> list:
     """
     order_expression = []
 
-    sort_fields = ('id', 'name', 'created_by', 'time_to_prepare', 'created_on', 'updated_on',
-                   'complexity', 'category.name', 'category.id')
+    sort_fields = (
+        'id',
+        'name',
+        'created_by',
+        'time_to_prepare',
+        'created_on',
+        'updated_on',
+        'complexity',
+        'category.name',
+        'category.id',
+    )
 
     # default sorting
     if not sort:
@@ -160,3 +171,9 @@ def sort_recipes(sort: str) -> list:
         order_expression.append(ordering)
 
     return order_expression
+
+
+def get_recipe_ingredients(recipe_id: int) -> list:
+    with db.connection.get_session() as session:
+        recipe_ingredients = session.query(RecipeIngredient).filter(RecipeIngredient.recipe_id == recipe_id).all()
+        return recipe_ingredients

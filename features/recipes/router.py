@@ -350,6 +350,11 @@ def add_ingredient_to_recipe(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=e.text,
         )
+    except features.recipes.exceptions.IngredientAlreadyInRecipe:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Ingredient {input_ingredient.ingredient_id} is already added to recipe {recipe_id}",
+        )
 
 
 @recipes_router.delete("/{recipe_id}/ingredients/{ingredient_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT)
@@ -404,14 +409,28 @@ def create_ingredient(
 
 
 @ingredient_router.get("/", response_model=list[IngredientResponse])
-def get_all_ingredients():
+def get_all_ingredients(user: common.authentication.authenticated_user):
     """
     Get all ingredients
 
+    :param user:
     :return:
     """
     all_ingredients = features.recipes.operations.get_all_ingredients_from_db()
     return all_ingredients
+
+
+@ingredient_router.get("/{ingredient_id}", response_model=IngredientResponse)
+def get_ingredient(user: common.authentication.authenticated_user, ingredient_id: int = fastapi.Path()):
+    """
+    Get ingredient by id
+
+    :param user:
+    :param ingredient_id
+    :return:
+    """
+    ingredient = features.recipes.operations.get_ingredient_from_db(pk=ingredient_id)
+    return ingredient
 
 
 @ingredient_router.delete("/{ingredient_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT)
