@@ -11,6 +11,8 @@ from celery import Celery
 _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
 MEDIA_PATH = ROOT_PATH.joinpath("media")
+ROOT_PATH.joinpath("cache").mkdir(exist_ok=True)
+CACHE_PATH = ROOT_PATH.joinpath("cache")
 
 _ENV_FILES_PATHS = (
     pathlib.Path(f"{ROOT_PATH}/.env.template"),

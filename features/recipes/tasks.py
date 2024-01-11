@@ -1,3 +1,5 @@
+import diskcache
+
 import configuration
 import db.connection
 import khLogging
@@ -6,12 +8,35 @@ from features.recipes.operations import create_category
 from features.recipes.exceptions import CategoryNameViolationException
 from features.users.operations import get_user_from_db
 from configuration import celery
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, text
 from openai import OpenAI
 from datetime import datetime, timedelta
 from typing import Type
 
 logging = khLogging.Logger("celery-recipes-tasks")
+
+CACHE = diskcache.Cache(directory=configuration.CACHE_PATH, disk=diskcache.JSONDisk)
+
+
+def _get_system_user_id_from_db() -> int:
+    with db.connection.get_connection() as connection:
+        system_user_id = connection.execute(
+            text('SELECT ID FROM "Users" WHERE username = :name'), {'name': 'System'}
+        ).scalar()
+        return system_user_id
+
+
+def _get_system_user_id() -> int:
+    """
+    Get system user id
+    :return:
+    """
+
+    system_user_id = CACHE.get('system_user_id')
+    if not system_user_id:
+        system_user_id = _get_system_user_id_from_db()
+        CACHE.set('system_user_id', system_user_id)
+        return system_user_id
 
 
 @celery.task
@@ -39,7 +64,7 @@ DEFAULT_PROMPT = """ Генерирай ми обобщение на рецеп�
   Ще подам съставките инструкциите на нов ред във формат ##текст##категория###време###сложност###. """
 
 
-def get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
+def _get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
     with db.connection.get_session() as session:
         ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
 
@@ -49,6 +74,7 @@ def get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
                 and_(
                     Recipe.is_deleted.is_(False),
                     or_(Recipe.created_on >= ten_minutes_ago, Recipe.updated_on >= ten_minutes_ago),
+                    Recipe.updated_by != _get_system_user_id(),
                 )
             )
             .all()
@@ -60,7 +86,7 @@ def get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
 def generate_recipe_summary():
     client = OpenAI(api_key=configuration.OpenAi().chatgpt_api_key)
 
-    recipes = get_recipes_updated_last_10_min()
+    recipes = _get_recipes_updated_last_10_min()
 
     for recipe in recipes:
         prompt = DEFAULT_PROMPT
