@@ -1,13 +1,38 @@
-import db.connection
-from datetime import datetime, timedelta
-from sqlalchemy import or_, and_
-from .models import Recipe
-from typing import Type
-from openai import OpenAI
 import configuration
+import db.connection
+import khLogging
+from features import Recipe
+from features.recipes.operations import create_category
+from features.recipes.exceptions import CategoryNameViolationException
+from features.users.operations import get_user_from_db
+from configuration import celery
+from sqlalchemy import and_, or_
+from openai import OpenAI
+from datetime import datetime, timedelta
+from typing import Type
 
-# Set your OpenAI API key
-API_KEY = configuration.OpenAi().chatgpt_api_key
+logging = khLogging.Logger("celery-recipes-tasks")
+
+
+@celery.task
+def seed_recipe_categories():
+    categories = [cat for cat in configuration.AppRecipeCategories().categories]
+    user = get_user_from_db(username=configuration.AppUsers().users[0]["username"])
+    if not user:
+        logging.info("No users found to add categories")
+        return "No users found to add categories"
+    if not categories:
+        logging.info("No categories found")
+        return "No categories found"
+    for category in categories:
+        try:
+            new_category = create_category(category_name=category, created_by=user.id)
+            logging.info(f"User {user.id} created Category (#{new_category.id}).")
+        except CategoryNameViolationException as ex:
+            logging.exception(str(ex))
+            continue
+    return "Finished adding categories to the database."
+
 
 DEFAULT_PROMPT = """ Генерирай ми обобщение на рецепта до 300 символа. Аз ще ти подам името на рецептата,
  стъпките за изпълнение и съставките ѝ.
@@ -33,7 +58,7 @@ def get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
 
 
 def generate_recipe_summary():
-    client = OpenAI(api_key=API_KEY)
+    client = OpenAI(api_key=configuration.OpenAi().chatgpt_api_key)
 
     recipes = get_recipes_updated_last_10_min()
 

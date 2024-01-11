@@ -14,11 +14,19 @@ from .exceptions import (
     InstructionNotFoundException,
     InstructionNameViolationException,
     RecipeWithInstructionNotFoundException,
+    IngredientDoesNotExistException,
 )
 from .helpers import paginate_recipes
-from .input_models import CreateInstructionInputModel, PSFRecipesInputModel
-from .models import RecipeCategory, Recipe, RecipeInstruction
-from .responses import InstructionResponse, PSFRecipesResponseModel
+from .input_models import CreateInstructionInputModel, PSFRecipesInputModel, IngredientInput, RecipeInputModel
+from .models import (
+    RecipeCategory,
+    Recipe,
+    RecipeInstruction,
+    Ingredient,
+)
+
+from .input_models import PatchRecipeInputModel
+from .responses import PSFRecipesResponseModel
 
 import configuration
 import khLogging
@@ -87,31 +95,21 @@ def create_category(category_name: str, created_by: int) -> RecipeCategory:
 def create_recipe(
     *,
     name: str,
-    time_to_prepare: int,
+    created_by: common.authentication.AuthenticatedUser,
     category_id: int = None,
-    picture: str = None,
+    picture: int = None,
     summary: str = None,
-    calories: float = 0,
-    carbo: float = 0,
-    fats: float = 0,
-    proteins: float = 0,
-    cholesterol: float = 0,
-    created_by: int = 1,
+    serves: int,
     instructions: list[CreateInstructionInputModel],
 ):
     """
     Create recipe
 
     :param name:
-    :param time_to_prepare:
     :param category_id:
     :param picture:
     :param summary:
-    :param calories:
-    :param carbo:
-    :param fats:
-    :param proteins:
-    :param cholesterol:
+    :param serves:
     :param created_by:
     :param instructions:
     :return:
@@ -123,26 +121,20 @@ def create_recipe(
 
     recipe = Recipe(
         name=name,
-        time_to_prepare=time_to_prepare,
         category=category,
         picture=picture,
         summary=summary,
-        calories=calories,
-        carbo=carbo,
-        fats=fats,
-        proteins=proteins,
-        cholesterol=cholesterol,
-        created_by=created_by,
+        serves=serves,
+        created_by=created_by.id,
     )
+    if instructions:
+        recipe.instructions = [RecipeInstruction(**instruction.model_dump()) for instruction in instructions]
 
     with db.connection.get_session() as session:
         session.add(recipe)
         session.commit()
         session.refresh(recipe)
 
-        if instructions:
-            create_instructions(instructions, recipe.id)
-            session.refresh(recipe)
     logging.info(f"User {created_by} create Recipe (#{recipe.id}).")
     return recipe
 
@@ -204,59 +196,13 @@ def get_recipe_by_id(recipe_id: int, user: common.authentication.AuthenticatedUs
         recipe = (
             session.query(Recipe)
             .join(Recipe.category, isouter=True)
-            .where(Recipe.id
-                   == recipe_id)
+            .where(Recipe.id == recipe_id)
             .filter(and_(*filters))
             .first()
         )
         if not recipe:
             raise RecipeNotFoundException
         return recipe
-
-
-def update_recipe(recipe_id: int) -> None:
-    """
-    Update recipe after adding or editing instructions
-    :param recipe_id:
-    :return:
-    """
-
-    with db.connection.get_session() as session:
-        recipe = get_recipe_by_id(recipe_id=recipe_id)
-
-        total_complexity = sum([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions])
-        complexity_len = len([InstructionResponse(**x.__dict__).complexity for x in recipe.instructions])
-        time_to_prepare = sum([InstructionResponse(**x.__dict__).time for x in recipe.instructions])
-
-        if complexity_len == 0:
-            recipe.complexity = 0
-        else:
-            recipe.complexity = round(total_complexity / complexity_len, 1)
-
-        recipe.time_to_prepare = time_to_prepare
-
-        session.add(recipe)
-        session.commit()
-        session.refresh(recipe)
-    logging.info(f"Recipe #{recipe_id} was updated")
-
-
-def create_instructions(instructions_request: list[CreateInstructionInputModel], recipe_id: int) -> None:
-    """
-    Create instructions
-    :param instructions_request:
-    :param recipe_id:
-    :return:
-    """
-
-    with db.connection.get_session() as session:
-        for instruction in instructions_request:
-            new_instruction = RecipeInstruction(**instruction.model_dump())
-            new_instruction.recipe_id = recipe_id
-            session.add(new_instruction)
-            session.commit()
-    logging.info(f"Recipe #{recipe_id} was updated with {len(instructions_request)} instructions")
-    update_recipe(recipe_id=recipe_id)
 
 
 def get_instruction_by_id(instruction_id: int):
@@ -278,6 +224,7 @@ def update_instruction(
     :param instruction_id:
     :param field:
     :param value:
+    :param user:
     """
 
     instruction = get_instruction_by_id(instruction_id)
@@ -291,8 +238,6 @@ def update_instruction(
             session.execute(update(RecipeInstruction), [{"id": instruction.id, f"{field}": value}])
             session.commit()
             RecipeInstruction.__setattr__(instruction, field, value)
-
-            update_recipe(recipe_id=recipe.id)
             logging.info(f"Instruction #({instruction_id}) was updated. Set {field} = {value}")
             return instruction
 
@@ -322,8 +267,6 @@ def create_instruction(recipe_id: int, instruction_request, user: common.authent
         session.add(instruction)
         session.commit()
         session.refresh(instruction)
-
-        update_recipe(recipe_id=recipe.id)
     return instruction
 
 
@@ -338,7 +281,6 @@ def delete_instruction(recipe_id: int, instruction_id: int, user: Optional[commo
         session.delete(instruction)
         session.commit()
         logging.info(f"Instruction #{instruction_id} was deleted from Recipe #{recipe_id}")
-        update_recipe(recipe_id=recipe.id)
 
 
 def delete_recipe(*, recipe_id: int, deleted_by: common.authentication.authenticated_user):
@@ -366,3 +308,170 @@ def delete_recipe(*, recipe_id: int, deleted_by: common.authentication.authentic
         )
         session.commit()
         return recipe
+
+
+def get_ingredient_from_db(*, pk: int = None, name: str = None):
+    """
+    Get ingredient from database
+
+    :param pk:
+    :param name:
+    :return:
+    """
+    with db.connection.get_session() as session:
+        query = session.query(Ingredient)
+        filters = []
+
+        if pk:
+            filters.append(Ingredient.id == pk)
+        elif name:
+            filters.append(Ingredient.name == name)
+
+        if filters:
+            query = query.filter(*filters, Ingredient.is_deleted == False)
+
+        ingredient = query.first()
+        if not ingredient:
+            raise IngredientDoesNotExistException()
+
+    return ingredient
+
+
+def get_all_ingredients_from_db():
+    """
+    Get all ingredients from database
+    :return:
+    """
+    with db.connection.get_session() as session:
+        all_ingredients = session.query(Ingredient).filter(Ingredient.is_deleted == False).all()
+        session.close()
+    return all_ingredients
+
+
+def create_or_get_ingredient(ingredient: IngredientInput, created_by: int):
+    """
+    Create a new ingredient or get an existing one by name
+    :param ingredient:
+    :param created_by:
+    :return:
+    """
+    try:
+        ingredient = get_ingredient_from_db(name=ingredient.name.lower())
+        return ingredient
+    except IngredientDoesNotExistException:
+        new_ingredient = Ingredient(
+            name=ingredient.name.lower(),
+            calories=ingredient.calories,
+            carbo=ingredient.carbo,
+            fats=ingredient.fats,
+            protein=ingredient.protein,
+            cholesterol=ingredient.cholesterol,
+            measurement=ingredient.measurement.lower(),
+            category=ingredient.category.lower(),
+            created_by=created_by,
+        )
+
+        with db.connection.get_session() as session:
+            session.add(new_ingredient)
+            session.commit()
+            session.refresh(new_ingredient)
+
+        return new_ingredient
+
+
+def delete_ingredient(pk: int, user_id: int):
+    """
+    Delete ingredient
+    :param pk:
+    :param user_id:
+    :return:
+    """
+    ingredient = get_ingredient_from_db(pk=pk)
+    if not ingredient:
+        raise IngredientDoesNotExistException()
+    with db.connection.get_session() as session:
+        ingredient.is_deleted = True
+        ingredient.deleted_by = user_id
+        ingredient.deleted_on = datetime.utcnow()
+        session.add(ingredient)
+        session.commit()
+        session.refresh(ingredient)
+        session.close()
+
+
+def update_ingredient(ingredient_id: int, field: str, value: str | float, updated_by: int):
+    """
+    Update Ingredient
+
+    :param ingredient_id:
+    :param field:
+    :param value:
+    :param updated_by:
+    :return:
+    """
+
+    db_ingredient = get_ingredient_from_db(pk=ingredient_id)
+    with db.connection.get_session() as session:
+        session.execute(
+            update(Ingredient),
+            [{"id": ingredient_id, f"{field}": str(value), "updated_by": updated_by}],
+        )
+        session.commit()
+        session.add(db_ingredient)
+        session.refresh(db_ingredient)
+
+        logging.info(f"Ingredient #{db_ingredient.id} updated. {updated_by} set {field}={value}")
+        return db_ingredient
+
+
+def patch_recipe(
+    *, recipe_id: int, patch_input_model: PatchRecipeInputModel, patched_by: common.authentication.AuthenticatedUser
+):
+    """
+    Patch recipe
+
+    :param recipe_id:
+    :param patch_input_model:
+    :param patched_by:
+    :return:
+    """
+
+    recipe = get_recipe_by_id(recipe_id, patched_by)
+    with db.connection.get_session() as session:
+        values = {patch_input_model.field: patch_input_model.value, 'updated_by': patched_by.id}
+        if patch_input_model.field.upper() == 'IS_PUBLISHED':
+            values['published_on'] = datetime.utcnow()
+            values['published_by'] = patched_by.id
+        session.execute(update(Recipe).where(Recipe.id == recipe.id).values(values))
+        session.commit()
+        session.add(recipe)
+        session.refresh(recipe)
+
+    return recipe
+
+
+def update_recipe(
+    *, recipe_id: int, update_recipe_input_model: RecipeInputModel, updated_by: common.authentication.AuthenticatedUser
+):
+    """
+    Update recipe
+
+    :param recipe_id:
+    :param update_recipe_input_model:
+    :param updated_by:
+    :return:
+    """
+
+    recipe = get_recipe_by_id(recipe_id, user=updated_by)
+    for field, value in iter(update_recipe_input_model):
+        if field.casefold() in ['instructions']:
+            value = [RecipeInstruction(**instruction.model_dump()) for instruction in value]
+        Recipe.__setattr__(recipe, field, value)
+
+    recipe.updated_by = updated_by.id
+
+    with db.connection.get_session() as session:
+        session.add(recipe)
+        session.commit()
+        session.refresh(recipe)
+    return recipe

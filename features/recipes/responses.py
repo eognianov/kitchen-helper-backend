@@ -39,19 +39,23 @@ class RecipeResponse(pydantic.BaseModel):
 
     id: int
     name: str = pydantic.Field(max_length=255)
-    picture: Optional[str]
+    picture: Optional[int]
     summary: Optional[str]
+    serves: Optional[int]
     calories: Optional[float]
     carbo: Optional[float]
     fats: Optional[float]
     proteins: Optional[float]
     cholesterol: Optional[float]
-    time_to_prepare: int
-    complexity: int = 0
+    time_to_prepare: int = 0
+    complexity: float = 0
     created_by: int = 0
     created_on: datetime.datetime
     updated_by: Optional[int]
     updated_on: datetime.datetime
+    is_published: bool = False
+    published_on: Optional[datetime.datetime]
+    published_by: Optional[int]
 
     category: CategoryShortResponse | Any = None
     instructions: list[InstructionResponse] | Any = None
@@ -61,9 +65,7 @@ class RecipeResponse(pydantic.BaseModel):
             self.category = CategoryShortResponse(**self.category.__dict__)
 
         if self.instructions:
-            self.instructions = [
-                InstructionResponse(**_.__dict__) for _ in self.instructions
-            ]
+            self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]
 
 
 class PSFRecipesResponseModel(pydantic.BaseModel):
@@ -76,3 +78,15 @@ class PSFRecipesResponseModel(pydantic.BaseModel):
     total_pages: int
     total_items: int
     recipes: list[RecipeResponse]
+
+
+class IngredientResponse(pydantic.BaseModel):
+    id: int
+    name: str
+    calories: float
+    carbo: float
+    fats: float
+    protein: float
+    cholesterol: float
+    measurement: str
+    category: str

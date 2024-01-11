@@ -107,22 +107,16 @@ class TestInstructionsOperations:
     def setup(self):
         self.recipe = {
             "name": "name",
-            "time_to_prepare": 0,
+            "serves": 1,
             "category_id": 1,
             "picture": "",
             "summary": "summary",
-            "calories": 1,
-            "carbo": 1,
-            "fats": 1,
-            "proteins": 1,
-            "cholesterol": 1,
-            "created_by": 1,
             "instructions": [],
         }
 
-    def test_create_recipe_without_instructions_success(self, use_test_db):
+    def test_create_recipe_without_instructions_success(self, use_test_db, user):
         operations.create_category("Category name", 1)
-        operations.create_recipe(**self.recipe)
+        operations.create_recipe(**self.recipe, created_by=user)
 
         with db.connection.get_session() as session:
             recipes = session.query(Recipe).all()
@@ -130,16 +124,16 @@ class TestInstructionsOperations:
         assert len(recipes) == 1
         assert len(recipe.instructions) == 0
 
-    def test_create_recipe_with_instructions_success(self, use_test_db, bypass_published_filter):
+    def test_create_recipe_with_instructions_success(self, use_test_db, bypass_published_filter, user):
         instruction = {
             "instruction": "instruction",
-            "category": "Lunch",
+            "category": "Boil",
             "time": 10,
             "complexity": 5,
         }
         instruction2 = {
             "instruction": "instruction",
-            "category": "Lunch",
+            "category": "Boil",
             "time": 10,
             "complexity": 4,
         }
@@ -148,7 +142,7 @@ class TestInstructionsOperations:
         self.recipe["instructions"].append(CreateInstructionInputModel(**instruction2))
 
         operations.create_category("Category name", 1)
-        operations.create_recipe(**self.recipe)
+        operations.create_recipe(**self.recipe, created_by=user)
 
         with db.connection.get_session() as session:
             recipes = session.query(Recipe).all()
@@ -157,15 +151,15 @@ class TestInstructionsOperations:
         assert len(recipe.instructions) == 2
         assert recipes[0].time_to_prepare == 20
         assert recipes[0].complexity == 4.5
-        assert recipes[0].instructions[0].category == "Lunch"
+        assert recipes[0].instructions[0].category == "Boil"
 
     def test_create_instruction_for_recipe_success(self, use_test_db, bypass_published_filter, user):
         operations.create_category("Category name", 1)
-        operations.create_recipe(**self.recipe)
+        operations.create_recipe(**self.recipe, created_by=user)
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -183,13 +177,13 @@ class TestInstructionsOperations:
             assert instruction.time == new_instruction["time"]
             assert instruction.complexity == new_instruction["complexity"]
 
-    def test_get_instruction_by_id_success(self, use_test_db, bypass_published_filter, user=user):
+    def test_get_instruction_by_id_success(self, use_test_db, bypass_published_filter, user):
         operations.create_category("Category name", 1)
-        operations.create_recipe(**self.recipe)
+        operations.create_recipe(**self.recipe, created_by=user)
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -206,11 +200,11 @@ class TestInstructionsOperations:
 
     def test_update_instruction_success(self, use_test_db, bypass_published_filter, user):
         operations.create_category("Category name", 1)
-        operations.create_recipe(**self.recipe)
+        operations.create_recipe(**self.recipe, created_by=user)
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -238,17 +232,17 @@ class TestInstructionsOperations:
 
     def test_delete_instruction_success(self, use_test_db, bypass_published_filter, user):
         operations.create_category("Category name", 1)
-        operations.create_recipe(**self.recipe)
+        operations.create_recipe(**self.recipe, created_by=user)
 
         new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
         new_instruction2 = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
@@ -260,7 +254,7 @@ class TestInstructionsOperations:
             recipe_id=1, instruction_request=CreateInstructionInputModel(**new_instruction2), user=user
         )
 
-        operations.delete_instruction(recipe_id=1, instruction_id=2, user=common.authentication.AuthenticatedUser(id=1))
+        operations.delete_instruction(recipe_id=1, instruction_id=2, user=user)
 
         with db.connection.get_session() as session:
             instructions = session.query(RecipeInstruction).all()
@@ -272,28 +266,22 @@ class TestInstructionsEndpoints:
         self.client = TestClient(app)
         self.recipe = {
             "name": "name",
-            "time_to_prepare": 0,
             "category_id": 1,
             "picture": "",
+            "serves": 4,
             "summary": "summary",
-            "calories": 1,
-            "carbo": 1,
-            "fats": 1,
-            "proteins": 1,
-            "cholesterol": 1,
-            "created_by": 1,
             "instructions": [],
         }
         self.new_instruction = {
             "instruction": "instruction",
-            "category": "lunch",
+            "category": "BOIL",
             "time": 10,
             "complexity": 5,
         }
 
     def test_patch_instruction_success(self, use_test_db, mocker, bypass_published_filter, user):
         operations.create_category("Category", 1)
-        created_recipe = operations.create_recipe(**self.recipe)
+        created_recipe = operations.create_recipe(**self.recipe, created_by=user)
         created_instruction = operations.create_instruction(
             recipe_id=1, instruction_request=CreateInstructionInputModel(**self.new_instruction), user=user
         )
@@ -313,7 +301,7 @@ class TestInstructionsEndpoints:
 
     def test_patch_instruction_with_wrong_field_fail(self, use_test_db, mocker, bypass_published_filter, user):
         operations.create_category("Category", 1)
-        created_recipe = operations.create_recipe(**self.recipe)
+        created_recipe = operations.create_recipe(**self.recipe, created_by=user)
         created_instruction = operations.create_instruction(
             recipe_id=1, instruction_request=CreateInstructionInputModel(**self.new_instruction), user=user
         )
@@ -329,7 +317,7 @@ class TestInstructionsEndpoints:
 
     def test_delete_instruction_success(self, use_test_db, mocker, bypass_published_filter, user):
         operations.create_category("Category", 1)
-        created_recipe = operations.create_recipe(**self.recipe)
+        created_recipe = operations.create_recipe(**self.recipe, created_by=user)
         created_instruction = operations.create_instruction(
             recipe_id=1, instruction_request=CreateInstructionInputModel(**self.new_instruction), user=user
         )
@@ -345,7 +333,7 @@ class TestInstructionsEndpoints:
 
     def test_delete_instruction_with_non_existing_recipe_fail(self, use_test_db, mocker, bypass_published_filter, user):
         operations.create_category("Category", 1)
-        created_recipe = operations.create_recipe(**self.recipe)
+        created_recipe = operations.create_recipe(**self.recipe, created_by=user)
         created_instruction = operations.create_instruction(
             recipe_id=1, instruction_request=CreateInstructionInputModel(**self.new_instruction), user=user
         )
@@ -360,7 +348,7 @@ class TestInstructionsEndpoints:
         self, use_test_db, mocker, bypass_published_filter, user
     ):
         operations.create_category("Category", 1)
-        created_recipe = operations.create_recipe(**self.recipe)
+        created_recipe = operations.create_recipe(**self.recipe, created_by=user)
         created_instruction = operations.create_instruction(
             recipe_id=1, instruction_request=CreateInstructionInputModel(**self.new_instruction), user=user
         )
@@ -373,8 +361,8 @@ class TestInstructionsEndpoints:
 
     def test_delete_instruction_with_wrong_recipe_fail(self, use_test_db, mocker, bypass_published_filter, user):
         operations.create_category("Category", 1)
-        operations.create_recipe(**self.recipe)
-        operations.create_recipe(**self.recipe)
+        operations.create_recipe(**self.recipe, created_by=user)
+        operations.create_recipe(**self.recipe, created_by=user)
         operations.create_instruction(
             recipe_id=1, instruction_request=CreateInstructionInputModel(**self.new_instruction), user=user
         )
