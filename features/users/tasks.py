@@ -1,4 +1,5 @@
 import os
+import uuid
 
 import db.connection
 import configuration
@@ -6,11 +7,36 @@ import khLogging
 import features.users.operations
 from sqlalchemy.orm import joinedload
 from configuration import celery
-from features.users import models, input_models, exceptions
+from features.users import models, input_models, exceptions, operations
 
 logging = khLogging.Logger("celery-users-tasks")
 app_users = configuration.AppUsers()
 app_users_role = configuration.AppUsersRoles()
+
+
+def seed_system_user():
+    """
+    Add system user
+
+    :return:
+    """
+
+    try:
+        system_user = operations.get_user_from_db(username='System')
+        logging.info(f'System user is already created with id: {system_user.id}')
+    except exceptions.UserDoesNotExistException:
+        logging.info(f'Creating system user')
+        with db.connection.get_session() as session:
+            system_user = models.User(
+                username='System',
+                password=operations.hash_password(str(uuid.uuid4())),
+                email='system@kitchenhelper.eognyanov.com',
+                is_email_confirmed=True,
+            )
+            session.add(system_user)
+            session.commit()
+            session.refresh(system_user)
+            logging.info(f'System user created id: {system_user.id}')
 
 
 def seed_users() -> str:
@@ -102,6 +128,7 @@ def app_seeder() -> str:
     Task for seeding users, user role and adding users to role
     :return:
     """
+    seed_system_user()
     message_seed_users = seed_users()
     message_seed_roles = seed_roles()
     message_add_roles_to_users = add_roles_to_users()
