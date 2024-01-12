@@ -4,7 +4,6 @@ from typing import Type, Optional
 
 import sqlalchemy.exc
 from sqlalchemy import update, and_, or_
-from sqlalchemy.orm import joinedload
 
 import common.authentication
 import db.connection
@@ -147,8 +146,10 @@ def create_recipe(
         session.commit()
         session.refresh(recipe)
 
-    if ingredients:
-        add_ingredients_to_recipe(ingredients, recipe.id, created_by)
+        if ingredients:
+            add_ingredients_to_recipe(ingredients, recipe.id, created_by)
+
+        session.refresh(recipe)
 
     logging.info(f"User {created_by} create Recipe (#{recipe.id}).")
     return recipe
@@ -195,7 +196,6 @@ def get_all_recipes(
             .filter(
                 *filter_expression,
             )
-            .options(joinedload(Recipe.ingredients).joinedload(RecipeIngredient.ingredient))
             .order_by(*order_expression)
         )
 
