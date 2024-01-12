@@ -67,6 +67,11 @@ class CreateInstructionInputModel(pydantic.BaseModel):
         return field.capitalize()
 
 
+class RecipeIngredientInputModel(pydantic.BaseModel):
+    ingredient_id: int = pydantic.Field(gt=0)
+    quantity: float = pydantic.Field(gt=0)
+
+
 class RecipeInputModel(pydantic.BaseModel):
     """Create recipe"""
 
@@ -76,6 +81,7 @@ class RecipeInputModel(pydantic.BaseModel):
     summary: Optional[str] = pydantic.Field(max_length=1000)
     category_id: Optional[int] = None
     instructions: Optional[list[CreateInstructionInputModel]] = None
+    ingredients: Optional[list[RecipeIngredientInputModel]] = None
 
 
 class PatchInstructionInputModel(pydantic.BaseModel):

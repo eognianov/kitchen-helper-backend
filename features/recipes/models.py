@@ -42,11 +42,6 @@ class Recipe(DbBaseModel):
     picture: Mapped[int] = mapped_column(ForeignKey("IMAGES.id"), default=None, nullable=True)
     summary: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True, default=None)
     serves: Mapped[int] = mapped_column(Integer, default=0)
-    calories: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
-    carbo: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
-    fats: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
-    proteins: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
-    cholesterol: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0)
     instructions: Mapped[list["RecipeInstruction"]] = relationship(
         "RecipeInstruction", back_populates="recipe", init=False, lazy='selectin'
     )
@@ -56,6 +51,46 @@ class Recipe(DbBaseModel):
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
     deleted_on: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True, default=None)
     deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, default=None)
+    ingredients = relationship(
+        "RecipeIngredient",
+        lazy="selectin",
+        primaryjoin="Recipe.id == RecipeIngredient.recipe_id",
+    )
+
+    @hybrid_property
+    def calories(self) -> float:
+        calories = 0
+        for ingredient_mapping in self.ingredients:
+            calories += ingredient_mapping.quantity * ingredient_mapping.ingredient.calories
+        return calories
+
+    @hybrid_property
+    def carbo(self) -> float:
+        carbo = 0
+        for ingredient_mapping in self.ingredients:
+            carbo += ingredient_mapping.quantity * ingredient_mapping.ingredient.carbo
+        return carbo
+
+    @hybrid_property
+    def fats(self) -> float:
+        fats = 0
+        for ingredient_mapping in self.ingredients:
+            fats += ingredient_mapping.quantity * ingredient_mapping.ingredient.fats
+        return fats
+
+    @hybrid_property
+    def proteins(self) -> float:
+        protein = 0
+        for ingredient_mapping in self.ingredients:
+            protein += ingredient_mapping.quantity * ingredient_mapping.ingredient.protein
+        return protein
+
+    @hybrid_property
+    def cholesterol(self) -> float:
+        cholesterol = 0
+        for ingredient_mapping in self.ingredients:
+            cholesterol += ingredient_mapping.quantity * ingredient_mapping.ingredient.cholesterol
+        return cholesterol
 
     @hybrid_property
     def complexity(self) -> float:
@@ -84,6 +119,8 @@ class RecipeInstruction(DbBaseModel):
 
 
 class Ingredient(DbBaseModel):
+    """Ingredient DB model"""
+
     __tablename__ = "INGREDIENTS"
 
     id: Mapped[int] = mapped_column(Integer, init=False, autoincrement=True, primary_key=True)
@@ -104,3 +141,18 @@ class Ingredient(DbBaseModel):
     is_deleted: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
     deleted_on: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True, init=False)
     deleted_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, init=False)
+
+
+class RecipeIngredient(DbBaseModel):
+    """RecipeIngredient DB model"""
+
+    __tablename__ = 'RECIPE_INGREDIENTS_MAPPING'
+
+    recipe_id: Mapped[int] = mapped_column(Integer, ForeignKey('RECIPES.id'), primary_key=True)
+    ingredient_id: Mapped[int] = mapped_column(Integer, ForeignKey('INGREDIENTS.id'), primary_key=True)
+    ingredient = relationship(
+        "Ingredient",
+        lazy="selectin",
+        primaryjoin="RecipeIngredient.ingredient_id == Ingredient.id",
+    )
+    quantity: Mapped[float] = mapped_column(Numeric(8, 2), nullable=False)

@@ -112,6 +112,7 @@ class TestInstructionsOperations:
             "picture": "",
             "summary": "summary",
             "instructions": [],
+            "ingredients": [],
         }
 
     def test_create_recipe_without_instructions_success(self, use_test_db, user):
@@ -271,6 +272,7 @@ class TestInstructionsEndpoints:
             "serves": 4,
             "summary": "summary",
             "instructions": [],
+            "ingredients": [],
         }
         self.new_instruction = {
             "instruction": "instruction",

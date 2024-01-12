@@ -16,6 +16,7 @@ from .input_models import (
     PSFRecipesInputModel,
     UpdateIngredientInputModel,
     PatchRecipeInputModel,
+    RecipeIngredientInputModel,
 )
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel, IngredientInput
 from .responses import RecipeResponse
@@ -169,6 +170,11 @@ def create_recipe(
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=f"Category with id {create_recipe_input_model.category_id} does not exist",
+        )
+    except features.recipes.exceptions.IngredientDoesNotExistException as e:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=e.text,
         )
 
 
@@ -342,6 +348,74 @@ def delete_recipe(recipe_id: int, user: common.authentication.authenticated_user
         )
 
 
+@recipes_router.post("/{recipe_id}/ingredients/", status_code=fastapi.status.HTTP_201_CREATED)
+def add_ingredient_to_recipe(
+    user: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    input_ingredient: RecipeIngredientInputModel = fastapi.Body(),
+):
+    """
+    Add ingredient to recipe
+    :param user:
+    :param recipe_id:
+    :param input_ingredient:
+    :return:
+    """
+    try:
+        recipe = features.recipes.operations.get_recipe_by_id(recipe_id, user)
+        ingredient = features.recipes.operations.get_ingredient_from_db(pk=input_ingredient.ingredient_id)
+        features.recipes.operations.add_ingredient_to_recipe(recipe.id, ingredient.id, input_ingredient.quantity, user)
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Recipe with id {recipe_id} does not exist",
+        )
+    except features.recipes.exceptions.IngredientDoesNotExistException as e:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=e.text,
+        )
+    except features.recipes.exceptions.IngredientAlreadyInRecipe:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Ingredient {input_ingredient.ingredient_id} is already added to recipe {recipe_id}",
+        )
+
+
+@recipes_router.delete("/{recipe_id}/ingredients/{ingredient_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT)
+def remove_ingredient_from_recipe(
+    user: common.authentication.authenticated_user,
+    recipe_id: int = fastapi.Path(),
+    ingredient_id: int = fastapi.Path(),
+):
+    """
+    Remove ingredient from recipe
+    :param user:
+    :param recipe_id:
+    :param ingredient_id:
+    :return:
+    """
+    try:
+        recipe = features.recipes.operations.get_recipe_by_id(recipe_id=recipe_id, user=user)
+        ingredient = features.recipes.operations.get_ingredient_from_db(pk=ingredient_id)
+        features.recipes.operations.remove_ingredient_from_recipe(recipe=recipe, ingredient=ingredient, user=user)
+    except features.recipes.exceptions.RecipeNotFoundException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Recipe with id {recipe_id} does not exist",
+        )
+    except features.recipes.exceptions.IngredientDoesNotExistException as e:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=e.text,
+        )
+    except features.recipes.exceptions.RecipeIngredientDoesNotExistException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=f"Recipe {recipe_id} does not have ingredient {ingredient_id}",
+        )
+
+
 @ingredient_router.post("/", status_code=fastapi.status.HTTP_201_CREATED, response_model=IngredientResponse)
 def create_ingredient(
     ingredient_input_model: IngredientInput,
@@ -360,14 +434,28 @@ def create_ingredient(
 
 
 @ingredient_router.get("/", response_model=list[IngredientResponse])
-def get_all_ingredients():
+def get_all_ingredients(user: common.authentication.authenticated_user):
     """
     Get all ingredients
 
+    :param user:
     :return:
     """
     all_ingredients = features.recipes.operations.get_all_ingredients_from_db()
     return all_ingredients
+
+
+@ingredient_router.get("/{ingredient_id}", response_model=IngredientResponse)
+def get_ingredient(user: common.authentication.authenticated_user, ingredient_id: int = fastapi.Path()):
+    """
+    Get ingredient by id
+
+    :param user:
+    :param ingredient_id
+    :return:
+    """
+    ingredient = features.recipes.operations.get_ingredient_from_db(pk=ingredient_id)
+    return ingredient
 
 
 @ingredient_router.delete("/{ingredient_id}", status_code=fastapi.status.HTTP_204_NO_CONTENT)
@@ -381,9 +469,9 @@ def delete_ingredient(ingredient_id: int, user: common.authentication.authentica
     """
 
     try:
-        features.recipes.operations.delete_ingredient(ingredient_id, user.id)
-    except features.recipes.exceptions.IngredientDoesNotExistException:
-        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND)
+        features.recipes.operations.delete_ingredient(ingredient_id, user)
+    except features.recipes.exceptions.IngredientDoesNotExistException as e:
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=e.text)
 
 
 @ingredient_router.patch("/{ingredient_id}", response_model=IngredientResponse)
@@ -406,5 +494,5 @@ def patch_ingredient(
             ingredient_id, update_ingredient_input_model.field, update_ingredient_input_model.value, updated_by=user.id
         )
         return ingredient
-    except features.recipes.exceptions.IngredientDoesNotExistException:
-        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND)
+    except features.recipes.exceptions.IngredientDoesNotExistException as e:
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=e.text)
