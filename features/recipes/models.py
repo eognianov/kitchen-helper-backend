@@ -41,7 +41,7 @@ class Recipe(DbBaseModel):
     category_id: Mapped[int] = mapped_column(ForeignKey("RECIPE_CATEGORIES.id"), nullable=True, default=None)
     picture: Mapped[int] = mapped_column(ForeignKey("IMAGES.id"), default=None, nullable=True)
     summary: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True, default=None)
-    serves: Mapped[int] = mapped_column(Integer, default=0)
+    serves: Mapped[int] = mapped_column(Integer, default=1, server_default='1')
     instructions: Mapped[list["RecipeInstruction"]] = relationship(
         "RecipeInstruction", back_populates="recipe", init=False, lazy='selectin'
     )
