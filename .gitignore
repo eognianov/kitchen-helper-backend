@@ -234,3 +234,5 @@ fabric.properties
 .env.prod
 media
 logs
+cache
+.env
