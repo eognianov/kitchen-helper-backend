@@ -15,14 +15,23 @@ from .exceptions import (
     InstructionNameViolationException,
     RecipeWithInstructionNotFoundException,
     IngredientDoesNotExistException,
+    RecipeIngredientDoesNotExistException,
+    IngredientAlreadyInRecipe,
 )
 from .helpers import paginate_recipes
-from .input_models import CreateInstructionInputModel, PSFRecipesInputModel, IngredientInput, RecipeInputModel
+from .input_models import (
+    CreateInstructionInputModel,
+    PSFRecipesInputModel,
+    IngredientInput,
+    RecipeInputModel,
+    RecipeIngredientInputModel,
+)
 from .models import (
     RecipeCategory,
     Recipe,
     RecipeInstruction,
     Ingredient,
+    RecipeIngredient,
 )
 
 from .input_models import PatchRecipeInputModel
@@ -101,6 +110,7 @@ def create_recipe(
     summary: str = None,
     serves: int,
     instructions: list[CreateInstructionInputModel],
+    ingredients: list[RecipeIngredientInputModel],
 ):
     """
     Create recipe
@@ -112,6 +122,7 @@ def create_recipe(
     :param serves:
     :param created_by:
     :param instructions:
+    :param ingredients:
     :return:
     """
 
@@ -133,6 +144,11 @@ def create_recipe(
     with db.connection.get_session() as session:
         session.add(recipe)
         session.commit()
+        session.refresh(recipe)
+
+        if ingredients:
+            add_ingredients_to_recipe(ingredients, recipe.id, created_by)
+
         session.refresh(recipe)
 
     logging.info(f"User {created_by} create Recipe (#{recipe.id}).")
@@ -332,7 +348,7 @@ def get_ingredient_from_db(*, pk: int = None, name: str = None):
 
         ingredient = query.first()
         if not ingredient:
-            raise IngredientDoesNotExistException()
+            raise IngredientDoesNotExistException(text=f"Ingredient with id {pk} does not exist")
 
     return ingredient
 
@@ -379,24 +395,66 @@ def create_or_get_ingredient(ingredient: IngredientInput, created_by: int):
         return new_ingredient
 
 
-def delete_ingredient(pk: int, user_id: int):
+def _remove_ingredient_from_all_recipes(ingredient_id: int, user: common.authentication.authenticated_user):
     """
-    Delete ingredient
+    Remove deleted ingredient from all recipes
+    :param ingredient_id:
+    :param user:
+    :return:
+    """
+    with db.connection.get_session() as session:
+        ingredient = session.query(Ingredient).get(ingredient_id)
+
+        if ingredient:
+            all_recipes_with_ingredient = (
+                session.query(Recipe)
+                .join(RecipeIngredient)
+                .filter(
+                    RecipeIngredient.ingredient_id == ingredient.id,
+                )
+                .all()
+            )
+
+            for recipe in all_recipes_with_ingredient:
+                recipe_ingredient = (
+                    session.query(RecipeIngredient)
+                    .filter_by(
+                        recipe_id=recipe.id,
+                        ingredient_id=ingredient.id,
+                    )
+                    .first()
+                )
+
+                if recipe_ingredient:
+                    session.delete(recipe_ingredient)
+
+                    recipe.updated_by = user.id
+                    recipe.updated_on = datetime.utcnow()
+
+                    session.commit()
+
+            session.commit()
+
+
+def delete_ingredient(pk: int, user: common.authentication.authenticated_user):
+    """
+    Delete ingredient and remove the relations with recipes
     :param pk:
-    :param user_id:
+    :param user:
     :return:
     """
     ingredient = get_ingredient_from_db(pk=pk)
     if not ingredient:
-        raise IngredientDoesNotExistException()
+        raise IngredientDoesNotExistException(text=f"Ingredient with id {pk} does not exist")
     with db.connection.get_session() as session:
         ingredient.is_deleted = True
-        ingredient.deleted_by = user_id
+        ingredient.deleted_by = user.id
         ingredient.deleted_on = datetime.utcnow()
         session.add(ingredient)
         session.commit()
         session.refresh(ingredient)
-        session.close()
+
+        _remove_ingredient_from_all_recipes(pk, user=user)
 
 
 def update_ingredient(ingredient_id: int, field: str, value: str | float, updated_by: int):
@@ -475,3 +533,72 @@ def update_recipe(
         session.commit()
         session.refresh(recipe)
     return recipe
+
+
+def add_ingredient_to_recipe(
+    recipe_id: int, ingredient_id: int, quantity: float, user: common.authentication.AuthenticatedUser
+):
+    """
+    Add ingredient to recipe
+    :param recipe_id:
+    :param ingredient_id:
+    :param quantity:
+    :param user:
+    :return:
+    """
+    with db.connection.get_session() as session:
+        db_ingredient = get_ingredient_from_db(pk=ingredient_id)
+        db_recipe = get_recipe_by_id(recipe_id=recipe_id, user=user)
+
+        if db_ingredient in db_recipe.ingredients:
+            raise IngredientAlreadyInRecipe()
+
+        recipe_ingredient = RecipeIngredient(recipe_id=recipe_id, ingredient_id=db_ingredient.id, quantity=quantity)
+
+        db_recipe.updated_by = user.id
+        db_recipe.updated_on = datetime.utcnow()
+
+        session.add(recipe_ingredient)
+        session.commit()
+        session.add(db_recipe)
+        session.commit()
+
+
+def add_ingredients_to_recipe(
+    ingredients: list[RecipeIngredientInputModel], recipe_id: int, user: common.authentication.authenticated_user
+):
+    """
+    Add ingredients to recipe
+    :param ingredients:
+    :param recipe_id:
+    :param user:
+    :return:
+    """
+    for ingredient in ingredients:
+        add_ingredient_to_recipe(recipe_id, ingredient.ingredient_id, ingredient.quantity, user=user)
+
+
+def remove_ingredient_from_recipe(
+    recipe: Recipe, ingredient: Ingredient, user: common.authentication.authenticated_user
+):
+    """
+    Remove ingredient from recipe
+    :param recipe:
+    :param ingredient:
+    :param user:
+    :return:
+    """
+    with db.connection.get_session() as session:
+        recipe_ingredient = (
+            session.query(RecipeIngredient).filter_by(recipe_id=recipe.id, ingredient_id=ingredient.id).first()
+        )
+
+        if recipe_ingredient:
+            session.delete(recipe_ingredient)
+
+            recipe.updated_by = user.id
+            recipe.updated_on = datetime.utcnow()
+
+            session.commit()
+        else:
+            raise RecipeIngredientDoesNotExistException()

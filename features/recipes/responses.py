@@ -4,6 +4,9 @@ from typing import Optional, Any
 
 import pydantic
 
+from features.recipes.models import Recipe
+from features.recipes import helpers
+
 
 class Category(pydantic.BaseModel):
     """Category response"""
@@ -34,6 +37,27 @@ class InstructionResponse(pydantic.BaseModel):
     recipe_id: int
 
 
+class IngredientResponse(pydantic.BaseModel):
+    """Ingredient response"""
+
+    id: int
+    name: str
+    calories: float
+    carbo: float
+    fats: float
+    protein: float
+    cholesterol: float
+    measurement: str
+    category: str
+
+
+class RecipeIngredientResponse(pydantic.BaseModel):
+    id: int
+    name: str
+    measurement: str
+    quantity: float
+
+
 class RecipeResponse(pydantic.BaseModel):
     """Recipe response"""
 
@@ -42,11 +66,11 @@ class RecipeResponse(pydantic.BaseModel):
     picture: Optional[int]
     summary: Optional[str]
     serves: Optional[int]
-    calories: Optional[float]
-    carbo: Optional[float]
-    fats: Optional[float]
-    proteins: Optional[float]
-    cholesterol: Optional[float]
+    calories: float = 0.0
+    carbo: float = 0.0
+    fats: float = 0.0
+    proteins: float = 0.0
+    cholesterol: float = 0.0
     time_to_prepare: int = 0
     complexity: float = 0
     created_by: int = 0
@@ -59,6 +83,7 @@ class RecipeResponse(pydantic.BaseModel):
 
     category: CategoryShortResponse | Any = None
     instructions: list[InstructionResponse] | Any = None
+    ingredients: list[RecipeIngredientResponse] | Any = None
 
     def model_post_init(self, __context: Any):
         if self.category:
@@ -66,6 +91,17 @@ class RecipeResponse(pydantic.BaseModel):
 
         if self.instructions:
             self.instructions = [InstructionResponse(**_.__dict__) for _ in self.instructions]
+
+        if self.ingredients:
+            self.ingredients = [
+                RecipeIngredientResponse(
+                    id=ingredient_mapping.ingredient.id,
+                    name=ingredient_mapping.ingredient.name,
+                    quantity=ingredient_mapping.quantity,
+                    measurement=ingredient_mapping.ingredient.measurement,
+                )
+                for ingredient_mapping in self.ingredients
+            ]
 
 
 class PSFRecipesResponseModel(pydantic.BaseModel):
@@ -78,15 +114,3 @@ class PSFRecipesResponseModel(pydantic.BaseModel):
     total_pages: int
     total_items: int
     recipes: list[RecipeResponse]
-
-
-class IngredientResponse(pydantic.BaseModel):
-    id: int
-    name: str
-    calories: float
-    carbo: float
-    fats: float
-    protein: float
-    cholesterol: float
-    measurement: str
-    category: str

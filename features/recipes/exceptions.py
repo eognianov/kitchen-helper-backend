@@ -26,4 +26,13 @@ class RecipeWithInstructionNotFoundException(Exception):
 
 
 class IngredientDoesNotExistException(Exception):
+    def __init__(self, text):
+        self.text = text
+
+
+class RecipeIngredientDoesNotExistException(Exception):
+    ...
+
+
+class IngredientAlreadyInRecipe(Exception):
     ...
