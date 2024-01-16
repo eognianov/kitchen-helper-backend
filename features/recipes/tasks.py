@@ -1,43 +1,20 @@
-import diskcache
-
 import configuration
 import db.connection
 import khLogging
-from features import Recipe
-from features.recipes.operations import create_category
+from features.recipes.operations import create_category, patch_recipe
 from features.recipes.exceptions import CategoryNameViolationException
 from features.users.operations import get_user_from_db
-from features.recipes.models import Recipe, RecipeIngredient
+from features.recipes.models import Recipe
+from features.recipes.input_models import PatchRecipeInputModel
+from common.authentication import AuthenticatedUser, get_system_user_id
+from features.recipes.constants import DEFAULT_PROMPT
 from configuration import celery
-from sqlalchemy import and_, or_, text
+from sqlalchemy import and_, or_
 from openai import OpenAI
 from datetime import datetime, timedelta
 from typing import Type
 
 logging = khLogging.Logger("celery-recipes-tasks")
-
-CACHE = diskcache.Cache(directory=configuration.CACHE_PATH, disk=diskcache.JSONDisk)
-
-
-def _get_system_user_id_from_db() -> int:
-    with db.connection.get_connection() as connection:
-        system_user_id = connection.execute(
-            text('SELECT ID FROM "Users" WHERE username = :name'), {'name': 'System'}
-        ).scalar()
-        return system_user_id
-
-
-def _get_system_user_id() -> int:
-    """
-    Get system user id
-    :return:
-    """
-
-    system_user_id = CACHE.get('system_user_id')
-    if not system_user_id:
-        system_user_id = _get_system_user_id_from_db()
-        CACHE.set('system_user_id', system_user_id)
-        return system_user_id
 
 
 @celery.task
@@ -64,45 +41,50 @@ def seed_recipe_categories():
     return "Finished adding categories to the database."
 
 
-DEFAULT_PROMPT = """ Генерирай ми обобщение на рецепта до 300 символа. Аз ще ти подам името на рецептата,
- стъпките за изпълнение и съставките ѝ.
-  Ще подам съставките инструкциите на нов ред във формат ##текст##категория###време###сложност###. """
-
-
 def _get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
     with db.connection.get_session() as session:
         ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
 
-        all_filtered_recipes = (
+        return (
             session.query(Recipe)
             .filter(
                 and_(
                     Recipe.is_deleted.is_(False),
                     or_(Recipe.created_on >= ten_minutes_ago, Recipe.updated_on >= ten_minutes_ago),
-                    Recipe.updated_by != _get_system_user_id(),
+                    Recipe.updated_by != get_system_user_id(),
                 )
             )
             .all()
         )
 
-    return all_filtered_recipes
-
 
 def generate_recipe_summary():
+    """Call Open Ai to generate recipes summary"""
+
     client = OpenAI(api_key=configuration.OpenAi().chatgpt_api_key)
 
     recipes = _get_recipes_updated_last_10_min()
 
     for recipe in recipes:
         prompt = DEFAULT_PROMPT
-        prompt += recipe.name + '\n'
+        prompt += f"Name: {recipe.name}" + '\n'
+        prompt += f"Category: {recipe.category.name}" + '\n'
+        prompt += f"Time to prepare: {recipe.time_to_prepare}" + '\n'
+        prompt += f"Complexity: {recipe.complexity}" + '\n'
+        prompt += f"Serves: {recipe.serves}" + '\n'
+        prompt += f"Calories: {recipe.calories}" + '\n'
+        prompt += f"Carbo: {recipe.carbo}" + '\n'
+        prompt += f"Fats: {recipe.fats}" + '\n'
+        prompt += f"Cholesterol: {recipe.cholesterol}" + '\n'
 
         for instruction in recipe.instructions:
+            prompt += f"###{instruction.category}| {instruction.instruction}" + '\n'
+
+        for ingredient_mapping in recipe.ingredients:
+            ingredient = ingredient_mapping.ingredient
             prompt += (
-                f'##{instruction.instruction}'
-                f'##{instruction.category}'
-                f'##{instruction.time_to_prepare}'
-                f'##{instruction.complexity}'
+                f"$$${ingredient_mapping.quantity} {ingredient.measurement} {ingredient.name}({ingredient.category})"
+                + '\n'
             )
 
         completion = client.chat.completions.create(
@@ -111,7 +93,10 @@ def generate_recipe_summary():
                 {"role": "user", "content": prompt},
             ],
         )
-        generated_summary = completion['choices'][0]['text']
+        generated_summary = completion.choices[0].message.content
 
-        # Do something with the generated summary
-        print(f"Recipe: {recipe.name}\nGenerated Summary: {generated_summary}\n")
+        patch_model = PatchRecipeInputModel(field='summary', value=generated_summary)
+        system_user_id = get_system_user_id()
+        patch_recipe(
+            recipe_id=recipe.id, patch_input_model=patch_model, patched_by=AuthenticatedUser(id=system_user_id)
+        )

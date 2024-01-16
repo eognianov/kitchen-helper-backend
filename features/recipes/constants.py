@@ -38,3 +38,11 @@ INGREDIENT_CATEGORIES = (
     'SNACKS',
     'MISCELLANEOUS',
 )
+
+DEFAULT_PROMPT = """
+Generate a quick recipe description for a dish using the provided steps and list of ingredients. 
+A description must be up to 500 characters and present the main characteristics of the dish.
+I will provide the dish information such as name, category, time to prepare and etc.
+The steps for preparing will be in this message, with each step starting with ###.
+Products will be listed starting with $$$.
+"""
