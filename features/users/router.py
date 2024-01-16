@@ -220,14 +220,14 @@ def create_role(
     return role
 
 
-@user_router.post("/{user_id}/roles/{role_id}", status_code=fastapi.status.HTTP_201_CREATED)
+@user_router.post("/{user_id}/roles/", status_code=fastapi.status.HTTP_201_CREATED)
 def add_user_to_role(
-    user_id: int,
-    role_id: int,
     user: Annotated[
         common.authentication.AuthenticatedUser,
         fastapi.Depends(common.authentication.admin),
     ],
+    user_id: int = fastapi.Path(),
+    role_id: int = fastapi.Body(),
 ):
     """
     Add role to user
