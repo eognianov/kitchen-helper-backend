@@ -167,7 +167,7 @@ def _get_published_filter_expression(user: Optional[common.authentication.Authen
     if user:
         if not user.is_admin:
             published_expression.append(and_(Recipe.is_deleted.is_(False)))
-            published_expression.append(and_(or_(Recipe.created_by.is_(user.id), Recipe.is_published.is_(True))))
+            published_expression.append(and_(or_(Recipe.created_by == user.id, Recipe.is_published.is_(True))))
     else:
         published_expression = [and_(Recipe.is_deleted.is_(False), Recipe.is_published.is_(True))]
 
