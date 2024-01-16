@@ -1305,7 +1305,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.post(f"/api/users/{admin.id}/roles/{second_role.id}", headers=headers)
+        response = cls.client.post(f"/api/users/{admin.id}/roles/", json=second_role.id, headers=headers)
 
         assert response.status_code == 201
 
@@ -1329,7 +1329,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.post(f"/api/users/{999}/roles/{second_role.id}", headers=headers)
+        response = cls.client.post(f"/api/users/{999}/roles/", json=second_role.id, headers=headers)
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'User does not exist'}
@@ -1353,7 +1353,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.post(f"/api/users/{admin.id}/roles/{999}", headers=headers)
+        response = cls.client.post(f"/api/users/{admin.id}/roles/", json=999, headers=headers)
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'Role does not exist'}
@@ -1377,7 +1377,7 @@ class TestUserEndpoints:
         token, _ = operations.create_token(user_id=admin.id, user_role_ids=[x.id for x in admin.roles])
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = cls.client.post(f"/api/users/{admin.id}/roles/{role.id}", headers=headers)
+        response = cls.client.post(f"/api/users/{admin.id}/roles", json=role.id, headers=headers)
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'User already have this role'}
