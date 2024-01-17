@@ -1,5 +1,4 @@
 #!/bin/sh
-
 echo "Waiting for postgres..."
 
 while ! nc -z db 5432; do
@@ -8,8 +7,13 @@ done
 
 echo "PostgreSQL started"
 
-echo "Applying migrations"
-alembic upgrade head
+
+command=$(echo "$@" | awk '{print $1}')
+
+if [ "$command" != "celery" ]; then
+  echo "Applying migrations"
+  alembic upgrade head
+fi
 
 echo "Waiting for rabbitmq..."
 
