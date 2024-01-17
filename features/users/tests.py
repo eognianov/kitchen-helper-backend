@@ -36,7 +36,7 @@ class TestUserOperations:
         :return:
         """
         password = "secure_password"
-        hashed_password = operations._hash_password(password=password)
+        hashed_password = operations.hash_password(password=password)
         assert bcrypt.checkpw(password.encode("utf-8"), hashed_password) is True
 
     @staticmethod

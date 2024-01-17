@@ -11,6 +11,8 @@ from celery import Celery
 _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
 MEDIA_PATH = ROOT_PATH.joinpath("media")
+ROOT_PATH.joinpath("cache").mkdir(exist_ok=True)
+CACHE_PATH = ROOT_PATH.joinpath("cache")
 
 _ENV_FILES_PATHS = (
     pathlib.Path(f"{ROOT_PATH}/.env.template"),
@@ -158,6 +160,7 @@ class Config(CustomBaseSettings):
 
     context: ContextOptions = ContextOptions.DEV
     database: DbTypeOptions = DbTypeOptions.SQLITE
+    log_queries: bool
     sqlite: SqliteConfig
     postgres: PostgresConfig
     server: ServerConfiguration
@@ -207,6 +210,10 @@ class Cloudinary(CustomBaseSettings):
     cloud_name: str
     api_key: str
     api_secret: str
+
+
+class OpenAi(CustomBaseSettings):
+    chatgpt_api_key: str
 
 
 class AppUsers(CustomBaseSettings):

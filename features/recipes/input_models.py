@@ -78,7 +78,7 @@ class RecipeInputModel(pydantic.BaseModel):
     name: str = pydantic.Field(max_length=255)
     picture: Optional[int] = pydantic.Field(gt=0, default=None)
     serves: Optional[int] = pydantic.Field(gt=0, default=1)
-    summary: Optional[str] = pydantic.Field(max_length=1000)
+    summary: Optional[str] = pydantic.Field(max_length=1000, default=None)
     category_id: Optional[int] = None
     instructions: Optional[list[CreateInstructionInputModel]] = None
     ingredients: Optional[list[RecipeIngredientInputModel]] = None
