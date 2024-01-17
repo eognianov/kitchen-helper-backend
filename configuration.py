@@ -160,6 +160,7 @@ class Config(CustomBaseSettings):
 
     context: ContextOptions = ContextOptions.DEV
     database: DbTypeOptions = DbTypeOptions.SQLITE
+    log_queries: bool
     sqlite: SqliteConfig
     postgres: PostgresConfig
     server: ServerConfiguration
