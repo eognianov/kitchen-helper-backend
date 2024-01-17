@@ -2,7 +2,7 @@ import math
 from datetime import datetime, timedelta
 
 from fastapi import Query
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, func, or_
 
 import db.connection
 from features.recipes.input_models import PSFRecipesInputModel
@@ -33,7 +33,7 @@ def paginate_recipes(filtered_recipes: Query, paginated_input_model: PSFRecipesI
     sort = f'&sort={paginated_input_model.sort}' if paginated_input_model.sort else ''
     filters = f'&filters={paginated_input_model.filters}' if paginated_input_model.filters else ''
     previous_page = (
-        f"recipes/?page={current_page - 1}&size={page_size}{sort}{filters}" if current_page - 1 > 0 else None
+        f"recipes/?page={current_page - 1}&page_size={page_size}{sort}{filters}" if current_page - 1 > 0 else None
     )
     next_page = (
         f"recipes/?page={current_page + 1}&page_size={page_size}{sort}{filters}" if current_page < total_pages else None
@@ -59,7 +59,17 @@ def filter_recipes(filters: str) -> list:
     """
     filter_expression = []
 
-    filter_fields = ('category', 'complexity', 'time_to_prepare', 'created_by', 'period')
+    filter_fields = (
+        'category',
+        'complexity',
+        'time_to_prepare',
+        'created_by',
+        'period',
+        'ingredient',
+        'title',
+        'summary',
+        'any',
+    )
 
     # different filters are separated with commas ","
     # example: &filters=complexity:0-3,time_to_prepare:0-20,created_by:1,period:3,category:1-2
@@ -122,6 +132,42 @@ def filter_recipes(filters: str) -> list:
                     raise ValueError(f"Category id must be an integer")
             filter_expression.append(RecipeCategory.id.in_(ids))
 
+        # &filters=ingredient:1-2 / filter by multiple ingredient using ids, separated with "-",
+        # having any of listed ingredients
+        if filter_name == 'ingredient':
+            conditions = conditions.split('-')
+            ids = []
+
+            for ingredient_id in conditions:
+                try:
+                    ids.append(int(ingredient_id))
+                except ValueError:
+                    raise ValueError(f"Ingredient id must be an integer")
+
+            with db.connection.get_session() as session:
+                subquery = (
+                    session.query(RecipeIngredient.recipe_id)
+                    .filter(RecipeIngredient.ingredient_id.in_(ids))
+                    .group_by(RecipeIngredient.recipe_id)
+                )
+            filter_expression.append(Recipe.id.in_(subquery))
+
+        # &filters=title:word / search by word or expression in recipe name
+        if filter_name == 'title':
+            if conditions != '':
+                filter_expression.append(Recipe.name.ilike(f"%{conditions}%"))
+
+        # &filters=summary:expression / search by word or expression in recipe name
+        if filter_name == 'summary':
+            if conditions != '':
+                filter_expression.append(Recipe.summary.ilike(f"%{conditions}%"))
+
+        # &filters=any:expression / search by word or expression in recipe name or summary
+        if filter_name == 'any':
+            if conditions != '':
+                filter_expression.append(
+                    or_(Recipe.name.ilike(f"%{conditions}%"), Recipe.summary.ilike(f"%{conditions}%"))
+                )
     return filter_expression
 
 
