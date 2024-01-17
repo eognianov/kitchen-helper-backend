@@ -46,7 +46,7 @@ def paginate_recipes(filtered_recipes: Query, paginated_input_model: PSFRecipesI
         next_page=next_page,
         total_pages=total_pages,
         total_items=total_items,
-        recipes=[RecipeResponse(**r.__dict__) for r in filtered_recipes],
+        recipes=[RecipeResponse(**r.to_dict()) for r in filtered_recipes],
     )
     return response
 
