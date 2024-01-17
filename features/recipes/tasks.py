@@ -58,13 +58,15 @@ def _get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
         )
 
 
+@celery.task
 def generate_recipe_summary():
     """Call Open Ai to generate recipes summary"""
+    logging.info("Start generate summary")
 
     client = OpenAI(api_key=configuration.OpenAi().chatgpt_api_key)
 
     recipes = _get_recipes_updated_last_10_min()
-
+    logging.info(f"Recipes created or updated in the last 10 minutes {len(recipes)}")
     for recipe in recipes:
         prompt = DEFAULT_PROMPT
         prompt += f"Name: {recipe.name}" + '\n'
@@ -86,7 +88,8 @@ def generate_recipe_summary():
                 f"$$${ingredient_mapping.quantity} {ingredient.measurement} {ingredient.name}({ingredient.category})"
                 + '\n'
             )
-
+        logging.info(f"Generated prompt for recipe with id {recipe.id}")
+        logging.info(prompt)
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -94,7 +97,8 @@ def generate_recipe_summary():
             ],
         )
         generated_summary = completion.choices[0].message.content
-
+        logging.info(f"Generated summary for recipe with id {recipe.id}")
+        logging.info(generated_summary)
         patch_model = PatchRecipeInputModel(field='summary', value=generated_summary)
         system_user_id = get_system_user_id()
         patch_recipe(
