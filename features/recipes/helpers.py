@@ -64,9 +64,7 @@ def filter_recipes(filters: str) -> list:
         'created_by',
         'period',
         'ingredient',
-        'title',
-        'summary',
-        'any',
+        'search',
         'ingredient',
         'published',
         'deleted'
@@ -147,7 +145,7 @@ def filter_recipes(filters: str) -> list:
                     except ValueError:
                         raise ValueError(f"Ingredient id must be an integer")
             else:
-                raise ValueError(f"Invalid conditions for ingredient")
+                raise ValueError("Invalid conditions for ingredient")
 
             if filter_type == 'any':
                 with db.connection.get_session() as session:
@@ -166,22 +164,25 @@ def filter_recipes(filters: str) -> list:
                     )
             filter_expression.append(Recipe.id.in_(subquery))
 
-        # &filters=title:word / search by word or expression in recipe name
-        if filter_name == 'title':
-            if conditions != '':
-                filter_expression.append(Recipe.name.ilike(f"%{conditions}%"))
+        # &filters=title/summary/any:expression
+        # search by word or expression in recipe name/summary/both
+        if filter_name == 'search':
+            conditions = conditions.split('-')
 
-        # &filters=summary:expression / search by word or expression in recipe name
-        if filter_name == 'summary':
-            if conditions != '':
-                filter_expression.append(Recipe.summary.ilike(f"%{conditions}%"))
+            if len(conditions) > 1 and conditions[0] in ('title', 'summary', 'any'):
+                search_type = conditions.pop(0)
+            else:
+                raise ValueError('Invalid conditions for search')
 
-        # &filters=any:expression / search by word or expression in recipe name or summary
-        if filter_name == 'any':
-            if conditions != '':
+            if search_type == 'title':
+                filter_expression.append(Recipe.name.ilike(f"%{conditions[0]}%"))
+            elif search_type == 'summary':
+                filter_expression.append(Recipe.summary.ilike(f"%{conditions[0]}%"))
+            elif search_type == 'any':
                 filter_expression.append(
-                    or_(Recipe.name.ilike(f"%{conditions}%"), Recipe.summary.ilike(f"%{conditions}%"))
+                    or_(Recipe.name.ilike(f"%{conditions[0]}%"), Recipe.summary.ilike(f"%{conditions[0]}%"))
                 )
+
         # &filters=published:true/false
         if filter_name == 'published':
             if conditions not in ('true', 'false'):
