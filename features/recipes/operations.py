@@ -360,7 +360,6 @@ def get_all_ingredients_from_db():
     """
     with db.connection.get_session() as session:
         all_ingredients = session.query(Ingredient).filter(Ingredient.is_deleted == False).all()
-        session.close()
     return all_ingredients
 
 

@@ -434,11 +434,10 @@ def create_ingredient(
 
 
 @ingredient_router.get("/", response_model=list[IngredientResponse])
-def get_all_ingredients(user: common.authentication.authenticated_user):
+def get_all_ingredients():
     """
     Get all ingredients
 
-    :param user:
     :return:
     """
     all_ingredients = features.recipes.operations.get_all_ingredients_from_db()
@@ -446,11 +445,10 @@ def get_all_ingredients(user: common.authentication.authenticated_user):
 
 
 @ingredient_router.get("/{ingredient_id}", response_model=IngredientResponse)
-def get_ingredient(user: common.authentication.authenticated_user, ingredient_id: int = fastapi.Path()):
+def get_ingredient(ingredient_id: int = fastapi.Path()):
     """
     Get ingredient by id
 
-    :param user:
     :param ingredient_id
     :return:
     """
