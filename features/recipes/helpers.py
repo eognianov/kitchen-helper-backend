@@ -2,7 +2,7 @@ import math
 from datetime import datetime, timedelta
 
 from fastapi import Query
-from sqlalchemy import desc, asc, func, or_
+from sqlalchemy import desc, asc, func, or_, distinct
 
 import db.connection
 from features.recipes.input_models import PSFRecipesInputModel
@@ -67,6 +67,8 @@ def filter_recipes(filters: str) -> list:
         'title',
         'summary',
         'any',
+        'ingredient_any',
+        'ingredient_all',
         'published',
         'deleted'
     )
@@ -132,9 +134,9 @@ def filter_recipes(filters: str) -> list:
                     raise ValueError(f"Category id must be an integer")
             filter_expression.append(RecipeCategory.id.in_(ids))
 
-        # &filters=ingredient:1-2 / filter by multiple ingredient using ids, separated with "-",
+        # &filters=ingredient_any:1-2 / filter by multiple ingredient using ids, separated with "-",
         # having any of listed ingredients
-        if filter_name == 'ingredient':
+        if filter_name == 'ingredient_any':
             conditions = conditions.split('-')
             ids = []
 
@@ -151,6 +153,27 @@ def filter_recipes(filters: str) -> list:
                     .group_by(RecipeIngredient.recipe_id)
                 )
             filter_expression.append(Recipe.id.in_(subquery))
+
+        # &filters=ingredient_all:1-2 / filter by multiple ingredient using ids, separated with "-",
+        # having all of listed ingredients
+        if filter_name == 'ingredient_all':
+            conditions = conditions.split('-')
+            ids = []
+
+            for ingredient_id in conditions:
+                try:
+                    ids.append(int(ingredient_id))
+                except ValueError:
+                    raise ValueError(f"Ingredient id must be an integer")
+
+            with db.connection.get_session() as session:
+                subquery = (
+                    session.query(RecipeIngredient.recipe_id)
+                    .filter(RecipeIngredient.ingredient_id.in_(ids))
+                    .group_by(RecipeIngredient.recipe_id)
+                    .having(func.count(distinct(RecipeIngredient.ingredient_id)) == len(ids))
+                )
+                filter_expression.append(Recipe.id.in_(subquery))
 
         # &filters=title:word / search by word or expression in recipe name
         if filter_name == 'title':
