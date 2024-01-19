@@ -61,14 +61,14 @@ def filter_recipes(filters: str) -> list:
 
     filter_fields = (
         'category',
-        'complexity',
-        'time_to_prepare',
         'created_by',
         'period',
         'ingredient',
         'title',
         'summary',
         'any',
+        'published',
+        'deleted'
     )
 
     # different filters are separated with commas ","
@@ -168,6 +168,22 @@ def filter_recipes(filters: str) -> list:
                 filter_expression.append(
                     or_(Recipe.name.ilike(f"%{conditions}%"), Recipe.summary.ilike(f"%{conditions}%"))
                 )
+        # &filters=published:true/false
+        if filter_name == 'published':
+            if conditions not in ('true', 'false'):
+                raise ValueError(f"Invalid parameter for filter published")
+            else:
+                condition = True if conditions == 'true' else False
+            filter_expression.append(Recipe.is_published == condition)
+
+        # &filters=deleted:true/false
+        if filter_name == 'deleted':
+            if conditions not in ('true', 'false'):
+                raise ValueError(f"Invalid parameter for filter deleted")
+            else:
+                condition = True if conditions == 'true' else False
+            filter_expression.append(Recipe.is_deleted == condition)
+
     return filter_expression
 
 
@@ -183,10 +199,8 @@ def sort_recipes(sort: str) -> list:
         'id',
         'name',
         'created_by',
-        'time_to_prepare',
         'created_on',
         'updated_on',
-        'complexity',
         'category.name',
         'category.id',
     )
@@ -213,7 +227,11 @@ def sort_recipes(sort: str) -> list:
         if not sort_column:
             sort_column = getattr(RecipeCategory, column.split('.')[1], None)
 
-        ordering = desc(sort_column) if direction == 'desc' else asc(sort_column)
+        if sort_column in ['name', 'category.name']:
+            ordering = desc(func.lower(sort_column)) if direction == 'desc' else asc(func.lower(sort_column))
+        else:
+            ordering = desc(sort_column) if direction == 'desc' else asc(sort_column)
+
         order_expression.append(ordering)
 
     return order_expression
