@@ -67,8 +67,7 @@ def filter_recipes(filters: str) -> list:
         'title',
         'summary',
         'any',
-        'ingredient_any',
-        'ingredient_all',
+        'ingredient',
         'published',
         'deleted'
     )
@@ -134,46 +133,38 @@ def filter_recipes(filters: str) -> list:
                     raise ValueError(f"Category id must be an integer")
             filter_expression.append(RecipeCategory.id.in_(ids))
 
-        # &filters=ingredient_any:1-2 / filter by multiple ingredient using ids, separated with "-",
-        # having any of listed ingredients
-        if filter_name == 'ingredient_any':
+        # &filters=ingredient:any/all-1-2 / filter by multiple ingredient using ids, separated with "-",
+        # having any of listed ingredients or having all of listed ingredients
+        if filter_name == 'ingredient':
             conditions = conditions.split('-')
             ids = []
 
-            for ingredient_id in conditions:
-                try:
-                    ids.append(int(ingredient_id))
-                except ValueError:
-                    raise ValueError(f"Ingredient id must be an integer")
+            if len(conditions) > 0 and (conditions[0].lower() == 'all' or conditions[0].lower() == 'any'):
+                filter_type = conditions.pop(0)
+                for ingredient_id in conditions:
+                    try:
+                        ids.append(int(ingredient_id))
+                    except ValueError:
+                        raise ValueError(f"Ingredient id must be an integer")
+            else:
+                raise ValueError(f"Invalid conditions for ingredient")
 
-            with db.connection.get_session() as session:
-                subquery = (
-                    session.query(RecipeIngredient.recipe_id)
-                    .filter(RecipeIngredient.ingredient_id.in_(ids))
-                    .group_by(RecipeIngredient.recipe_id)
-                )
+            if filter_type == 'any':
+                with db.connection.get_session() as session:
+                    subquery = (
+                        session.query(RecipeIngredient.recipe_id)
+                        .filter(RecipeIngredient.ingredient_id.in_(ids))
+                        .group_by(RecipeIngredient.recipe_id)
+                    )
+            else:
+                with db.connection.get_session() as session:
+                    subquery = (
+                        session.query(RecipeIngredient.recipe_id)
+                        .filter(RecipeIngredient.ingredient_id.in_(ids))
+                        .group_by(RecipeIngredient.recipe_id)
+                        .having(func.count(distinct(RecipeIngredient.ingredient_id)) == len(ids))
+                    )
             filter_expression.append(Recipe.id.in_(subquery))
-
-        # &filters=ingredient_all:1-2 / filter by multiple ingredient using ids, separated with "-",
-        # having all of listed ingredients
-        if filter_name == 'ingredient_all':
-            conditions = conditions.split('-')
-            ids = []
-
-            for ingredient_id in conditions:
-                try:
-                    ids.append(int(ingredient_id))
-                except ValueError:
-                    raise ValueError(f"Ingredient id must be an integer")
-
-            with db.connection.get_session() as session:
-                subquery = (
-                    session.query(RecipeIngredient.recipe_id)
-                    .filter(RecipeIngredient.ingredient_id.in_(ids))
-                    .group_by(RecipeIngredient.recipe_id)
-                    .having(func.count(distinct(RecipeIngredient.ingredient_id)) == len(ids))
-                )
-                filter_expression.append(Recipe.id.in_(subquery))
 
         # &filters=title:word / search by word or expression in recipe name
         if filter_name == 'title':
