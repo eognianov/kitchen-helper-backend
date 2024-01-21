@@ -133,7 +133,7 @@ def generate_image_url(image_name: str, in_cloudinary: bool = False) -> str:
     """
 
     if not in_cloudinary:
-        url = f"{Path.joinpath(IMAGES_DIR, image_name).relative_to(configuration.ROOT_PATH)}"
+        url = f"/api/{Path.joinpath(IMAGES_DIR, image_name).relative_to(configuration.ROOT_PATH)}"
     else:
         url = f"https://res.cloudinary.com/{configuration.Cloudinary().cloud_name}/image/upload/{image_name}"
     return url
