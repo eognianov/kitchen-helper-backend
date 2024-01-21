@@ -100,7 +100,6 @@ async def add_image(added_by, url: str = None, image: bytes = None):
     return image_db
 
 
-@cache
 def get_image(image_id: int):
     """
     Get image
