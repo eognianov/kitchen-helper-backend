@@ -14,6 +14,8 @@ import configuration
 import khLogging
 from features.users.tasks import app_seeder
 from features.recipes.tasks import seed_recipe_categories
+import threading
+from features.users.grpc_server import serve as users_grpc
 
 CPUS = multiprocessing.cpu_count()
 config = configuration.Config()
@@ -30,6 +32,9 @@ async def startup_shutdown_lifespan(app: fastapi.FastAPI):
     """
     try:
         app_seeder.apply_async(link=seed_recipe_categories.si())
+        users_grpc_thread = threading.Thread(target=users_grpc)
+        users_grpc_thread.daemon = True
+        users_grpc_thread.start()
     except Exception:
         error_message = "Seed task is not able to run!"
         if config.running_on_dev:

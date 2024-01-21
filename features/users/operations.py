@@ -1,5 +1,6 @@
 import pathlib
 import secrets
+from typing import Optional
 
 import features.users.exceptions
 from db.connection import get_session
@@ -22,6 +23,7 @@ from .input_models import RegisterUserInputModel
 from .models import User, Role, UserRole, ConfirmationToken
 from .constants import TokenTypes
 import khLogging
+from functools import cache
 
 logging = khLogging.Logger.get_child_logger(__file__)
 
@@ -550,3 +552,16 @@ def update_user_password(user: User, new_password: str, token: ConfirmationToken
         session.close()
 
     return user
+
+
+@cache
+def get_username(user_id: int) -> Optional[str]:
+    """
+    Get username from the db
+    :param user_id:
+    :return:
+    """
+
+    with db.connection.get_session() as session:
+        username = session.query(User.username).where(User.id == user_id).scalar()
+        return username

@@ -1,11 +1,10 @@
 """Recipes feature responses"""
 import datetime
 from typing import Optional, Any
-
 import pydantic
-
-from features.recipes.models import Recipe
-from features.recipes import helpers
+import communication.users_pb2_grpc
+import communication.users_pb2
+import grpc
 
 
 class Category(pydantic.BaseModel):
@@ -73,7 +72,7 @@ class RecipeResponse(pydantic.BaseModel):
     cholesterol: float = 0.0
     time_to_prepare: int = 0
     complexity: float = 0
-    created_by: int = 0
+    created_by: int | str = 0
     created_on: datetime.datetime
     updated_by: Optional[int]
     updated_on: datetime.datetime
@@ -86,6 +85,11 @@ class RecipeResponse(pydantic.BaseModel):
     ingredients: list[RecipeIngredientResponse] | Any = None
 
     def model_post_init(self, __context: Any):
+        try:
+            self.created_by = _get_username(self.created_by)
+        except Exception:
+            # TODO enhance error handling during grpc calls
+            pass
         if self.category:
             self.category = CategoryShortResponse(**self.category.__dict__)
 
@@ -114,3 +118,11 @@ class PSFRecipesResponseModel(pydantic.BaseModel):
     total_pages: int
     total_items: int
     recipes: list[RecipeResponse]
+
+
+def _get_username(user_id: int) -> str:
+    with grpc.insecure_channel('localhost:50051') as channel:
+        stud = communication.users_pb2_grpc.UsersStub(channel)
+        request = communication.users_pb2.UsernameRequest(user_id=user_id)
+        response = stud.get_username(request)
+        return response.username
