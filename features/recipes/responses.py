@@ -85,7 +85,11 @@ class RecipeResponse(pydantic.BaseModel):
     ingredients: list[RecipeIngredientResponse] | Any = None
 
     def model_post_init(self, __context: Any):
-        self.created_by = _get_username(self.created_by)
+        try:
+            self.created_by = _get_username(self.created_by)
+        except Exception:
+            # TODO enhance error handling during grpc calls
+            pass
         if self.category:
             self.category = CategoryShortResponse(**self.category.__dict__)
 

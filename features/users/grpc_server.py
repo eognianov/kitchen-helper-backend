@@ -4,11 +4,13 @@ import grpc
 import communication.users_pb2
 import communication.users_pb2_grpc
 import configuration
+import features.users.operations
 
 
 class UserServicer(communication.users_pb2_grpc.UsersServicer):
     def get_username(self, request, context):
-        message = communication.users_pb2.UsernameResponse(username='eognianov')
+        username = features.users.operations.get_username(request.user_id)
+        message = communication.users_pb2.UsernameResponse(username=username)
         return message
 
 
