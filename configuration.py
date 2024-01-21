@@ -166,6 +166,7 @@ class Config(CustomBaseSettings):
     server: ServerConfiguration
     rabbitmq: RabbitmqConfiguration
     celery: CelerySettings
+    users_grpc_server_host: str
 
     @property
     def running_on_dev(self) -> bool:
