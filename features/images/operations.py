@@ -15,6 +15,7 @@ from httpx import AsyncClient, HTTPStatusError, RequestError
 import aiofiles
 import cloudinary.uploader
 import configuration
+from functools import cache
 
 import khLogging
 
@@ -33,9 +34,7 @@ async def _get_image_metadata(image_content: io.BytesIO):
 
 def upload_image_to_cloud(content: bytes, image_name: str, uploader: str) -> bool:
     cloudinary.config(**configuration.Cloudinary().model_dump())
-    response = cloudinary.uploader.upload(
-        content, public_id=image_name.split(".")[0], context=f"uploader={uploader}"
-    )
+    response = cloudinary.uploader.upload(content, public_id=image_name.split(".")[0], context=f"uploader={uploader}")
     return bool(response.get("secure_url"))
 
 
@@ -101,7 +100,7 @@ async def add_image(added_by, url: str = None, image: bytes = None):
     return image_db
 
 
-async def get_image(image_id: int):
+def get_image(image_id: int):
     """
     Get image
     :param image_id:
@@ -123,3 +122,18 @@ async def get_images():
     """
     with db.connection.get_session() as session:
         return session.query(Image).all()
+
+
+def generate_image_url(image_name: str, in_cloudinary: bool = False) -> str:
+    """
+    Generate image url
+    :param image_name:
+    :param in_cloudinary:
+    :return:
+    """
+
+    if not in_cloudinary:
+        url = f"/api/{Path.joinpath(IMAGES_DIR, image_name).relative_to(configuration.ROOT_PATH)}"
+    else:
+        url = f"https://res.cloudinary.com/{configuration.Cloudinary().cloud_name}/image/upload/{image_name}"
+    return url

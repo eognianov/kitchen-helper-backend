@@ -4,7 +4,13 @@ from typing import Optional, Any
 import pydantic
 import communication.users_pb2_grpc
 import communication.users_pb2
+import communication.images_pb2
+import communication.images_pb2_grpc
 import grpc
+import configuration
+import khLogging
+
+config = configuration.Config()
 
 
 class Category(pydantic.BaseModel):
@@ -62,7 +68,7 @@ class RecipeResponse(pydantic.BaseModel):
 
     id: int
     name: str = pydantic.Field(max_length=255)
-    picture: Optional[int]
+    picture: Optional[int] | Optional[str]
     summary: Optional[str]
     serves: Optional[int]
     calories: float = 0.0
@@ -90,6 +96,12 @@ class RecipeResponse(pydantic.BaseModel):
         except Exception:
             # TODO enhance error handling during grpc calls
             pass
+        if self.picture:
+            try:
+                self.picture = _get_image_url(self.picture)
+            except Exception:
+                # TODO enhance error handling during grpc calls
+                pass
         if self.category:
             self.category = CategoryShortResponse(**self.category.__dict__)
 
@@ -121,8 +133,16 @@ class PSFRecipesResponseModel(pydantic.BaseModel):
 
 
 def _get_username(user_id: int) -> str:
-    with grpc.insecure_channel('localhost:50051') as channel:
+    with grpc.insecure_channel(config.users_grpc_server_host) as channel:
         stud = communication.users_pb2_grpc.UsersStub(channel)
         request = communication.users_pb2.UsernameRequest(user_id=user_id)
         response = stud.get_username(request)
         return response.username
+
+
+def _get_image_url(image_id: int) -> Optional[str]:
+    with grpc.insecure_channel(config.images_grpc_server_host) as channel:
+        stud = communication.images_pb2_grpc.ImagesStub(channel)
+        request = communication.images_pb2.ImageRequest(image_id=image_id)
+        response = stud.get_image_url(request)
+        return response.image_url

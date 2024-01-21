@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package images;
+
+service Images {
+  rpc get_image_url (ImageRequest) returns (ImageResponse);
+}
+
+message ImageRequest {
+  int64 image_id = 1;
+}
+
+message ImageResponse {
+  optional string image_url = 1;
+}
+
