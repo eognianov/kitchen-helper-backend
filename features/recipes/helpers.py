@@ -2,7 +2,7 @@ import math
 from datetime import datetime, timedelta
 
 from fastapi import Query
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, func, or_, distinct
 
 import db.connection
 from features.recipes.input_models import PSFRecipesInputModel
@@ -33,7 +33,7 @@ def paginate_recipes(filtered_recipes: Query, paginated_input_model: PSFRecipesI
     sort = f'&sort={paginated_input_model.sort}' if paginated_input_model.sort else ''
     filters = f'&filters={paginated_input_model.filters}' if paginated_input_model.filters else ''
     previous_page = (
-        f"recipes/?page={current_page - 1}&size={page_size}{sort}{filters}" if current_page - 1 > 0 else None
+        f"recipes/?page={current_page - 1}&page_size={page_size}{sort}{filters}" if current_page - 1 > 0 else None
     )
     next_page = (
         f"recipes/?page={current_page + 1}&page_size={page_size}{sort}{filters}" if current_page < total_pages else None
@@ -59,7 +59,16 @@ def filter_recipes(filters: str) -> list:
     """
     filter_expression = []
 
-    filter_fields = ('category', 'complexity', 'time_to_prepare', 'created_by', 'period')
+    filter_fields = (
+        'category',
+        'created_by',
+        'period',
+        'ingredient',
+        'search',
+        'ingredient',
+        'published',
+        'deleted'
+    )
 
     # different filters are separated with commas ","
     # example: &filters=complexity:0-3,time_to_prepare:0-20,created_by:1,period:3,category:1-2
@@ -122,6 +131,74 @@ def filter_recipes(filters: str) -> list:
                     raise ValueError(f"Category id must be an integer")
             filter_expression.append(RecipeCategory.id.in_(ids))
 
+        # &filters=ingredient:any/all-1-2 / filter by multiple ingredient using ids, separated with "-",
+        # having any of listed ingredients or having all of listed ingredients
+        if filter_name == 'ingredient':
+            conditions = conditions.split('-')
+            ids = []
+
+            if len(conditions) > 0 and (conditions[0].lower() == 'all' or conditions[0].lower() == 'any'):
+                filter_type = conditions.pop(0)
+                for ingredient_id in conditions:
+                    try:
+                        ids.append(int(ingredient_id))
+                    except ValueError:
+                        raise ValueError(f"Ingredient id must be an integer")
+            else:
+                raise ValueError("Invalid conditions for ingredient")
+
+            if filter_type == 'any':
+                with db.connection.get_session() as session:
+                    subquery = (
+                        session.query(RecipeIngredient.recipe_id)
+                        .filter(RecipeIngredient.ingredient_id.in_(ids))
+                        .group_by(RecipeIngredient.recipe_id)
+                    )
+            else:
+                with db.connection.get_session() as session:
+                    subquery = (
+                        session.query(RecipeIngredient.recipe_id)
+                        .filter(RecipeIngredient.ingredient_id.in_(ids))
+                        .group_by(RecipeIngredient.recipe_id)
+                        .having(func.count(distinct(RecipeIngredient.ingredient_id)) == len(ids))
+                    )
+            filter_expression.append(Recipe.id.in_(subquery))
+
+        # &filters=title/summary/any:expression
+        # search by word or expression in recipe name/summary/both
+        if filter_name == 'search':
+            conditions = conditions.split('-')
+
+            if len(conditions) > 1 and conditions[0] in ('title', 'summary', 'any'):
+                search_type = conditions.pop(0)
+            else:
+                raise ValueError('Invalid conditions for search')
+
+            if search_type == 'title':
+                filter_expression.append(Recipe.name.ilike(f"%{conditions[0]}%"))
+            elif search_type == 'summary':
+                filter_expression.append(Recipe.summary.ilike(f"%{conditions[0]}%"))
+            elif search_type == 'any':
+                filter_expression.append(
+                    or_(Recipe.name.ilike(f"%{conditions[0]}%"), Recipe.summary.ilike(f"%{conditions[0]}%"))
+                )
+
+        # &filters=published:true/false
+        if filter_name == 'published':
+            if conditions not in ('true', 'false'):
+                raise ValueError(f"Invalid parameter for filter published")
+            else:
+                condition = True if conditions == 'true' else False
+            filter_expression.append(Recipe.is_published == condition)
+
+        # &filters=deleted:true/false
+        if filter_name == 'deleted':
+            if conditions not in ('true', 'false'):
+                raise ValueError(f"Invalid parameter for filter deleted")
+            else:
+                condition = True if conditions == 'true' else False
+            filter_expression.append(Recipe.is_deleted == condition)
+
     return filter_expression
 
 
@@ -137,10 +214,8 @@ def sort_recipes(sort: str) -> list:
         'id',
         'name',
         'created_by',
-        'time_to_prepare',
         'created_on',
         'updated_on',
-        'complexity',
         'category.name',
         'category.id',
     )
@@ -167,7 +242,11 @@ def sort_recipes(sort: str) -> list:
         if not sort_column:
             sort_column = getattr(RecipeCategory, column.split('.')[1], None)
 
-        ordering = desc(sort_column) if direction == 'desc' else asc(sort_column)
+        if sort_column in ['name', 'category.name']:
+            ordering = desc(func.lower(sort_column)) if direction == 'desc' else asc(func.lower(sort_column))
+        else:
+            ordering = desc(sort_column) if direction == 'desc' else asc(sort_column)
+
         order_expression.append(ordering)
 
     return order_expression
