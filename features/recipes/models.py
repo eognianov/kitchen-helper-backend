@@ -102,6 +102,22 @@ class Recipe(DbBaseModel):
     def time_to_prepare(self) -> int:
         return sum(_.time for _ in self.instructions)
 
+    def to_dict(self):
+        """
+        Parse the model to dictionary, including the hybrid_properties as well
+        :return:
+        """
+
+        _model_dict = self.__dict__
+        _model_dict['calories'] = self.calories
+        _model_dict['carbo'] = self.carbo
+        _model_dict['fats'] = self.fats
+        _model_dict['proteins'] = self.proteins
+        _model_dict['cholesterol'] = self.cholesterol
+        _model_dict['complexity'] = self.complexity
+        _model_dict['time_to_prepare'] = self.time_to_prepare
+        return _model_dict
+
 
 class RecipeInstruction(DbBaseModel):
     """Recipe instruction"""

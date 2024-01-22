@@ -2,6 +2,7 @@
 
 from typing import Annotated, Optional
 
+import diskcache
 import fastapi
 import pydantic
 from fastapi.security import OAuth2PasswordBearer
@@ -9,10 +10,36 @@ from jose import jwt, JWTError
 import common.constants
 
 import configuration
+import db.connection
+from sqlalchemy import text
+
+CACHE = diskcache.Cache(directory=configuration.CACHE_PATH, disk=diskcache.JSONDisk)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/signin", auto_error=False)
 
 jwt_config = configuration.JwtToken()
+
+
+def _get_system_user_id_from_db() -> int:
+    with db.connection.get_connection() as connection:
+        system_user_id = connection.execute(
+            text('SELECT ID FROM "Users" WHERE username = :name'), {'name': 'System'}
+        ).scalar()
+        return system_user_id
+
+
+def get_system_user_id() -> int:
+    """
+    Get system user id
+    :return:
+    """
+
+    system_user_id = CACHE.get('system_user_id')
+    if not system_user_id:
+        system_user_id = _get_system_user_id_from_db()
+        CACHE.set('system_user_id', system_user_id)
+        return system_user_id
+    return system_user_id
 
 
 class AuthenticatedUser(pydantic.BaseModel):
@@ -29,7 +56,7 @@ class AuthenticatedUser(pydantic.BaseModel):
         Check if user is admin
         :return:
         """
-        return self.roles and common.constants.ADMIN_ROLE_ID in self.roles
+        return (self.roles and common.constants.ADMIN_ROLE_ID in self.roles) or self.id == get_system_user_id()
 
 
 async def extract_user_data_from_jwt(

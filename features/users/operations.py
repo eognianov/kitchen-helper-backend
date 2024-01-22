@@ -1,5 +1,6 @@
 import pathlib
 import secrets
+from typing import Optional
 
 import features.users.exceptions
 from db.connection import get_session
@@ -22,6 +23,7 @@ from .input_models import RegisterUserInputModel
 from .models import User, Role, UserRole, ConfirmationToken
 from .constants import TokenTypes
 import khLogging
+from functools import cache
 
 logging = khLogging.Logger.get_child_logger(__file__)
 
@@ -30,7 +32,7 @@ config = configuration.Config()
 brevo = configuration.BrevoSettings()
 
 
-def _hash_password(password: str) -> bytes:
+def hash_password(password: str) -> bytes:
     """
     Hash password
 
@@ -67,7 +69,7 @@ def create_new_user(user: RegisterUserInputModel) -> User:
             if get_user_from_db(username=user.username, email=user.email):
                 raise features.users.exceptions.UserAlreadyExists()
         except features.users.exceptions.UserDoesNotExistException:
-            user.password = _hash_password(password=user.password)
+            user.password = hash_password(password=user.password)
             db_user = User(username=user.username, email=user.email, password=user.password)
             session.add(db_user)
             session.commit()
@@ -537,7 +539,7 @@ def update_user_password(user: User, new_password: str, token: ConfirmationToken
     if check_password(user, new_password):
         raise features.users.exceptions.SamePasswordsException()
 
-    hashed_password = _hash_password(new_password)
+    hashed_password = hash_password(new_password)
     user.password = hashed_password
 
     with get_session() as session:
@@ -550,3 +552,16 @@ def update_user_password(user: User, new_password: str, token: ConfirmationToken
         session.close()
 
     return user
+
+
+@cache
+def get_username(user_id: int) -> Optional[str]:
+    """
+    Get username from the db
+    :param user_id:
+    :return:
+    """
+
+    with db.connection.get_session() as session:
+        username = session.query(User.username).where(User.id == user_id).scalar()
+        return username
