@@ -13,6 +13,7 @@ from sqlalchemy import and_, or_
 from openai import OpenAI
 from datetime import datetime, timedelta
 from typing import Type
+from gtts import gTTS
 
 logging = khLogging.Logger("celery-recipes-tasks")
 
@@ -103,3 +104,34 @@ def generate_recipe_summary():
         patch_recipe(
             recipe_id=recipe.id, patch_input_model=patch_model, patched_by=AuthenticatedUser(id=system_user_id)
         )
+
+
+@celery.task
+def generate_instruction_audio_files():
+    with db.connection.get_session() as session:
+        ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
+        recently_updated_recipes = session.query(Recipe).filter(Recipe.updated_on >= ten_minutes_ago).all()
+
+        if not recently_updated_recipes:
+            logging.info("No recipes to generate instruction audio files.")
+            return "No recipes to generate instruction audio files."
+
+        audio_folder = configuration.MEDIA_PATH.joinpath("audio")
+        audio_folder.mkdir(parents=True, exist_ok=True)
+
+        for recipe in recently_updated_recipes:
+            recipe_folder = configuration.MEDIA_PATH.joinpath(audio_folder, str(recipe.id))
+            recipe_folder.mkdir(parents=True, exist_ok=True)
+
+            for index, instruction in enumerate(recipe.instructions):
+                instruction_text = instruction.instruction
+                audio_file_path = recipe_folder.joinpath(f"{index}.mp3")
+
+                if not audio_file_path.exists():
+                    tts = gTTS(text=instruction_text, lang="en")
+                    tts.save(str(audio_file_path))
+
+                    logging.info(f"Audio file generated for instruction {instruction.id}")
+
+    logging.info("Task completed: generate_instruction_audio_files")
+    return "Task completed: generate_instruction_audio_files"
