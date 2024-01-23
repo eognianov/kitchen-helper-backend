@@ -17,6 +17,20 @@ from features.recipes.tasks import seed_recipe_categories
 import threading
 from features.users.grpc_server import serve as users_grpc
 from features.images.grpc_server import serve as images_grpc
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.resources import Resource, SERVICE_NAME
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+
+resource = Resource(attributes={SERVICE_NAME: "kitchen-helper"})
+trace_provider = TracerProvider(resource=resource)
+processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://jaeger:4318/v1/traces"))
+trace_provider.add_span_processor(processor)
+trace.set_tracer_provider(trace_provider)
 
 CPUS = multiprocessing.cpu_count()
 config = configuration.Config()
@@ -68,6 +82,7 @@ app.include_router(features.recipes.ingredient_router, prefix='/api/ingredients'
 app.include_router(features.images.router, prefix='/api/images')
 app.mount('/api/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 
+FastAPIInstrumentor.instrument_app(app)
 
 if __name__ == '__main__':
     uvicorn.run(

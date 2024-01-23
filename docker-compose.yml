@@ -95,6 +95,8 @@ services:
     ports:
       - "16686:16686"
       - "6831:6831"
+      - "4317:4317"
+      - "4318:4318"
     volumes:
       - kitchen-helper-jaeger-volume:/var/lib/jaeger
 
