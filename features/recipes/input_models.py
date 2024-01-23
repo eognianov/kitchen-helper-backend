@@ -309,7 +309,7 @@ class PatchRecipeInputModel(pydantic.BaseModel):
 
         def _parse_bool(value: str) -> bool:
             if value.isdigit():
-                return bool(value)
+                return bool(int(value))
             elif value.isalpha() and value.casefold() in ['true', 'false']:
                 return eval(value.capitalize())
             return False
