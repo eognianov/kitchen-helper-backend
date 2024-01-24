@@ -251,7 +251,9 @@ def update_instruction(
 
     try:
         with db.connection.get_session() as session:
-            session.execute(update(RecipeInstruction), [{"id": instruction.id, f"{field}": value}])
+            session.execute(
+                update(RecipeInstruction), [{"id": instruction.id, f"{field}": value, "updated_by": user.id}]
+            )
             session.commit()
             RecipeInstruction.__setattr__(instruction, field, value)
             logging.info(f"Instruction #({instruction_id}) was updated. Set {field} = {value}")

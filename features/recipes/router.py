@@ -1,8 +1,11 @@
 """Recipes feature endpoints"""
+import json
 
+import aiofiles
 import fastapi
 
 import common.authentication
+import configuration
 import features.recipes.exceptions
 import features.recipes.exceptions
 import features.recipes.operations
@@ -21,6 +24,7 @@ from .input_models import (
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel, IngredientInput
 from .responses import RecipeResponse
 from typing import Annotated, Optional
+from fastapi import WebSocket
 
 categories_router = fastapi.APIRouter()
 recipes_router = fastapi.APIRouter()
@@ -494,3 +498,31 @@ def patch_ingredient(
         return ingredient
     except features.recipes.exceptions.IngredientDoesNotExistException as e:
         raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=e.text)
+
+
+@recipes_router.websocket("/instructions/{instruction_id}/ws")
+async def websocket_endpoint(websocket: WebSocket, instruction_id: int = fastapi.Path()):
+    """
+    Websocket endpoint for sending instructions audio files
+
+    :param websocket:
+    :param instruction_id:
+    :return:
+    """
+    await websocket.accept()
+    audio_files_path = configuration.AUDIO_PATH
+    if not audio_files_path.is_dir():
+        await websocket.close(code=4004)
+    try:
+        instruction = features.recipes.operations.get_instruction_by_id(instruction_id)
+        if not instruction.audio_file:
+            await websocket.close(code=4004)
+        async with aiofiles.open(audio_files_path.joinpath(instruction.audio_file), mode="rb") as audio_file:
+            chunk = await audio_file.read(1024)
+            while chunk:
+                await websocket.send_bytes(chunk)
+                chunk = await audio_file.read(1024)
+        await websocket.send_text("audio_stream_end")
+        await websocket.close()
+    except features.recipes.exceptions.InstructionNotFoundException:
+        await websocket.close(code=4004)

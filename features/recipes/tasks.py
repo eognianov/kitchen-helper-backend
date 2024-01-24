@@ -4,7 +4,7 @@ import khLogging
 from features.recipes.operations import create_category, patch_recipe
 from features.recipes.exceptions import CategoryNameViolationException
 from features.users.operations import get_user_from_db
-from features.recipes.models import Recipe
+from features.recipes.models import Recipe, RecipeInstruction
 from features.recipes.input_models import PatchRecipeInputModel
 from common.authentication import AuthenticatedUser, get_system_user_id
 from features.recipes.constants import DEFAULT_PROMPT
@@ -13,6 +13,7 @@ from sqlalchemy import and_, or_
 from openai import OpenAI
 from datetime import datetime, timedelta
 from typing import Type
+from gtts import gTTS
 
 logging = khLogging.Logger("celery-recipes-tasks")
 
@@ -103,3 +104,45 @@ def generate_recipe_summary():
         patch_recipe(
             recipe_id=recipe.id, patch_input_model=patch_model, patched_by=AuthenticatedUser(id=system_user_id)
         )
+
+
+@celery.task
+def generate_instruction_audio_files():
+    """
+    Celery task to generate or update instruction audio files
+
+    :return:
+    """
+    with db.connection.get_session() as session:
+        system_user_id = get_system_user_id()
+        ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
+        recently_updated_instructions = (
+            session.query(RecipeInstruction)
+            .filter(
+                or_(
+                    and_(
+                        RecipeInstruction.updated_by != system_user_id, RecipeInstruction.updated_on >= ten_minutes_ago
+                    ),
+                    RecipeInstruction.audio_file.is_(None),
+                )
+            )
+            .all()
+        )
+
+        if not recently_updated_instructions:
+            logging.info("No instructions to generate audio files.")
+            return "No instructions to generate audio files."
+        audio_folder = configuration.AUDIO_PATH
+        for instruction in recently_updated_instructions:
+            audio_file_path = audio_folder.joinpath(f"{instruction.id}.mp3")
+            tts = gTTS(text=instruction.instruction, lang="en")
+            tts.save(str(audio_file_path))
+            instruction.audio_file = f"{instruction.id}.mp3"
+            instruction.updated_by = system_user_id
+            session.add(instruction)
+            session.commit()
+
+            logging.info(f"Audio file generated for instruction {instruction.id}")
+
+    logging.info("Task completed: generate_instruction_audio_files")
+    return "Task completed: generate_instruction_audio_files"
