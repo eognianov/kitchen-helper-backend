@@ -22,3 +22,7 @@ celery==5.3.6
 diskcache==5.6.3
 grpcio==1.60.0
 grpcio-tools==1.60.0
+opentelemetry-api==1.22.0
+opentelemetry-instrumentation-fastapi==0.43b0
+opentelemetry-sdk==1.22.0
+opentelemetry-exporter-otlp-proto-http==1.22.0

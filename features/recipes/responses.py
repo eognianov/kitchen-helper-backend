@@ -102,6 +102,8 @@ class RecipeResponse(pydantic.BaseModel):
             except Exception:
                 # TODO enhance error handling during grpc calls
                 pass
+        else:
+            self.picture = "https://res.cloudinary.com/dipxtlowj/image/upload/084892ec-9a02-4335-941a-d8a2795358ce.jpeg"
         if self.category:
             self.category = CategoryShortResponse(**self.category.__dict__)
 
