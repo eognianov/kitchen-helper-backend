@@ -1,4 +1,6 @@
 """Recipes feature endpoints"""
+import json
+
 import aiofiles
 import fastapi
 
@@ -500,33 +502,29 @@ def patch_ingredient(
 
 @recipes_router.websocket("/{recipe_id}/instructions/ws")
 async def websocket_endpoint(websocket: WebSocket, recipe_id: int = fastapi.Path()):
+    """
+    Websocket endpoint for sending instructions audio files
+
+    :param websocket:
+    :param recipe_id:
+    :return:
+    """
+    await websocket.accept()
     audio_files_path = configuration.AUDIO_PATH
-
     if not audio_files_path.is_dir():
-        raise fastapi.HTTPException(status_code=404, detail="No audio files found")
-
+        await websocket.close(code=4004)
     try:
         recipe = features.recipes.operations.get_recipe_by_id(recipe_id=recipe_id)
-    except features.recipes.exceptions.RecipeNotFoundException:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Recipe with {recipe_id=} does not exist",
-        )
-
-    await websocket.accept()
-
-    for instruction in recipe.instructions:
-        audio_file_path = instruction.audio_file_path
-
-        if not audio_files_path:
-            continue
-
-        async with aiofiles.open(audio_file_path, mode="rb") as audio_file:
-            chunk = await audio_file.read(1024)
-
-            while chunk:
-                await websocket.send_bytes(chunk)
+        for instruction in recipe.instructions:
+            audio_file_path = instruction.audio_file_path
+            if not audio_files_path:
+                continue
+            async with aiofiles.open(audio_file_path, mode="rb") as audio_file:
                 chunk = await audio_file.read(1024)
-
-    await websocket.send_text("audio_stream_end")
-    await websocket.close()
+                while chunk:
+                    await websocket.send_bytes(chunk)
+                    chunk = await audio_file.read(1024)
+        await websocket.send_text("audio_stream_end")
+        await websocket.close()
+    except features.recipes.exceptions.RecipeNotFoundException:
+        await websocket.close(code=4004)

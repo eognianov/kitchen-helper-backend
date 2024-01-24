@@ -108,13 +108,24 @@ def generate_recipe_summary():
 
 @celery.task
 def generate_instruction_audio_files():
+    """
+    Celery task to generate instruction audio files
+
+    :return:
+    """
     with db.connection.get_session() as session:
         system_user_id = get_system_user_id()
         ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
         recently_updated_instructions = (
             session.query(RecipeInstruction)
             .filter(
-                and_(RecipeInstruction.updated_by != system_user_id, RecipeInstruction.updated_on >= ten_minutes_ago)
+                Recipe.instructions.any(
+                    and_(
+                        RecipeInstruction.updated_by != system_user_id,
+                        RecipeInstruction.recipe.has(is_published=True),
+                        RecipeInstruction.updated_on >= ten_minutes_ago,
+                    )
+                )
             )
             .all()
         )
