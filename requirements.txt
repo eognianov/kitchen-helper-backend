@@ -23,3 +23,4 @@ diskcache==5.6.3
 grpcio==1.60.0
 grpcio-tools==1.60.0
 gTTS==2.5.0
+websockets==12.0
