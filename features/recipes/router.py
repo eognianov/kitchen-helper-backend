@@ -515,7 +515,6 @@ async def websocket_endpoint(websocket: WebSocket, instruction_id: int = fastapi
         await websocket.close(code=4004)
     try:
         instruction = features.recipes.operations.get_instruction_by_id(instruction_id)
-        print(audio_files_path.joinpath(instruction.audio_file))
         if not instruction.audio_file:
             await websocket.close(code=4004)
         async with aiofiles.open(audio_files_path.joinpath(instruction.audio_file), mode="rb") as audio_file:
