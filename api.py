@@ -66,6 +66,7 @@ app.include_router(features.recipes.category_router, prefix='/api/categories')
 app.include_router(features.recipes.recipes_router, prefix='/api/recipes')
 app.include_router(features.recipes.ingredient_router, prefix='/api/ingredients')
 app.include_router(features.images.router, prefix='/api/images')
+app.include_router(features.images.router, prefix='/api/ws')
 app.mount('/api/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 
 

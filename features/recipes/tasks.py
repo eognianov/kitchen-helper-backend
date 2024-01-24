@@ -4,7 +4,7 @@ import khLogging
 from features.recipes.operations import create_category, patch_recipe
 from features.recipes.exceptions import CategoryNameViolationException
 from features.users.operations import get_user_from_db
-from features.recipes.models import Recipe
+from features.recipes.models import Recipe, RecipeInstruction
 from features.recipes.input_models import PatchRecipeInputModel
 from common.authentication import AuthenticatedUser, get_system_user_id
 from features.recipes.constants import DEFAULT_PROMPT
@@ -109,29 +109,29 @@ def generate_recipe_summary():
 @celery.task
 def generate_instruction_audio_files():
     with db.connection.get_session() as session:
+        system_user_id = get_system_user_id()
         ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
-        recently_updated_recipes = session.query(Recipe).filter(Recipe.updated_on >= ten_minutes_ago).all()
+        recently_updated_instructions = (
+            session.query(RecipeInstruction)
+            .filter(
+                and_(RecipeInstruction.updated_by != system_user_id, RecipeInstruction.updated_on >= ten_minutes_ago)
+            )
+            .all()
+        )
+        if not recently_updated_instructions:
+            logging.info("No instructions to generate audio files.")
+            return "No instructions to generate audio files."
+        audio_folder = configuration.AUDIO_PATH
+        for instruction in recently_updated_instructions:
+            audio_file_path = audio_folder.joinpath(f"{instruction.id}.mp3")
+            tts = gTTS(text=instruction.instruction, lang="en")
+            tts.save(str(audio_file_path))
+            instruction.audio_file_path = str(audio_file_path)
+            instruction.updated_by = system_user_id
+            session.add(instruction)
+            session.commit()
 
-        if not recently_updated_recipes:
-            logging.info("No recipes to generate instruction audio files.")
-            return "No recipes to generate instruction audio files."
-
-        audio_folder = configuration.MEDIA_PATH.joinpath("audio")
-        audio_folder.mkdir(parents=True, exist_ok=True)
-
-        for recipe in recently_updated_recipes:
-            recipe_folder = configuration.MEDIA_PATH.joinpath(audio_folder, str(recipe.id))
-            recipe_folder.mkdir(parents=True, exist_ok=True)
-
-            for index, instruction in enumerate(recipe.instructions):
-                instruction_text = instruction.instruction
-                audio_file_path = recipe_folder.joinpath(f"{index}.mp3")
-
-                if not audio_file_path.exists():
-                    tts = gTTS(text=instruction_text, lang="en")
-                    tts.save(str(audio_file_path))
-
-                    logging.info(f"Audio file generated for instruction {instruction.id}")
+            logging.info(f"Audio file generated for instruction {instruction.id}")
 
     logging.info("Task completed: generate_instruction_audio_files")
     return "Task completed: generate_instruction_audio_files"

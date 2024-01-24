@@ -132,6 +132,11 @@ class RecipeInstruction(DbBaseModel):
 
     recipe_id: Mapped[int] = mapped_column(ForeignKey('RECIPES.id'), nullable=True, init=False)
     recipe: Mapped[Recipe] = relationship('Recipe', back_populates='instructions', init=False, lazy='selectin')
+    updated_by: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"), nullable=True, init=False)
+    updated_on: Mapped[datetime.datetime] = mapped_column(
+        DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp(), init=False
+    )
+    audio_file_path: Mapped[str] = mapped_column(String(500), nullable=True, init=False)
 
 
 class Ingredient(DbBaseModel):
