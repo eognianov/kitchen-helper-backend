@@ -119,10 +119,16 @@ def generate_instruction_audio_files():
         recently_updated_instructions = (
             session.query(RecipeInstruction)
             .filter(
-                and_(RecipeInstruction.updated_by != system_user_id, RecipeInstruction.updated_on >= ten_minutes_ago)
+                or_(
+                    and_(
+                        RecipeInstruction.updated_by != system_user_id, RecipeInstruction.updated_on >= ten_minutes_ago
+                    ),
+                    RecipeInstruction.audio_file.is_(None),
+                )
             )
             .all()
         )
+
         if not recently_updated_instructions:
             logging.info("No instructions to generate audio files.")
             return "No instructions to generate audio files."
