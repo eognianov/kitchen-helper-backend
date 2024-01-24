@@ -500,13 +500,13 @@ def patch_ingredient(
         raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=e.text)
 
 
-@recipes_router.websocket("/{recipe_id}/instructions/ws")
-async def websocket_endpoint(websocket: WebSocket, recipe_id: int = fastapi.Path()):
+@recipes_router.websocket("/instructions/{instruction_id}/ws")
+async def websocket_endpoint(websocket: WebSocket, instruction_id: int = fastapi.Path()):
     """
     Websocket endpoint for sending instructions audio files
 
     :param websocket:
-    :param recipe_id:
+    :param instruction_id:
     :return:
     """
     await websocket.accept()
@@ -514,17 +514,16 @@ async def websocket_endpoint(websocket: WebSocket, recipe_id: int = fastapi.Path
     if not audio_files_path.is_dir():
         await websocket.close(code=4004)
     try:
-        recipe = features.recipes.operations.get_recipe_by_id(recipe_id=recipe_id)
-        for instruction in recipe.instructions:
-            audio_file_path = instruction.audio_file_path
-            if not audio_file_path:
-                continue
-            async with aiofiles.open(audio_file_path, mode="rb") as audio_file:
+        instruction = features.recipes.operations.get_instruction_by_id(instruction_id)
+        print(audio_files_path.joinpath(instruction.audio_file))
+        if not instruction.audio_file:
+            await websocket.close(code=4004)
+        async with aiofiles.open(audio_files_path.joinpath(instruction.audio_file), mode="rb") as audio_file:
+            chunk = await audio_file.read(1024)
+            while chunk:
+                await websocket.send_bytes(chunk)
                 chunk = await audio_file.read(1024)
-                while chunk:
-                    await websocket.send_bytes(chunk)
-                    chunk = await audio_file.read(1024)
         await websocket.send_text("audio_stream_end")
         await websocket.close()
-    except features.recipes.exceptions.RecipeNotFoundException:
+    except features.recipes.exceptions.InstructionNotFoundException:
         await websocket.close(code=4004)

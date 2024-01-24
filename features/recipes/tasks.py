@@ -119,13 +119,7 @@ def generate_instruction_audio_files():
         recently_updated_instructions = (
             session.query(RecipeInstruction)
             .filter(
-                Recipe.instructions.any(
-                    and_(
-                        RecipeInstruction.updated_by != system_user_id,
-                        RecipeInstruction.recipe.has(is_published=True),
-                        RecipeInstruction.updated_on >= ten_minutes_ago,
-                    )
-                )
+                and_(RecipeInstruction.updated_by != system_user_id, RecipeInstruction.updated_on >= ten_minutes_ago)
             )
             .all()
         )
@@ -137,7 +131,7 @@ def generate_instruction_audio_files():
             audio_file_path = audio_folder.joinpath(f"{instruction.id}.mp3")
             tts = gTTS(text=instruction.instruction, lang="en")
             tts.save(str(audio_file_path))
-            instruction.audio_file_path = str(audio_file_path)
+            instruction.audio_file = f"{instruction.id}.mp3"
             instruction.updated_by = system_user_id
             session.add(instruction)
             session.commit()

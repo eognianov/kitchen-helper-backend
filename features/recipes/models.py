@@ -136,7 +136,7 @@ class RecipeInstruction(DbBaseModel):
     updated_on: Mapped[datetime.datetime] = mapped_column(
         DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp(), init=False
     )
-    audio_file_path: Mapped[str] = mapped_column(String(500), nullable=True, init=False)
+    audio_file: Mapped[str] = mapped_column(String(500), nullable=True, init=False)
 
 
 class Ingredient(DbBaseModel):
