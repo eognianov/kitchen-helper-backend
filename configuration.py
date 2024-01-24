@@ -14,7 +14,6 @@ MEDIA_PATH = ROOT_PATH.joinpath("media")
 ROOT_PATH.joinpath("cache").mkdir(exist_ok=True)
 CACHE_PATH = ROOT_PATH.joinpath("cache")
 AUDIO_PATH = MEDIA_PATH.joinpath("audio")
-AUDIO_PATH.mkdir(exist_ok=True)
 
 _ENV_FILES_PATHS = (
     pathlib.Path(f"{ROOT_PATH}/.env.template"),
