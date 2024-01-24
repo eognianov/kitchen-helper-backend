@@ -109,7 +109,7 @@ def generate_recipe_summary():
 @celery.task
 def generate_instruction_audio_files():
     """
-    Celery task to generate instruction audio files
+    Celery task to generate or update instruction audio files
 
     :return:
     """
