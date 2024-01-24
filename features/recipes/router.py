@@ -517,7 +517,7 @@ async def websocket_endpoint(websocket: WebSocket, recipe_id: int = fastapi.Path
         recipe = features.recipes.operations.get_recipe_by_id(recipe_id=recipe_id)
         for instruction in recipe.instructions:
             audio_file_path = instruction.audio_file_path
-            if not audio_files_path:
+            if not audio_file_path:
                 continue
             async with aiofiles.open(audio_file_path, mode="rb") as audio_file:
                 chunk = await audio_file.read(1024)
