@@ -59,12 +59,12 @@ class CreateInstructionInputModel(pydantic.BaseModel):
     time: int = pydantic.Field(ge=1)
     complexity: float = pydantic.Field(ge=1, le=5)
 
-    # @pydantic.field_validator("category", mode="after")
-    # @classmethod
-    # def validate_category(cls, field: str):
-    #     if field.upper() not in INSTRUCTION_CATEGORIES:
-    #         raise ValueError(f"{field} is not valid category")
-    #     return field.capitalize()
+    @pydantic.field_validator("category", mode="after")
+    @classmethod
+    def validate_category(cls, field: str):
+        # if field.upper() not in INSTRUCTION_CATEGORIES:
+        #     raise ValueError(f"{field} is not valid category")
+        return field.capitalize()
 
 
 class RecipeIngredientInputModel(pydantic.BaseModel):

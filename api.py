@@ -82,7 +82,8 @@ app.include_router(features.recipes.ingredient_router, prefix='/api/ingredients'
 app.include_router(features.images.router, prefix='/api/images')
 app.mount('/api/media', fastapi.staticfiles.StaticFiles(directory=configuration.MEDIA_PATH))
 
-FastAPIInstrumentor.instrument_app(app)
+if config.context != configuration.ContextOptions.TEST:
+    FastAPIInstrumentor.instrument_app(app)
 
 if __name__ == '__main__':
     uvicorn.run(
