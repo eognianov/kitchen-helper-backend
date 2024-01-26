@@ -125,7 +125,8 @@ def generate_instruction_audio_files():
             .filter(
                 or_(
                     and_(
-                        RecipeInstruction.updated_by != system_user_id, RecipeInstruction.updated_on >= ten_minutes_ago
+                        or_(RecipeInstruction.updated_by != system_user_id, RecipeInstruction.updated_by.is_(None)),
+                        RecipeInstruction.updated_on >= ten_minutes_ago,
                     ),
                     RecipeInstruction.audio_file.is_(None),
                 )
