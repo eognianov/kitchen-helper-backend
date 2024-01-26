@@ -10,9 +10,11 @@ from celery import Celery
 
 _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
-MEDIA_PATH = ROOT_PATH.joinpath("media")
 ROOT_PATH.joinpath("cache").mkdir(exist_ok=True)
 CACHE_PATH = ROOT_PATH.joinpath("cache")
+MEDIA_PATH = ROOT_PATH.joinpath("media")
+MEDIA_PATH.joinpath("audio").mkdir(exist_ok=True)
+MEDIA_PATH.joinpath("images").mkdir(exist_ok=True)
 AUDIO_PATH = MEDIA_PATH.joinpath("audio")
 
 _ENV_FILES_PATHS = (

@@ -50,8 +50,12 @@ def _get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
             .filter(
                 and_(
                     Recipe.is_deleted.is_(False),
-                    or_(Recipe.created_on >= ten_minutes_ago, Recipe.updated_on >= ten_minutes_ago),
-                    Recipe.updated_by != get_system_user_id(),
+                    or_(
+                        Recipe.created_on >= ten_minutes_ago,
+                        Recipe.updated_on >= ten_minutes_ago,
+                        Recipe.summary.is_(None),
+                    ),
+                    or_(Recipe.updated_by.is_(None), Recipe.updated_by != get_system_user_id()),
                 )
             )
             .all()
@@ -91,7 +95,7 @@ def generate_recipe_summary():
         logging.info(f"Generated prompt for recipe with id {recipe.id}")
         logging.info(prompt)
         completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
                 {"role": "user", "content": prompt},
             ],
