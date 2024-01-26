@@ -12,6 +12,7 @@ _module_path = pathlib.Path(__file__).resolve()
 ROOT_PATH = _module_path.parent
 ROOT_PATH.joinpath("cache").mkdir(exist_ok=True)
 CACHE_PATH = ROOT_PATH.joinpath("cache")
+ROOT_PATH.joinpath('media').mkdir(exist_ok=True)
 MEDIA_PATH = ROOT_PATH.joinpath("media")
 MEDIA_PATH.joinpath("audio").mkdir(exist_ok=True)
 MEDIA_PATH.joinpath("images").mkdir(exist_ok=True)
