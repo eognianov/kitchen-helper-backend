@@ -23,6 +23,7 @@ from .input_models import (
 )
 from .input_models import PatchInstructionInputModel, CreateInstructionInputModel, IngredientInput
 from .responses import RecipeResponse
+import features.recipes.tasks
 from typing import Annotated, Optional
 from fastapi import WebSocket
 
@@ -526,3 +527,16 @@ async def websocket_endpoint(websocket: WebSocket, instruction_id: int = fastapi
         await websocket.close()
     except features.recipes.exceptions.InstructionNotFoundException:
         await websocket.close(code=4004)
+
+
+@recipes_router.post('/fake')
+def generate_recipes(count: int, user: common.authentication.authenticated_user):
+    """
+    Generate recipes
+    :param count:
+    :param user:
+    :return:
+    """
+
+    recipes = features.recipes.tasks.generate_recipes.delay(count)
+    return recipes.id
