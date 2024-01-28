@@ -40,8 +40,9 @@ INGREDIENT_CATEGORIES = (
 )
 
 DEFAULT_PROMPT = """
-Generate a quick recipe description for a dish using the provided steps and list of ingredients. 
-A description must be up to 500 characters and present the main characteristics of the dish.
+Generate a recipe summary for a dish using the provided steps and list of ingredients. 
+Recipe summary must be up to 900 characters long.
+I want the recipe summary to be like waiter or chef tries to sell this dish to e customer. 
 I will provide the dish information such as name, category, time to prepare and etc.
 The steps for preparing will be in this message, with each step starting with ###.
 Products will be listed starting with $$$.
