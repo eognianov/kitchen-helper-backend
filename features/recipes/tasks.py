@@ -29,6 +29,8 @@ from gtts import gTTS
 
 logging = khLogging.Logger("celery-recipes-tasks")
 
+SYSTEM_USER_ID = get_system_user_id()
+
 
 @celery.task
 def seed_recipe_categories():
@@ -53,7 +55,7 @@ def seed_recipe_categories():
     return "Finished adding categories to the database."
 
 
-def _get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
+def _get_recipes_for_summary_generation() -> list[Type[Recipe]]:
     with db.connection.get_session() as session:
         ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
 
@@ -63,11 +65,9 @@ def _get_recipes_updated_last_10_min() -> list[Type[Recipe]]:
                 and_(
                     Recipe.is_deleted.is_(False),
                     or_(
-                        Recipe.created_on >= ten_minutes_ago,
-                        Recipe.updated_on >= ten_minutes_ago,
+                        and_(Recipe.updated_on >= ten_minutes_ago, Recipe.updated_by != SYSTEM_USER_ID),
                         Recipe.summary.is_(None),
                     ),
-                    or_(Recipe.updated_by.is_(None), Recipe.updated_by != get_system_user_id()),
                 )
             )
             .all()
@@ -81,7 +81,7 @@ def generate_recipe_summary():
 
     client = OpenAI(api_key=configuration.OpenAi().chatgpt_api_key)
 
-    recipes = _get_recipes_updated_last_10_min()
+    recipes = _get_recipes_for_summary_generation()
     logging.info(f"Recipes created or updated in the last 10 minutes {len(recipes)}")
     for recipe in recipes:
         prompt = DEFAULT_PROMPT
@@ -115,8 +115,8 @@ def generate_recipe_summary():
         generated_summary = completion.choices[0].message.content
         logging.info(f"Generated summary for recipe with id {recipe.id}")
         logging.info(generated_summary)
-        patch_model = PatchRecipeInputModel(field='summary', value=generated_summary)
-        system_user_id = get_system_user_id()
+        patch_model = PatchRecipeInputModel(field='summary', value=generated_summary[:1000])
+        system_user_id = SYSTEM_USER_ID
         patch_recipe(
             recipe_id=recipe.id, patch_input_model=patch_model, patched_by=AuthenticatedUser(id=system_user_id)
         )
@@ -130,7 +130,7 @@ def generate_instruction_audio_files():
     :return:
     """
     with db.connection.get_session() as session:
-        system_user_id = get_system_user_id()
+        system_user_id = SYSTEM_USER_ID
         ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
         recently_updated_instructions = (
             session.query(RecipeInstruction)
@@ -256,13 +256,13 @@ def generate_recipes(count: int = 1):
         existing_recipes.append(name)
         category_id = recipes_categories_to_id.get(category.upper())
         if not category_id:
-            new_category = create_category(category, get_system_user_id())
+            new_category = create_category(category, SYSTEM_USER_ID)
             category_id = new_category.id
             recipes_categories_to_id[category.upper()] = category_id
         for _ingredient in ingredients:
             ingredient_id = ingredients_name_to_id.get(_ingredient.get('name').upper())
             if not ingredient_id:
-                ingredient = create_or_get_ingredient(IngredientInput(**_ingredient), get_system_user_id())
+                ingredient = create_or_get_ingredient(IngredientInput(**_ingredient), SYSTEM_USER_ID)
                 ingredients_name_to_id[ingredient.name.upper()] = ingredient.id
                 ingredient_id = ingredient.id
             recipe_ingredient_input_models.append(
@@ -270,12 +270,15 @@ def generate_recipes(count: int = 1):
             )
         for instruction in instructions:
             recipe_instruction_input_models.append(CreateInstructionInputModel(**instruction))
-        create_recipe(
-            name=name,
-            created_by=AuthenticatedUser(id=get_system_user_id()),
-            category_id=category_id,
-            serves=serves,
-            instructions=recipe_instruction_input_models,
-            ingredients=recipe_ingredient_input_models,
-        )
-        logging.info("Recipe added")
+            try:
+                recipe = create_recipe(
+                    name=name,
+                    created_by=AuthenticatedUser(id=SYSTEM_USER_ID),
+                    category_id=category_id,
+                    serves=serves,
+                    instructions=recipe_instruction_input_models,
+                    ingredients=recipe_ingredient_input_models,
+                )
+                logging.info(f"Recipe added. Id: {recipe.id}")
+            except Exception as e:
+                logging.exception(f"Recipe creation failed! {e}")
