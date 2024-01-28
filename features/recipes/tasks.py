@@ -16,7 +16,6 @@ from features.recipes.input_models import (
     PatchRecipeInputModel,
     IngredientInput,
     RecipeIngredientInputModel,
-    RecipeInputModel,
     CreateInstructionInputModel,
 )
 from common.authentication import AuthenticatedUser, get_system_user_id
@@ -228,6 +227,13 @@ def _get_ingredient_to_id_mapping():
     return {i.name.upper(): i.id for i in ingredients}
 
 
+def _get_recipe_names() -> list[str]:
+    with db.connection.get_session() as session:
+        recipes = session.query(Recipe.name)
+
+    return [_.name for _ in recipes]
+
+
 @celery.task
 def generate_recipes(count: int = 1):
     """
@@ -239,14 +245,15 @@ def generate_recipes(count: int = 1):
 
     recipes_categories_to_id = _get_category_to_id_mapping()
     ingredients_name_to_id = _get_ingredient_to_id_mapping()
-    generated_names = []
-
+    existing_recipes = _get_recipe_names()
+    logging.info("Start generate recipe")
     for _ in range(count):
         recipe_ingredient_input_models = []
         recipe_instruction_input_models = []
-        recipe_response = _get_recipe(excluded_names=generated_names)
+        recipe_response = _get_recipe(excluded_names=existing_recipes)
         name, category, serves, instructions, ingredients = _parse_chatgpt_recipe_response(recipe_response)
-        generated_names.append(name)
+        logging.info(f"New recipe name: {name}")
+        existing_recipes.append(name)
         category_id = recipes_categories_to_id.get(category.upper())
         if not category_id:
             new_category = create_category(category, get_system_user_id())
@@ -259,7 +266,7 @@ def generate_recipes(count: int = 1):
                 ingredients_name_to_id[ingredient.name.upper()] = ingredient.id
                 ingredient_id = ingredient.id
             recipe_ingredient_input_models.append(
-                RecipeIngredientInputModel(ingredient_id=ingredient_id, quantity=_ingredient.get("quantity"))
+                RecipeIngredientInputModel(ingredient_id=ingredient_id, quantity=int(_ingredient.get("quantity"), 0))
             )
         for instruction in instructions:
             recipe_instruction_input_models.append(CreateInstructionInputModel(**instruction))
@@ -271,3 +278,4 @@ def generate_recipes(count: int = 1):
             instructions=recipe_instruction_input_models,
             ingredients=recipe_ingredient_input_models,
         )
+        logging.info("Recipe added")
