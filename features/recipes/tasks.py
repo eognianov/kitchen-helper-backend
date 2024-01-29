@@ -288,18 +288,18 @@ def generate_recipes(count: int = 1):
         except Exception as e:
             logging.exception(f"Recipe creation failed! {e}")
 
-        with db.connection.get_session() as session:
-            logging.info("Publish all new recipes")
-            if recipes_added:
-                session.execute(
-                    update(Recipe)
-                    .values(
-                        {
-                            "is_published": True,
-                            "published_on": datetime.utcnow(),
-                            "published_by": get_system_user_id(),
-                            "updated_by": get_system_user_id(),
-                        }
-                    )
-                    .where(Recipe.id.in_(recipes_added))
+    with db.connection.get_session() as session:
+        logging.info("Publish all new recipes")
+        if recipes_added:
+            session.execute(
+                update(Recipe)
+                .values(
+                    {
+                        "is_published": True,
+                        "published_on": datetime.utcnow(),
+                        "published_by": get_system_user_id(),
+                        "updated_by": get_system_user_id(),
+                    }
                 )
+                .where(Recipe.id.in_(recipes_added))
+            )
