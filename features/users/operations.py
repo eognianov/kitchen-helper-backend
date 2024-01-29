@@ -340,7 +340,7 @@ def _prepare_mail_template(*, token_type: str, token: str, recipient: str):
 
     if token_type == TokenTypes.EMAIL_CONFIRMATION:
         template_name = "confirmation-email-template.html"
-        confirmation_link = f"{app_server_host}/api/users/confirm-email/{token}"
+        confirmation_link = f"{app_server_host}/confirm-email/{token}"
     elif token_type == TokenTypes.PASSWORD_RESET:
         template_name = "password-reset-email.html"
         confirmation_link = f"{app_server_host}/api/users/reset-password/{token}"

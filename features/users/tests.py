@@ -496,7 +496,7 @@ class TestUserOperations:
         """
         user = operations.create_new_user(user=input_models.RegisterUserInputModel(**USER_DATA))
         token = operations.generate_email_password_token(user=user, token_type=constants.TokenTypes.EMAIL_CONFIRMATION)
-        confirmation_link = f"{config.server.host}:{config.server.port}/api/users/confirm-email/{token.token}"
+        confirmation_link = f"{config.server.host}:{config.server.port}/confirm-email/{token.token}"
         html_content = operations._prepare_mail_template(
             token_type=token.token_type, token=token.token, recipient=user.email
         )
