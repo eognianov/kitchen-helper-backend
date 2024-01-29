@@ -62,8 +62,8 @@ class CreateInstructionInputModel(pydantic.BaseModel):
     @pydantic.field_validator("category", mode="after")
     @classmethod
     def validate_category(cls, field: str):
-        if field.upper() not in INSTRUCTION_CATEGORIES:
-            raise ValueError(f"{field} is not valid category")
+        # if field.upper() not in INSTRUCTION_CATEGORIES:
+        #     raise ValueError(f"{field} is not valid category")
         return field.capitalize()
 
 
@@ -156,19 +156,19 @@ class IngredientInput(pydantic.BaseModel):
     measurement: str
     category: str
 
-    @pydantic.field_validator("measurement")
-    @classmethod
-    def validate_measurement(cls, value):
-        if value.upper() not in constants.INGREDIENT_MEASUREMENT_UNITS:
-            raise ValueError(f"{value} is not a valid measurement")
-        return value
+    # @pydantic.field_validator("measurement")
+    # @classmethod
+    # def validate_measurement(cls, value):
+    #     if value.upper() not in constants.INGREDIENT_MEASUREMENT_UNITS:
+    #         raise ValueError(f"{value} is not a valid measurement")
+    #     return value
 
-    @pydantic.field_validator("category")
-    @classmethod
-    def validate_category(cls, value):
-        if value.upper() not in constants.INGREDIENT_CATEGORIES:
-            raise ValueError(f"{value} is not a valid category")
-        return value
+    # @pydantic.field_validator("category")
+    # @classmethod
+    # def validate_category(cls, value):
+    #     if value.upper() not in constants.INGREDIENT_CATEGORIES:
+    #         raise ValueError(f"{value} is not a valid category")
+    #     return value
 
 
 class UpdateIngredientInputModel(pydantic.BaseModel):
