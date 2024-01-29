@@ -46,7 +46,7 @@ async def startup_shutdown_lifespan(app: fastapi.FastAPI):
     :return:
     """
     try:
-        # app_seeder.apply_async(link=seed_recipe_categories.si()) # disabled until burning category ids is fixed
+        app_seeder.apply_async(link=seed_recipe_categories.si())
         users_grpc_thread = threading.Thread(target=users_grpc)
         users_grpc_thread.daemon = True
         users_grpc_thread.start()

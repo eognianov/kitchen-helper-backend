@@ -21,7 +21,7 @@ from features.recipes.input_models import (
 from common.authentication import AuthenticatedUser, get_system_user_id
 from features.recipes.constants import DEFAULT_PROMPT, GET_RECIPE_PROMPT
 from configuration import celery
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, update
 from openai import OpenAI
 from datetime import datetime, timedelta
 from typing import Type, Tuple
@@ -246,29 +246,34 @@ def generate_recipes(count: int = 1):
     logging.info("Start generate recipe")
     recipes_added = []
     for _ in range(count):
-        recipe_ingredient_input_models = []
-        recipe_instruction_input_models = []
-        recipe_response = _get_recipe(excluded_names=existing_recipes)
-        name, category, serves, instructions, ingredients = _parse_chatgpt_recipe_response(recipe_response)
-        logging.info(f"New recipe name: {name}")
-        existing_recipes.append(name)
-        category_id = recipes_categories_to_id.get(category.upper())
-        if not category_id:
-            new_category = create_category(category, get_system_user_id())
-            category_id = new_category.id
-            recipes_categories_to_id[category.upper()] = category_id
-        for _ingredient in ingredients:
-            ingredient_id = ingredients_name_to_id.get(_ingredient.get('name').upper())
-            if not ingredient_id:
-                ingredient = create_or_get_ingredient(IngredientInput(**_ingredient), get_system_user_id())
-                ingredients_name_to_id[ingredient.name.upper()] = ingredient.id
-                ingredient_id = ingredient.id
-            recipe_ingredient_input_models.append(
-                RecipeIngredientInputModel(ingredient_id=ingredient_id, quantity=int(_ingredient.get("quantity"), 0))
-            )
-        for instruction in instructions:
-            recipe_instruction_input_models.append(CreateInstructionInputModel(**instruction))
-            try:
+        try:
+            recipe_ingredient_input_models = []
+            recipe_instruction_input_models = []
+            recipe_response = _get_recipe(excluded_names=existing_recipes)
+            name, category, serves, instructions, ingredients = _parse_chatgpt_recipe_response(recipe_response)
+            if name.casefold() in existing_recipes:
+                logging.info(f"Skipping {name}. Already existing")
+            logging.info(f"New recipe name: {name}")
+            existing_recipes.append(name)
+            category_id = recipes_categories_to_id.get(category.upper())
+            if not category_id:
+                new_category = create_category(category, get_system_user_id())
+                category_id = new_category.id
+                recipes_categories_to_id[category.upper()] = category_id
+            for _ingredient in ingredients:
+                ingredient_id = ingredients_name_to_id.get(_ingredient.get('name').upper())
+                if not ingredient_id:
+                    ingredient = create_or_get_ingredient(IngredientInput(**_ingredient), get_system_user_id())
+                    ingredients_name_to_id[ingredient.name.upper()] = ingredient.id
+                    ingredient_id = ingredient.id
+                recipe_ingredient_input_models.append(
+                    RecipeIngredientInputModel(
+                        ingredient_id=ingredient_id, quantity=float(_ingredient.get("quantity", 0))
+                    )
+                )
+            for instruction in instructions:
+                recipe_instruction_input_models.append(CreateInstructionInputModel(**instruction))
+
                 recipe = create_recipe(
                     name=name,
                     created_by=AuthenticatedUser(id=get_system_user_id()),
@@ -279,8 +284,21 @@ def generate_recipes(count: int = 1):
                 )
                 recipes_added.append(recipe.id)
                 logging.info(f"Recipe added. Id: {recipe.id}")
-            except Exception as e:
-                logging.exception(f"Recipe creation failed! {e}")
+        except Exception as e:
+            logging.exception(f"Recipe creation failed! {e}")
 
         with db.connection.get_session() as session:
-            session.execute()
+            logging.info("Publish all new recipes")
+            if recipes_added:
+                session.execute(
+                    update(Recipe)
+                    .values(
+                        {
+                            "is_published": True,
+                            "published_on": datetime.utcnow(),
+                            "published_by": get_system_user_id(),
+                            "updated_by": get_system_user_id(),
+                        }
+                    )
+                    .where(Recipe.id.in_(recipes_added))
+                )
