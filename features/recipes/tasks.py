@@ -239,7 +239,7 @@ def generate_recipes(count: int = 1):
     :param count:
     :return:
     """
-
+    logging.info(f"{count} recipes were requested")
     recipes_categories_to_id = _get_category_to_id_mapping()
     ingredients_name_to_id = _get_ingredient_to_id_mapping()
     existing_recipes = _get_recipe_names()
@@ -253,6 +253,7 @@ def generate_recipes(count: int = 1):
             name, category, serves, instructions, ingredients = _parse_chatgpt_recipe_response(recipe_response)
             if name.casefold() in existing_recipes:
                 logging.info(f"Skipping {name}. Already existing")
+                continue
             logging.info(f"New recipe name: {name}")
             existing_recipes.append(name)
             category_id = recipes_categories_to_id.get(category.upper())
@@ -274,16 +275,16 @@ def generate_recipes(count: int = 1):
             for instruction in instructions:
                 recipe_instruction_input_models.append(CreateInstructionInputModel(**instruction))
 
-                recipe = create_recipe(
-                    name=name,
-                    created_by=AuthenticatedUser(id=get_system_user_id()),
-                    category_id=category_id,
-                    serves=serves,
-                    instructions=recipe_instruction_input_models,
-                    ingredients=recipe_ingredient_input_models,
-                )
-                recipes_added.append(recipe.id)
-                logging.info(f"Recipe added. Id: {recipe.id}")
+            recipe = create_recipe(
+                name=name,
+                created_by=AuthenticatedUser(id=get_system_user_id()),
+                category_id=category_id,
+                serves=serves,
+                instructions=recipe_instruction_input_models,
+                ingredients=recipe_ingredient_input_models,
+            )
+            recipes_added.append(recipe.id)
+            logging.info(f"Recipe added. Id: {recipe.id}")
         except Exception as e:
             logging.exception(f"Recipe creation failed! {e}")
 
