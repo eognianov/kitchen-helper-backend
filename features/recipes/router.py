@@ -524,11 +524,12 @@ async def websocket_endpoint(websocket: WebSocket, instruction_id: int = fastapi
                 await websocket.send_bytes(chunk)
                 chunk = await audio_file.read(1024)
         await websocket.send_text("audio_stream_end")
-        await websocket.close()
     except features.recipes.exceptions.InstructionNotFoundException:
         await websocket.close(code=4004)
     except FileNotFoundError:
         await websocket.close(code=4004)
+    finally:
+        await websocket.close()
 
 
 @recipes_router.post('/fake')
