@@ -288,9 +288,9 @@ def generate_recipes(count: int = 1):
         except Exception as e:
             logging.exception(f"Recipe creation failed! {e}")
 
-    with db.connection.get_session() as session:
+    if recipes_added:
         logging.info("Publish all new recipes")
-        if recipes_added:
+        with db.connection.get_session() as session:
             session.execute(
                 update(Recipe)
                 .values(
