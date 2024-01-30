@@ -37,10 +37,10 @@ def seed_recipe_categories():
     :return:
     """
     categories = [cat for cat in configuration.AppRecipeCategories().categories]
-    user = get_user_from_db(username=configuration.AppUsers().users[0]["username"])
+    user = get_user_from_db(username="System")
     if not user:
-        logging.info("No users found to add categories")
-        return "No users found to add categories"
+        logging.info("System user not found to add categories")
+        return "System user not found to add categories"
     if not categories:
         logging.info("No categories found")
         return "No categories found"

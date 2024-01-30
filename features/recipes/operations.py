@@ -54,16 +54,27 @@ def get_all_recipe_categories() -> list[Type[RecipeCategory]]:
         return session.query(RecipeCategory).all()
 
 
-def get_category_by_id(category_id: int) -> Type[RecipeCategory]:
+def get_category_by_id_or_name(*, category_id: int = None, category_name: str = None) -> Type[RecipeCategory]:
     """
     Get category by id
 
-    param category_id:
+    :param category_id:
+    :param category_name:
     :return:
     """
 
     with db.connection.get_session() as session:
-        category = session.query(RecipeCategory).where(RecipeCategory.id == category_id).first()
+        query = session.query(RecipeCategory)
+        filters = []
+
+        if category_id:
+            filters.append(RecipeCategory.id == category_id)
+        elif category_name:
+            filters.append(RecipeCategory.name == category_name)
+
+        if filters:
+            category = query.filter(*filters).first()
+
         if not category:
             raise CategoryNotFoundException()
         return category
@@ -71,7 +82,7 @@ def get_category_by_id(category_id: int) -> Type[RecipeCategory]:
 
 def update_category(category_id: int, field: str, value: str, updated_by: int) -> Type[RecipeCategory]:
     """Update category"""
-    category = get_category_by_id(category_id)
+    category = get_category_by_id_or_name(category_id=category_id)
     try:
         with db.connection.get_session() as session:
             session.execute(
@@ -90,6 +101,10 @@ def create_category(category_name: str, created_by: int) -> RecipeCategory:
     """Create category"""
 
     try:
+        category = get_category_by_id_or_name(category_name=category_name)
+        if category:
+            raise CategoryNameViolationException()
+    except CategoryNotFoundException:
         category = RecipeCategory(name=category_name, created_by=created_by)
         with db.connection.get_session() as session:
             session.add(category)
@@ -128,7 +143,7 @@ def create_recipe(
 
     category = None
     if category_id:
-        category = get_category_by_id(category_id)
+        category = get_category_by_id_or_name(category_id=category_id)
 
     recipe = Recipe(
         name=name,
