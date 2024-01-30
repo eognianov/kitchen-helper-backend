@@ -517,7 +517,7 @@ async def websocket_endpoint(websocket: WebSocket, instruction_id: int = fastapi
     try:
         instruction = features.recipes.operations.get_instruction_by_id(instruction_id)
         if not instruction.audio_file:
-            await websocket.close(code=4004)
+            raise FileNotFoundError()
         async with aiofiles.open(audio_files_path.joinpath(instruction.audio_file), mode="rb") as audio_file:
             chunk = await audio_file.read(1024)
             while chunk:
@@ -526,6 +526,8 @@ async def websocket_endpoint(websocket: WebSocket, instruction_id: int = fastapi
         await websocket.send_text("audio_stream_end")
         await websocket.close()
     except features.recipes.exceptions.InstructionNotFoundException:
+        await websocket.close(code=4004)
+    except FileNotFoundError:
         await websocket.close(code=4004)
 
 
