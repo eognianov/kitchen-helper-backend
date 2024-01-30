@@ -303,3 +303,4 @@ def generate_recipes(count: int = 1):
                 )
                 .where(Recipe.id.in_(recipes_added))
             )
+            session.commit()
