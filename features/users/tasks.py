@@ -75,7 +75,7 @@ def seed_roles() -> str:
 
     system_user_id = get_system_user_id()
     if not system_user_id:
-        return "System user found to add role"
+        return "System user not found to add role"
     with db.connection.get_session() as session:
         role_name = app_users_role.role
         try:
