@@ -40,7 +40,7 @@ class TestCategoryOperations:
 
     def test_get_category_by_id_success(self, use_test_db):
         created_category = operations.create_category("name", 1)
-        category_from_db = operations.get_category_by_id(created_category.id)
+        category_from_db = operations.get_category_by_id_or_name(category_id=created_category.id)
 
         assert created_category.name == category_from_db.name
         assert created_category.created_by == category_from_db.created_by
@@ -48,7 +48,7 @@ class TestCategoryOperations:
 
     def test_get_category_by_id_not_fail(self, use_test_db):
         with pytest.raises(CategoryNotFoundException):
-            operations.get_category_by_id(1)
+            operations.get_category_by_id_or_name(category_id=1)
 
     def test_get_all_categories(self, use_test_db):
         assert len(operations.get_all_recipe_categories()) == 0
@@ -58,7 +58,7 @@ class TestCategoryOperations:
     def test_update_category(self, use_test_db):
         created_category = operations.create_category("name", 1)
         operations.update_category(created_category.id, "name", "new_name", 1)
-        updated_category = operations.get_category_by_id(created_category.id)
+        updated_category = operations.get_category_by_id_or_name(category_id=created_category.id)
         assert updated_category.name == "new_name"
 
 
@@ -84,10 +84,10 @@ class TestCategoriesEndpoints:
     @classmethod
     def test_get_category_by_id(cls, use_test_db, mocker):
         created_category = operations.create_category("new", 1)
-        get_category_spy = mocker.spy(operations, "get_category_by_id")
+        get_category_spy = mocker.spy(operations, "get_category_by_id_or_name")
         response = cls.client.get(f"/api/categories/{created_category.id}")
         assert response.status_code == 200
-        get_category_spy.assert_called_with(created_category.id)
+        get_category_spy.assert_called_with(category_id=created_category.id)
 
     @classmethod
     def test_patch_category(cls, use_test_db, mocker, admin):

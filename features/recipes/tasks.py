@@ -37,17 +37,17 @@ def seed_recipe_categories():
     :return:
     """
     categories = [cat for cat in configuration.AppRecipeCategories().categories]
-    user = get_user_from_db(username=configuration.AppUsers().users[0]["username"])
-    if not user:
-        logging.info("No users found to add categories")
-        return "No users found to add categories"
+    system_user_id = get_system_user_id()
+    if not system_user_id:
+        logging.info("System user not found to add categories")
+        return "System user not found to add categories"
     if not categories:
         logging.info("No categories found")
         return "No categories found"
     for category in categories:
         try:
-            new_category = create_category(category_name=category, created_by=user.id)
-            logging.info(f"User {user.id} created Category (#{new_category.id}).")
+            new_category = create_category(category_name=category, created_by=system_user_id)
+            logging.info(f"User {system_user_id} created Category (#{new_category.id}).")
         except CategoryNameViolationException as ex:
             continue
     return "Finished adding categories to the database."

@@ -8,6 +8,7 @@ import features.users.operations
 from sqlalchemy.orm import joinedload
 from configuration import celery
 from features.users import models, input_models, exceptions, operations
+from common.authentication import get_system_user_id
 
 logging = khLogging.Logger("celery-users-tasks")
 app_users = configuration.AppUsers()
@@ -72,15 +73,15 @@ def seed_roles() -> str:
     :return:
     """
 
-    user = features.users.operations.get_user_from_db(username=app_users.users[0]["username"])
-    if not user:
-        return "No users found to add role"
+    system_user_id = get_system_user_id()
+    if not system_user_id:
+        return "System user not found to add role"
     with db.connection.get_session() as session:
         role_name = app_users_role.role
         try:
             role = features.users.operations.create_role(
                 name=role_name,
-                created_by=user.id,
+                created_by=system_user_id,
             )
             logging.info(f"Role #{role.id} was added to the database")
         except features.users.exceptions.RoleAlreadyExists:
@@ -112,12 +113,13 @@ def add_roles_to_users() -> str:
         session.close()
 
     if not users:
-        return "No admins found to add role."
-
-    added_by = users[0].id
+        return "No users found to add role."
+    system_user_id = get_system_user_id()
+    if not system_user_id:
+        return "System user not found to add roles to users"
     for user in users:
-        features.users.operations.add_user_to_role(user_id=user.id, role_id=role.id, added_by=added_by)
-        logging.info(f"User #{user.id} was add to role #{role.id} by #{added_by}")
+        features.users.operations.add_user_to_role(user_id=user.id, role_id=role.id, added_by=system_user_id)
+        logging.info(f"User #{user.id} was add to role #{role.id} by #{system_user_id}")
 
     return "Finished adding users to role."
 

@@ -61,7 +61,7 @@ def get_category(category_id: int = fastapi.Path()):
     """
 
     try:
-        return features.recipes.operations.get_category_by_id(category_id)
+        return features.recipes.operations.get_category_by_id_or_name(category_id=category_id)
     except features.recipes.exceptions.CategoryNotFoundException:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_404_NOT_FOUND,
