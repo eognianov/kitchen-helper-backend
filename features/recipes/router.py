@@ -512,9 +512,9 @@ async def websocket_endpoint(websocket: WebSocket, instruction_id: int = fastapi
     """
     await websocket.accept()
     audio_files_path = configuration.AUDIO_PATH
-    if not audio_files_path.is_dir():
-        await websocket.close(code=4004)
     try:
+        if not audio_files_path.is_dir():
+            raise FileNotFoundError()
         instruction = features.recipes.operations.get_instruction_by_id(instruction_id)
         if not instruction.audio_file:
             raise FileNotFoundError()
