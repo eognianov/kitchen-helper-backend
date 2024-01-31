@@ -242,7 +242,7 @@ def sort_recipes(sort: str) -> list:
         if not sort_column:
             sort_column = getattr(RecipeCategory, column.split('.')[1], None)
 
-        if sort_column in ['name', 'category.name']:
+        if sort_column in [Recipe.name, RecipeCategory.name]:
             ordering = desc(func.lower(sort_column)) if direction == 'desc' else asc(func.lower(sort_column))
         else:
             ordering = desc(sort_column) if direction == 'desc' else asc(sort_column)
