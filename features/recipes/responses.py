@@ -40,6 +40,10 @@ class InstructionResponse(pydantic.BaseModel):
     time: int
     complexity: float
     recipe_id: int
+    audio_file: Optional[str] | bool
+
+    def model_post_init(self, __context: Any) -> None:
+        self.audio_file = bool(self.audio_file)
 
 
 class IngredientResponse(pydantic.BaseModel):
